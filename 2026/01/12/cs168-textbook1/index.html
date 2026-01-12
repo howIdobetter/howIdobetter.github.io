@@ -1,0 +1,668 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="一剑留名ing">
+  <meta name="keywords" content="技术，博客，学习">
+  
+    <meta name="description" content="Introduction to Internet词汇表ubiquitous : 无处不在的infrastructure : 基础设施World Wide Web : 万维网reasoning about : 对…的考量federate : 联邦式&#x2F;联邦式interoperability : 互操作性innovation paradox : 创新悖论decoupling : 解耦heter">
+<meta property="og:type" content="article">
+<meta property="og:title" content="cs168 textbook1">
+<meta property="og:url" content="https://howidobetter.github.io/2026/01/12/cs168-textbook1/index.html">
+<meta property="og:site_name" content="随便做做">
+<meta property="og:description" content="Introduction to Internet词汇表ubiquitous : 无处不在的infrastructure : 基础设施World Wide Web : 万维网reasoning about : 对…的考量federate : 联邦式&#x2F;联邦式interoperability : 互操作性innovation paradox : 创新悖论decoupling : 解耦heter">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-01-12T06:18:27.000Z">
+<meta property="article:modified_time" content="2026-01-12T08:59:31.651Z">
+<meta property="article:author" content="一剑留名ing">
+<meta property="article:tag" content="~~~&#x2F;&#x2F;&#x2F;(^v^)\\\~~~">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>cs168 textbook1 - 随便做做</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+  
+<link rel="stylesheet" href="/css/glass.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"howidobetter.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":100,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100},"height":"3px"},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>随便做做</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="cs168 textbook1"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-01-12 14:18" pubdate>
+          2026年1月12日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          1.9k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          16 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">cs168 textbook1</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="Introduction-to-Internet"><a href="#Introduction-to-Internet" class="headerlink" title="Introduction to Internet"></a>Introduction to Internet</h1><h2 id="词汇表"><a href="#词汇表" class="headerlink" title="词汇表"></a>词汇表</h2><p>ubiquitous : 无处不在的<br>infrastructure : 基础设施<br>World Wide Web : 万维网<br>reasoning about : 对…的考量<br>federate : 联邦式&#x2F;联邦式<br>interoperability : 互操作性<br>innovation paradox : 创新悖论<br>decoupling : 解耦<br>heterogeneity : 异构性<br>orders of magnitude : 数量级<br>outdated : 过时的<br>asynchronously : 异步地<br>fixed target : 固定目标<br>design for failure : 面向故障设计<br>protocol : 协议<br>robustness &amp; security : 鲁棒性与安全性<br>edge cases : 边缘情况&#x2F;极端情况<br>malicious behavior : 恶意行为<br>entities : 实体，在网络语境下，它是一个抽象称谓，可以指代计算机、路由器、甚至是运行中的一个程序。</p>
+<h2 id="重要概念"><a href="#重要概念" class="headerlink" title="重要概念"></a>重要概念</h2><p>Federated System : 联邦系统<br>ISP : 运营商<br>RFC (Request For Comments) : 互联网的“宪法”草案。</p>
+<h2 id="什么是网络？"><a href="#什么是网络？" class="headerlink" title="什么是网络？"></a>什么是网络？</h2><p>互联网作为一种在全球设备间传输数据的工具无处不在，CS168专注于支持网络的基础设施（包括软件和硬件）。万维网和互联网不同，万维网可以看作是建立在互联网之上的应用程序，可以通过网页浏览器来访问。除了万维网，其他应用程序同样可以使用互联网基础设施。非Web应用的例子包括Zoom或在线游戏，甚至物联网（IOT）设备，比如冰箱或汽车中的传感器。</p>
+<h2 id="为什么互联网有趣？"><a href="#为什么互联网有趣？" class="headerlink" title="为什么互联网有趣？"></a>为什么互联网有趣？</h2><p>互联网并非一种新型网络技术（例如电线早已存在），其本质创新在于解决了一个全新问题：如何将多种现有网络相互连接。解决这一问题需要一种新的设计范式，这一范式也影响了计算机科学的其他领域。计算机网络是计算机科学领域中相对较新的分支。互联网的引入带来了许多不同于传统计算机科学领域的新挑战。例如，与理论领域不同，我们缺乏互联网的形式化模型；与硬件领域不同，我们缺乏可测量的性能基准。</p>
+<p>与以往课程不同，仅仅编写能运行的代码是不够的。编写的代码必须能扩展到数十亿用户，同时，代码还必须符合不同运营方的商业关系。</p>
+<p>适用于轻量级应用（例如家用计算器）的代码，未必能在重型服务器上运行。今天还能正常工作的代码，随着网络节点的动态变化，到了明天也可能崩溃。互联网的设计理念深刻影响了现代系统的架构方式（例如在设计中对目标、约束和权衡的考量方式）。</p>
+<h2 id="互联网的联邦特性"><a href="#互联网的联邦特性" class="headerlink" title="互联网的联邦特性"></a>互联网的联邦特性</h2><p>互联网的联邦特性 互联网是一个联邦式系统，要求运营商之间具备互操作性。换言之，尽管每个运营商（ISP）独立运作，但为了实现全球互联，所有运营商必须协同工作。也就是说，全球所有 ISP 都需要对某些公共协议达成一致，以实现全球连通。 联邦制带来了若干挑战。竞争实体（如竞争对手公司）被迫合作，即便他们可能并不愿彼此分享机密信息。在设计协议时，除了技术考量外，我们还必须考虑现实中的商业激励因素。 联邦制也增加了创新的难度。在其他领域，企业可以通过开发独有的新特性来创新。但在互联网领域，如果你拥有一项别人都没有的功能，你反而无法使用它。每个人都必须使用共同的语言（协议），因此互联网的任何升级都必须将互操作性考虑在内。</p>
+<h2 id="互联网的可扩展性"><a href="#互联网的可扩展性" class="headerlink" title="互联网的可扩展性"></a>互联网的可扩展性</h2><p>联邦制使互联网实现了巨大的规模。我们无需由单一运营商管理数十亿用户和数万亿服务，而只需专注于将所有不同的运营商互联。联邦制还允许我们利用极其多样化的技术（如无线、光纤）和性能差异巨大的设备（如小容量的家庭链路或大容量的海底光缆）来构建互联网。这些技术也在不断演进，这意味着我们无法设定一个固定的目标（例如，容量和需求正以数量级的速度持续增长）。 互联网的宏大规模还意味着，我们设计的任何系统都必须支持海量的用户和应用（例如，某些应用比其他应用需要更多容量，而某些用户可能是恶意攻击者）。 互联网的全球规模要求我们的系统和协议必须异步运行。数据的传输速度不能超过光速（且通常比光速慢得多）。假设你向地球另一端的服务器发送一条消息，当消息到达时，你的 CPU 可能已经执行了数百万条额外指令，而你发送的消息可能已经过时了。 互联网的规模意味着，即便发送一条消息也可能需要与许多组件（如软件、交换机、链路）进行交互。其中任何组件都可能发生故障，而我们甚至可能无法察觉。如果确实发生了故障，可能需要很长时间才能得知这一坏消息。互联网是第一个必须针对大规模故障进行设计的系统。其中的许多理念后来被应用到了其他领域。</p>
+<h2 id="协议"><a href="#协议" class="headerlink" title="协议"></a>协议</h2><p>在CS168中，我们将重点关注定义实体间如何进行通信交换的“协议”。这些协议规定了：它们交换的消息格式是什么？以及它们如何对这些消息做出响应？ 例如，假设你正在编写一个需要在互联网上收发数据的应用程序。发送端和接收端的代码必须就数据的格式以及针对不同消息应采取的动作达成一致。 这是一个协议示例：爱丽丝（Alice）和鲍勃（Bob）先互相打招呼，然后爱丽丝请求一个文件，鲍勃回复该文件。为了定义这一协议，我们需要确定“语法”（例如，如何用 0 和 1 来表示“给我这个文件”）和“语义”（例如，爱丽丝在请求文件之前必须先收到鲍勃的问候）。 不同的协议是为了满足不同的需求而设计的。例如，如果爱丽丝需要以最快速度获取文件，我们可能会设计一个省略初始打招呼环节的协议。设计一个优秀的协议远比想象中困难！我们还需要考虑边缘情况、程序错误以及恶意行为。例如，如果爱丽丝请求文件，而鲍勃却回复了“你好”，爱丽丝该如何反应？ 在整个课程中，我们将看到许多已在互联网上标准化的协议。当我们提及某个协议时，你有时会看到缩写 RFC（征求意见稿）。许多标准以 RFC 文档的形式发布，并最终被广泛接受，尽管并非所有 RFC 都会被采纳。RFC 文档均有编号，有时人们会直接通过编号来指代协议。例如，“RFC 1918 地址”指的就是该文档定义的特定地址。 负责协议标准化的机构各不相同。IEEE 专注于底层的电气工程领域。IETF 则专注于互联网本身，并负责 RFC 的发布。</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/v/" class="print-no-link">#~~~///(^v^)\\\~~~</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>cs168 textbook1</div>
+      <div>https://howidobetter.github.io/2026/01/12/cs168-textbook1/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>一剑留名ing</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年1月12日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/01/08/cmu15-445-Porject-1-%E9%83%A8%E5%88%86%E6%80%9D%E8%B7%AF%EF%BC%88fall2024%EF%BC%89/" title="cmu15-445-Porject \#1-部分思路（fall2024）">
+                        <span class="hidden-mobile">cmu15-445-Porject \#1-部分思路（fall2024）</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+      © 2024 <a href="https://howIdobetter.github.io" target="_blank" rel="nofollow noopener"><span>一剑留名ing</span></a>
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+
+  
+
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  
+<script src="/js/snow.js"></script>
+<script src="/js/glass.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
