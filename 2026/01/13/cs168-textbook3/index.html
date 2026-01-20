@@ -1,0 +1,759 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="一剑留名ing">
+  <meta name="keywords" content="技术，博客，学习">
+  
+    <meta name="description" content="报头词汇表Checksum : 校验和。数据完整性的守护者。通过数学算法计算数据的特征值，接收方比对该值以判断数据是否中途被电磁干扰篡改。 重要概念Headers : 首部&#x2F;报头。附加在数据包前面的控制信息。它包含了网络设备处理该包所需的“元数据”（Metadata）。Network Infrastructure : 网络基础设施。指路由器、交换机等中间设备。它们是“搬运工”，不应干涉“">
+<meta property="og:type" content="article">
+<meta property="og:title" content="cs168-textbook3">
+<meta property="og:url" content="https://howidobetter.github.io/2026/01/13/cs168-textbook3/index.html">
+<meta property="og:site_name" content="随便做做">
+<meta property="og:description" content="报头词汇表Checksum : 校验和。数据完整性的守护者。通过数学算法计算数据的特征值，接收方比对该值以判断数据是否中途被电磁干扰篡改。 重要概念Headers : 首部&#x2F;报头。附加在数据包前面的控制信息。它包含了网络设备处理该包所需的“元数据”（Metadata）。Network Infrastructure : 网络基础设施。指路由器、交换机等中间设备。它们是“搬运工”，不应干涉“">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook3/1768290014549.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook3/1768290210693.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook3/1768290809197.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook3/1768290913731.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook3/1768290986455.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook3/1768291029414.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook3/1768291070155.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook3/1768291103835.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook3/1768291137912.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook3/1768291258722.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook3/1768291567927.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook3/1768291733629.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook3/1768291849565.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook3/1768291863191.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook3/1768291880039.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook3/1768291933549.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook3/1768292047382.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook3/1768292133422.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook3/1768292111603.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook3/1768292165052.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook3/1768292227710.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook3/1768292266564.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook3/1768292279098.png">
+<meta property="article:published_time" content="2026-01-13T07:37:35.000Z">
+<meta property="article:modified_time" content="2026-01-13T08:18:01.776Z">
+<meta property="article:author" content="一剑留名ing">
+<meta property="article:tag" content="~~~&#x2F;&#x2F;&#x2F;(^v^)\\\~~~">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://howidobetter.github.io/image/cs168-textbook3/1768290014549.png">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>cs168-textbook3 - 随便做做</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+  
+<link rel="stylesheet" href="/css/glass.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"howidobetter.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":100,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100},"height":"3px"},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>随便做做</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="cs168-textbook3"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-01-13 15:37" pubdate>
+          2026年1月13日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          3.4k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          29 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">cs168-textbook3</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="报头"><a href="#报头" class="headerlink" title="报头"></a>报头</h1><h2 id="词汇表"><a href="#词汇表" class="headerlink" title="词汇表"></a>词汇表</h2><p>Checksum : 校验和。数据完整性的守护者。通过数学算法计算数据的特征值，接收方比对该值以判断数据是否中途被电磁干扰篡改。</p>
+<h2 id="重要概念"><a href="#重要概念" class="headerlink" title="重要概念"></a>重要概念</h2><p>Headers : 首部&#x2F;报头。附加在数据包前面的控制信息。它包含了网络设备处理该包所需的“元数据”（Metadata）。<br>Network Infrastructure : 网络基础设施。指路由器、交换机等中间设备。它们是“搬运工”，不应干涉“货物”内容。<br>Destination Address : 目的地址。网络层的“导航坐标”。路由器查表（Routing Table）时唯一关心的关键字段。<br>Peer &#x2F; Peer Entity	对等方 &#x2F; 对等实体	指在不同机器上运行的同一个协议层。例如，你手机里的 TCP 协议和服务器里的 TCP 协议互为“对等方”。<br>Horizontal Logic : 横向逻辑	逻辑上，L4 只和 L4 说话，L3 只和 L3 说话。<br>Vertical Service : 纵向服务	物理上，数据必须经过下层的包裹和搬运才能送达。</p>
+<h2 id="为什么我们需要报头（首部）"><a href="#为什么我们需要报头（首部）" class="headerlink" title="为什么我们需要报头（首部）"></a>为什么我们需要报头（首部）</h2><p>在上一节中，我们了解到在第 3 层，数据以“数据包（Packets）”的形式在互联网中传输。假设一个应用程序想要通过互联网发送一个文件。我们可以提取图像的一部分比特，将它们放入一个数据包中，然后发送出去。然而，当交换机（路由器）接收到这一串 1 和 0 的序列时，它完全不知道该如何处理这些比特。</p>
+<p><img src="/image/cs168-textbook3/1768290014549.png" srcset="/img/loading.gif" lazyload alt="1768290014549"></p>
+<p>在类比中，如果我给朋友写了一封信并直接递给邮局，邮局完全不知道该拿它怎么办。相反，我们应该把信装进信封，并在信封上写下一些信息（例如朋友的地址），告诉邮局如何处理这封信。</p>
+<p>就像信封一样，当我们发送一个数据包时，我们需要附加额外的元数据（Metadata），告诉网络基础设施如何处理该数据包。这些额外的元数据被称为首部（Header）。其余的比特（例如发送的文件、信封里的信件）被称为有效载荷（Payload）。</p>
+<p><img src="/image/cs168-textbook3/1768290210693.png" srcset="/img/loading.gif" lazyload alt="1768290210693"></p>
+<p>在类比中，邮局不应该阅读我的信件内容。它应该只阅读信封上的信息，以决定如何寄送我的信件。同样地，网络基础设施也应该只读取首部（Header），以决定如何交付数据。</p>
+<p>收件人关心的是信件内部的内容，而不是信封。同样地，端系统上的应用程序关心的是有效载荷（Payload），而不是首部。尽管如此，端系统仍然需要了解首部，以便在发送数据包之前为其添加首部。</p>
+<h2 id="报头是标准化的"><a href="#报头是标准化的" class="headerlink" title="报头是标准化的"></a>报头是标准化的</h2><p>你也可以将首部看作是发送&#x2F;接收数据的端系统与承载数据的网络基础设施之间的 API。当我们编写软件时，我们需要确定用户与代码交互的接口（例如用户可以调用哪些函数，以及这些函数的参数）。同样，首部中的信息就是用户访问网络功能并传递参数的方式。</p>
+<p>互联网上的每一个人（每一个端系统、每一台交换机）都必须在首部格式上达成一致。如果微软的 Windows 系统修改了其操作系统中的代码，转而发送具有不同首部结构的数据包，那么其他任何人都无法理解这些发出的数据包。</p>
+<p>这也意味着我们在设计首部时必须非常谨慎。一旦我们设计并并在互联网上部署了一个首部，就很难再更改这个设计（因为我们必须让所有人都同意去更改它）。这就是为什么标准制定机构会花费数年时间来设计并标准化首部的原因。</p>
+<h2 id="报头应该包含什么？"><a href="#报头应该包含什么？" class="headerlink" title="报头应该包含什么？"></a>报头应该包含什么？</h2><p>我们应该在首部放入哪些信息？</p>
+<p>首部肯定应该包含目的地址（Destination Address），它告诉我们该将数据包发送到何处。</p>
+<p>首部也可以包含其他非必须但很有用的信息。从技术上讲，**源地址（Source Address）**对于交付数据包并不是必须的，但在实践中，我们几乎总是在首部包含源地址。这使得接收者能够向发送者发送回复。</p>
+<p>首部还可以包含校验和（Checksum），以确保数据包在传输过程中没有损坏。</p>
+<p>首部还可以包含其他元数据，例如数据包的长度（Length）。需要注意的是，数据包的大小是可以变化的（例如，用户可能只需要发送几个字节）。</p>
+<h2 id="多重报头（首部）"><a href="#多重报头（首部）" class="headerlink" title="多重报头（首部）"></a>多重报头（首部）</h2><p>让我们简要回到邮政类比。假设 A 公司的老板想给 B 公司的老板写一封信。这封邮件是如何被发送的呢？</p>
+<p><img src="/image/cs168-textbook3/1768290809197.png" srcset="/img/loading.gif" lazyload alt="1768290809197"></p>
+<p>A 公司的老板折好信件并将其交给秘书。接着，秘书将信件装入一个信封，并在信封上写下 B 公司老板的全名。</p>
+<p><img src="/image/cs168-textbook3/1768290913731.png" srcset="/img/loading.gif" lazyload alt="1768290913731"></p>
+<p>秘书将这封信交给收发室。邮政工作人员将信件放入一个写有 B 公司街道地址的箱子中，然后将包裹装上快递车。</p>
+<p><img src="/image/cs168-textbook3/1768290986455.png" srcset="/img/loading.gif" lazyload alt="1768290986455"></p>
+<p>此时，信件本身被多层标识信息（信封、箱子）包裹着。快递公司将信件发往 B 公司（期间可能经过多辆卡车、飞机、邮递员等）。</p>
+<p><img src="/image/cs168-textbook3/1768291029414.png" srcset="/img/loading.gif" lazyload alt="1768291029414"></p>
+<p>当信件到达 B 公司时，收发室拆掉箱子，并将信封交给秘书。</p>
+<p><img src="/image/cs168-textbook3/1768291070155.png" srcset="/img/loading.gif" lazyload alt="1768291070155"></p>
+<p>然后，秘书看到信封上老板的名字，拆掉信封，并将信件呈递给 B 公司的老板。</p>
+<p><img src="/image/cs168-textbook3/1768291103835.png" srcset="/img/loading.gif" lazyload alt="1768291103835"></p>
+<p>请注意，随着我们向更低的抽象层级移动，我们在数据周围包裹了更多的首部（Headers）。然后，随着我们向更高的抽象层级移动，我们将这些层级从数据中逐层剥离。</p>
+<p><img src="/image/cs168-textbook3/1768291137912.png" srcset="/img/loading.gif" lazyload alt="1768291137912"></p>
+<p>每一层只需要理解它自己的首部，并且在某种意义上，它正在与位于同一层的对等方（Peers）进行“通信”。当秘书 A 在信封上写下名字时，那是给秘书 B 看的（而不是给邮递员或老板看的）。</p>
+<p>更正式地说，在互联网上，处于同一层级的对等方通过在该层建立“协议”来进行通信。该协议仅对该特定层级的实体有意义。</p>
+<p><img src="/image/cs168-textbook3/1768291258722.png" srcset="/img/loading.gif" lazyload alt="1768291258722"></p>
+<p>请注意，某些层级提供了多种协议选择（例如第 2 层的无线或有线协议）。在这些情况下，通信的双方需要使用相同的协议选择。有线发送方无法直接与无线接收方进行对话。</p>
+<h2 id="寻址和命名"><a href="#寻址和命名" class="headerlink" title="寻址和命名"></a>寻址和命名</h2><p>早些时候，我们提到首部需要包含接收者的地址。那么，这个地址究竟是什么呢？正式地说， **网络地址（Network Address）**是一个告诉我们主机在网络中所处位置的数值。</p>
+<p>当我们更详细地观察不同的层级时，会发现不同层级拥有不同的寻址方案。如果你想在 Soda Hall（加州大学伯克利分校的一栋建筑）内部寄信，你可以将目的地址写成“Soda Hall 413 室”，楼内的人就知道该把信送到哪里。相比之下，如果你想寄信到纽约，你必须写下一个完整的街道地址，如“纽约州纽约市主街 123 号”。</p>
+<p>同样，互联网中的不同层级也有各自最适合该特定层级的寻址方案。例如，有时主机会通过其人类可读的名称（如 <a target="_blank" rel="noopener" href="http://www.google.com)被引用;有时,同一台主机会通过机器可读的/">www.google.com）被引用；有时，同一台主机会通过机器可读的</a> IP 地址（如 74.124.56.2）被引用，这个数字编码了关于服务器位置的信息（且如果服务器移动，该地址可能会改变）；还有些时候，同一台主机可能会通过其硬件 MAC 地址被引用，而这个地址永远不会改变。</p>
+<p><img src="/image/cs168-textbook3/1768291567927.png" srcset="/img/loading.gif" lazyload alt="1768291567927"></p>
+<h2 id="端系统与路由器中的层次结构"><a href="#端系统与路由器中的层次结构" class="headerlink" title="端系统与路由器中的层次结构"></a>端系统与路由器中的层次结构</h2><p>互联网不仅仅是由发送方和接收方构成的。除了这两个端系统之外，还有路由器负责将数据包跨越多个“跳数”转发至目的地。那么，我们的分层和首部理念在所有这些机器之间是如何交互的呢？</p>
+<p>端系统（End Hosts）需要实现所有层级。你的电脑需要了解第 7 层（应用层）才能运行浏览器；也需要了解第 1 层（物理层）才能将比特通过导线发送出去。你还需要中间的所有层级，以便将应用层数据（老板的信件）一路向下传递到物理层。</p>
+<p>那么**路由器（Routers）**呢？路由器确实需要第 1 层来接收导线上的比特，需要第 2 层来在链路上发送数据包，以及需要第 3 层来在全球网络中转发数据包。然而，路由器并不真的需要考虑第 4 层和第 7 层。路由器并不运行网页浏览器来显示页面，也不需要考虑可靠性（回想一下，它是“尽力而为”的服务模型）。</p>
+<p><img src="/image/cs168-textbook3/1768291733629.png" srcset="/img/loading.gif" lazyload alt="1768291733629"></p>
+<p>总结：底三层在所有地方都有实现，但顶两层仅在端系统中实现。</p>
+<h2 id="端系统与路由器中的多层首部"><a href="#端系统与路由器中的多层首部" class="headerlink" title="端系统与路由器中的多层首部"></a>端系统与路由器中的多层首部</h2><p>让我们再次思考寄信的过程。A 公司将信件装入信封，然后又将其放入一个箱子中。这个箱子并不会魔术般地直接飞到 B 公司。事实上，它可能会经过好几个邮局。</p>
+<p><img src="/image/cs168-textbook3/1768291849565.png" srcset="/img/loading.gif" lazyload alt="1768291849565"></p>
+<p>在每个邮局，邮递员都会打开箱子并对邮件进行分拣。邮递员查看信封（打开箱子后显露出的下一层首部），看到信封是发往 B 公司的。</p>
+<p><img src="/image/cs168-textbook3/1768291863191.png" srcset="/img/loading.gif" lazyload alt="1768291863191"></p>
+<p>接着，邮递员将信封放入另一个箱子中——这个箱子可能与之前的不同——以便信件能够到达前往 B 公司途中的下一个邮局。</p>
+<p><img src="/image/cs168-textbook3/1768291880039.png" srcset="/img/loading.gif" lazyload alt="1768291880039"></p>
+<p>这个过程在每个邮局不断重复。箱子被打开，露出里面的信封。然后，信封被放入一个新的箱子，前往下一个邮局。请注意，没有任何一个邮局会拆开信封去查看里面的信件，因为他们不需要阅读它。</p>
+<p><img src="/image/cs168-textbook3/1768291933549.png" srcset="/img/loading.gif" lazyload alt="1768291933549"></p>
+<p>最终，信件装在一个箱子里到达了 B 公司。这一次，B 公司打开了箱子，也拆开了信封，展示出里面的信件。</p>
+<h2 id="端系统与路由器中的多层首部-1"><a href="#端系统与路由器中的多层首部-1" class="headerlink" title="端系统与路由器中的多层首部"></a>端系统与路由器中的多层首部</h2><p>现在我们已经掌握了端系统和路由器的全景图，让我们重新审视数据包在网络中跨越多个“跳数”时，首部包裹与解包的演示。</p>
+<p>首先，主机 A 接收消息并沿协议栈向下处理，依次添加第 7、4、3、2 和 1 层级的首部。现在，我们得到了一个被各层级首部包裹的数据包。第 1 层协议将该包的比特流沿导线发送到前往目的地的第一个路由器。</p>
+<p><img src="/image/cs168-textbook3/1768292047382.png" srcset="/img/loading.gif" lazyload alt="1768292047382"></p>
+<p>该路由器必须将数据包转发到下一跳，以便数据包最终到达主机 B。我们知道，在全球网络中转发数据包是第 3 层的工作。因此，路由器必须将该数据包解析至第 3 层。路由器读取并拆解第 1 层和第 2 层的首部，露出下方的第 3 层首部。路由器读取该首部以决定接下来的转发路径。</p>
+<p>现在，为了将数据包传送到下一跳，路由器必须再次沿协议栈向下处理，包裹新的第 2 层和第 1 层首部，然后将比特流发送到下一跳的导线上。</p>
+<p><img src="/image/cs168-textbook3/1768292133422.png" srcset="/img/loading.gif" lazyload alt="1768292133422"></p>
+<p>这一模式在每个路由器上不断重复：第 1 层和第 2 层被拆解以露出第 3 层首部，然后在发送到下一跳之前包裹新的第 2 层和第 1 层首部。请注意，没有任何路由器会查看第 3 层协议以上的内容，因为高层协议仅由端系统进行解析。</p>
+<p><img src="/image/cs168-textbook3/1768292111603.png" srcset="/img/loading.gif" lazyload alt="1768292111603"></p>
+<p>最终，数据包到达了主机 B，它会逐一拆解每一层：第 1、2、3、4、7 层。主机 B 成功接收到了消息！</p>
+<p><img src="/image/cs168-textbook3/1768292165052.png" srcset="/img/loading.gif" lazyload alt="1768292165052"></p>
+<p>这种分层方案的一个结果是：每一跳都可以使用不同的第 2 层和第 1 层协议。例如，第一跳可以通过有线发送，主机 A 和第一个路由器使用的初始 L2&#x2F;L1 首部可以是针对有线协议的。相比之下，稍后的某一跳可以通过无线链路发送，该跳两端的路由器使用的 L2&#x2F;L1 首部则可以是针对无线协议的。</p>
+<p><img src="/image/cs168-textbook3/1768292227710.png" srcset="/img/loading.gif" lazyload alt="1768292227710"></p>
+<p>更广泛地说，我们提到每一层只需要与其同层的对等方进行通信。我们现在可以在所有层级中看到这一点。在第 4 层和第 7 层，两个主机必须使用相同的协议来发送和接收数据包。主机的对等方是另一个主机。</p>
+<p>相比之下，在第 1 层和第 2 层，路由器必须与前一跳和后一跳的路由器使用相同的协议，以便接收和发送数据。路由器的对等方是沿路径与其相邻的路由器。</p>
+<p><img src="/image/cs168-textbook3/1768292266564.png" srcset="/img/loading.gif" lazyload alt="1768292266564"></p>
+<p>总结：每个路由器解析第 1 层到第 3 层，而端系统解析第 1 层到第 7 层。</p>
+<p><img src="/image/cs168-textbook3/1768292279098.png" srcset="/img/loading.gif" lazyload alt="1768292279098"></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/v/" class="print-no-link">#~~~///(^v^)\\\~~~</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>cs168-textbook3</div>
+      <div>https://howidobetter.github.io/2026/01/13/cs168-textbook3/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>一剑留名ing</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年1月13日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2026/01/15/cs168-textbook4/" title="cs168-textbook4">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">cs168-textbook4</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/01/13/cs168-textbook2/" title="cs168-textbook2">
+                        <span class="hidden-mobile">cs168-textbook2</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+      © 2024 <a href="https://howIdobetter.github.io" target="_blank" rel="nofollow noopener"><span>一剑留名ing</span></a>
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+
+  
+
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  
+<script src="/js/snow.js"></script>
+<script src="/js/glass.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

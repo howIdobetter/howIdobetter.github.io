@@ -1,0 +1,748 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="一剑留名ing">
+  <meta name="keywords" content="技术，博客，学习">
+  
+    <meta name="description" content="链路词汇表Bandwidth	带宽	链路的最大数据传输速率（Bits per second）。Propagation Delay	传播延迟	信号在介质中从发送端传输到接收端所需的时间。Bandwidth-Delay Product (BDP)带宽延迟积衡量链路“在途”数据的最大容量（$BDP &#x3D; \text{Bandwidth} \times \text{Delay}$）。Latency">
+<meta property="og:type" content="article">
+<meta property="og:title" content="cs168-textbook6">
+<meta property="og:url" content="https://howidobetter.github.io/2026/01/20/cs168-textbook6/index.html">
+<meta property="og:site_name" content="随便做做">
+<meta property="og:description" content="链路词汇表Bandwidth	带宽	链路的最大数据传输速率（Bits per second）。Propagation Delay	传播延迟	信号在介质中从发送端传输到接收端所需的时间。Bandwidth-Delay Product (BDP)带宽延迟积衡量链路“在途”数据的最大容量（$BDP &#x3D; \text{Bandwidth} \times \text{Delay}$）。Latency">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook6/1768912287536.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook6/1768912837921.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook6/1768912759443.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook6/1768912804037.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook6/1768913827534.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook6/1768913871442.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook6/1768913879198.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook6/1768913886312.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook6/1768913911899.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook6/1768913941015.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook6/1768913979669.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook6/1768914400497.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook6/1768914431865.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook6/1768914449097.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook6/1768914472353.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook6/1768914501787.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook6/1768915077875.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook6/1768915096501.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook6/1768915139267.png">
+<meta property="article:published_time" content="2026-01-20T12:21:20.000Z">
+<meta property="article:modified_time" content="2026-01-20T13:19:26.677Z">
+<meta property="article:author" content="一剑留名ing">
+<meta property="article:tag" content="~~~&#x2F;&#x2F;&#x2F;(^v^)\\\~~~">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://howidobetter.github.io/image/cs168-textbook6/1768912287536.png">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>cs168-textbook6 - 随便做做</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+  
+<link rel="stylesheet" href="/css/glass.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"howidobetter.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":100,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100},"height":"3px"},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>随便做做</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="cs168-textbook6"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-01-20 20:21" pubdate>
+          2026年1月20日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          2.9k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          25 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">cs168-textbook6</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="链路"><a href="#链路" class="headerlink" title="链路"></a>链路</h1><h2 id="词汇表"><a href="#词汇表" class="headerlink" title="词汇表"></a>词汇表</h2><p>Bandwidth	带宽	链路的最大数据传输速率（Bits per second）。<br>Propagation Delay	传播延迟	信号在介质中从发送端传输到接收端所需的时间。<br>Bandwidth-Delay Product (BDP)带宽延迟积衡量链路“在途”数据的最大容量（$BDP &#x3D; \text{Bandwidth} \times \text{Delay}$）。<br>Latency	时延&#x2F;延迟	泛指从发送到接收的时间差，受传播、排队、处理等多种因素影响。<br>Timing Diagram	时序图	描述协议实体间随时间交互的图表。<br>Transmission Delay传输延迟将所有比特推向传输介质所需的时间（$L&#x2F;R$）。<br>Propagation Delay传播延迟电磁信号在介质中跨越物理距离所需的时间（$D&#x2F;S$）。<br>End-to-End Delay	端到端延迟	数据包从离开源到完全到达目的地经历的总时间。<br>Serialization	串行化	将数据结构转换为比特流并逐一发送的过程。</p>
+<h2 id="链路及其属性"><a href="#链路及其属性" class="headerlink" title="链路及其属性"></a>链路及其属性</h2><p>既然我们已经对互联网的分层架构有了初步了解，现在让我们专注于数据包是如何跨越**链路（Link）**进行传输的。我们可以使用三个属性来衡量链路的性能。</p>
+<p>链路的**带宽（Bandwidth）**告诉我们单位时间内可以在链路上发送多少比特。直观地说，这就是链路的“速率”。如果把链路比作输水管，带宽就是水管的宽度。更宽的水管允许我们每秒向其中注入更多的水。我们通常以“比特每秒”为单位衡量带宽（例如：5 Gbps &#x3D; 每秒 50 亿比特）。</p>
+<p>链路的**传播延迟（Propagation Delay）**告诉我们一个比特在链路上行程所需的时间。在水管类比中，这相当于水管的长度。较短的水管意味着水在到达另一端之前，在管中停留的时间更短。传播延迟以时间为单位（如：纳秒、毫秒）。</p>
+<p>如果我们将带宽与传播延迟相乘，就会得到带宽延迟积（Bandwidth-Delay Product, BDP）。直观上，这是链路的“容量”，即在任何给定瞬间，存在于链路上的比特总数。在水管类比中，如果我们注满水管并冻结时间，水管的容量就是那一瞬间管子里水的总量。</p>
+<p><img src="/image/cs168-textbook6/1768912287536.png" srcset="/img/loading.gif" lazyload alt="1768912287536"></p>
+<p>注： 你有时可能会看到**时延（Latency）**这个术语。在单条链路的语境下，时延指的就是其传播延迟；但该词也可用于其他语境（例如：跨越多条链路的端到端延迟）。“Latency”本身没有严格的正式定义，其含义取决于具体语境。</p>
+<h2 id="时序图"><a href="#时序图" class="headerlink" title="时序图"></a>时序图</h2><p>假设我们有一条带宽为 1 Mbps（即每秒 100 万比特）、传播延迟为 1 ms（即 0.001 秒）的链路。</p>
+<p>我们想通过这条链路发送一个 100 字节（即 800 比特）的数据包。从发送第一个比特开始，到接收到最后一个比特为止，总共需要多长时间？</p>
+<p>为了回答这个问题，我们可以画一张时序图（Timing Diagram）。左侧的垂直线代表发送方，右侧代表接收方。时间从 0 开始，随着图表向下移动而增加。</p>
+<p><img src="/image/cs168-textbook6/1768912837921.png" srcset="/img/loading.gif" lazyload alt="1768912837921"></p>
+<p>让我们先关注第一个比特。由于带宽允许每秒发送 1,000,000 个比特，因此将单个比特推上链路需要 $1&#x2F;1,000,000 &#x3D; 0.000001$ 秒。在第 0.000001 秒时，链路上已经有了一个比特，位于发送端。<br>随后，这个比特需要 0.001 秒在链路上传输（传播延迟），因此在 $0.000001 + 0.001$ 秒时，第一个比特到达接收方。<br><img src="/image/cs168-textbook6/1768912759443.png" srcset="/img/loading.gif" lazyload alt="1768912759443"></p>
+<p>现在让我们考虑最后一个比特。如前所述，放一个比特到链路上需要 0.000001 秒。我们总共有 800 个比特要发送，因此最后一个比特在 $800 \times 0.000001 &#x3D; 0.0008$ 秒时被放置到链路上。</p>
+<p>接着，最后一个比特也需要 0.001 秒在链路上传输，因此在 $0.0008 + 0.001$ 秒时，最后一个比特到达接收方。这就是我们说数据包“到达”接收方的时间点。</p>
+<p><img src="/image/cs168-textbook6/1768912804037.png" srcset="/img/loading.gif" lazyload alt="1768912804037"></p>
+<h2 id="分组延迟"><a href="#分组延迟" class="headerlink" title="分组延迟"></a>分组延迟</h2><p>更广泛地说，分组延迟（Packet Delay）是指发送整个数据包所需的时间——从第一个比特被推上信道（Wire）开始，直到最后一个比特在另一端被接收为止。该延迟是传输延迟（Transmission Delay）与传播延迟（Propagation Delay）的总和。</p>
+<p>传输延迟告诉我们把所有比特放置到信道上需要多长时间。在前面的例子中，计算方式是 $800 \cdot (1&#x2F;1,000,000)$。通常情况下，传输延迟等于数据包大小（Packet Size）除以链路带宽（Link Bandwidth）。</p>
+<p>由于传输延迟是带宽的函数，我们可以根据带宽和传播延迟这两个链路属性，来计算出最终的分组延迟。</p>
+<h2 id="带宽和传播延迟的权衡"><a href="#带宽和传播延迟的权衡" class="headerlink" title="带宽和传播延迟的权衡"></a>带宽和传播延迟的权衡</h2><p>考虑以下两条链路：</p>
+<p>链路 1： 带宽 10 Mbps，传播延迟 10 ms。</p>
+<p>链路 2： 带宽 1 Mbps，传播延迟 1 ms。</p>
+<p>哪条链路更好？这取决于你发送的数据包。</p>
+<p>假设我们要发送一个单个 10 字节的小包。对于这两条链路而言，将数据包推上信道的时间（传输延迟）几乎可以忽略不计，传播延迟是延迟的主要来源。由于链路 2 的传播延迟更短，因此它是更好的选择。</p>
+<p>相反，假设我们要发送一个单个 10,000 字节的大包。此时，传输延迟成为了延迟的主要来源。我们更倾向于选择链路 1，因为它拥有更高的带宽，能让我们更快地将字节推上信道。你可以通过正式的分组延迟公式验证这一直觉：链路 1 发送该包大约需要 18 ms，而链路 2 则需要大约 81 ms。</p>
+<p>举个现实世界的例子：视频通话。如果视频画质很差（模糊、马赛克），通常是因为带宽不足（此时缩短传播延迟也无济于事）。相比之下，如果你说话之后要等很久对方才有反应（音画不同步或明显的交谈停顿），通常是因为传播延迟太长（此时增加带宽也无法改善）。</p>
+<h2 id="管道图"><a href="#管道图" class="headerlink" title="管道图"></a>管道图</h2><p>到目前为止，我们一直在通过画时序图来标记网络事件发生的时间点（例如接收方何时收到数据包）。</p>
+<p>另一种观察数据包跨网络传输的方法是：在某个冻结的时间点，画出链路上比特的分布情况。这两种视角传达的信息是一致的，但取决于具体语境，某种视角可能比另一种更有用。</p>
+<p>为了描绘链路，我们可以将链路想象成一根管道（类似于水管类比），并将其画成一个长方形：宽度代表传播延迟，高度代表带宽。长方形的面积则代表链路的容量。</p>
+<p><img src="/image/cs168-textbook6/1768913827534.png" srcset="/img/loading.gif" lazyload alt="1768913827534"></p>
+<p>假设我们要通过链路发送一个 50 字节的数据包。在管道视角下，我们可以展示数据包在链路上移动的冻结瞬间。数据包被排列成一个矩形，其高度告诉我们在单个时间步内有多少字节被推上信道。在每个时间步，数据包在管道中向右滑动。最终，数据包开始离开管道，且在每个时间步中，矩形的一列数据会退出管道。</p>
+<p><img src="/image/cs168-textbook6/1768913871442.png" srcset="/img/loading.gif" lazyload alt="1768913871442"></p>
+<p><img src="/image/cs168-textbook6/1768913879198.png" srcset="/img/loading.gif" lazyload alt="1768913879198"></p>
+<p><img src="/image/cs168-textbook6/1768913886312.png" srcset="/img/loading.gif" lazyload alt="1768913886312"></p>
+<p>一个非直观的事实： 时序图中的分组传输延迟对应于管道图中数据包矩形的宽度。</p>
+<p>为了理解这一点，假设有一条带宽为 5 bps（每秒 5 比特）的链路，我们要发送一个 20 比特的数据包。在时序图中，从发送第一个比特到发送最后一个比特之间有 4 秒的时间。</p>
+<p><img src="/image/cs168-textbook6/1768913911899.png" srcset="/img/loading.gif" lazyload alt="1768913911899"></p>
+<p>在管道图中，每一秒都有由 5 个比特组成的一列“行进”进入管道。我们需要 4 列才能全部进入，这需要 4 秒。这意味着数据包在管道中的宽度就是 4 列数据包，即 4 秒。</p>
+<p><img src="/image/cs168-textbook6/1768913941015.png" srcset="/img/loading.gif" lazyload alt="1768913941015"></p>
+<p>管道图允许我们在同一坐标轴上观察分组传输时间和传播延迟，并将这两项进行对比。</p>
+<p><img src="/image/cs168-textbook6/1768913979669.png" srcset="/img/loading.gif" lazyload alt="1768913979669"></p>
+<p>管道图在比较不同链路时非常有用。让我们看看相同的数据包在三种不同链路中的表现：</p>
+<ol>
+<li><strong>缩短传播延迟：</strong> 管道的宽度变窄。管道的高度保持不变，每个矩形数据包的形状也不变。（记住，你可以把数据包的高度看作每个时间步进入管道的比特数，宽度看作将所有比特推入管道所需的时间。）<ul>
+<li><strong>观察结果：</strong> 数据包宽度不变，意味着传输延迟没有改变。此外，链路面积减小，说明链路容量降低了。</li>
+</ul>
+</li>
+<li><strong>增加带宽：</strong> 管道的高度变高，表明单位时间内我们可以将更多比特推入管道。<ul>
+<li><strong>观察结果：</strong> 数据包的形状也发生了变化。数据包现在变得 <strong>更高</strong> ，因为单位时间内推入的比特更多。结果，我们完成填充数据包的速度大大加快，因此数据包的 <strong>宽度（传输延迟）减小了</strong> 。</li>
+</ul>
+</li>
+</ol>
+<h2 id="过载链路"><a href="#过载链路" class="headerlink" title="过载链路"></a>过载链路</h2><p><img src="/image/cs168-textbook6/1768914400497.png" srcset="/img/loading.gif" lazyload alt="1768914400497"></p>
+<p>请想象数据包到达交换机的场景。交换机需要将所有收到的包转发到输出链路上。如果交换机拥有足够的容量来处理每一个到达的包，那么一切正常。</p>
+<p><img src="/image/cs168-textbook6/1768914431865.png" srcset="/img/loading.gif" lazyload alt="1768914431865"></p>
+<p>但如果是下面这种情况呢？</p>
+<p><img src="/image/cs168-textbook6/1768914449097.png" srcset="/img/loading.gif" lazyload alt="1768914449097"></p>
+<p>从长远来看，我们有足够的容量发送所有输出包；但在当前的特定瞬间，有两个包同时到达，而我们只能发送一个。这被称为 <strong>瞬时过载（Transient Overload）</strong> ，在互联网交换机中极其常见。<br>为了应对瞬时过载，交换机会维护一个 <strong>分组队列（Queue of packets）</strong> 。如果两个包同时到达，交换机会将其中一个排入队列，并发送另一个。</p>
+<p><img src="/image/cs168-textbook6/1768914472353.png" srcset="/img/loading.gif" lazyload alt="1768914472353"></p>
+<p>在任何给定时刻，交换机可以选择从某个输入链路发送包，或者发送队列中的包。这一选择由**分组调度（Packet Scheduling）**算法决定，我们将研究许多不同的算法设计。</p>
+<p><img src="/image/cs168-textbook6/1768914501787.png" srcset="/img/loading.gif" lazyload alt="1768914501787"></p>
+<p>当没有输入包进入时，交换机可以清空队列，发送之前缓存的所有包。</p>
+<p><img src="/image/cs168-textbook6/1768915077875.png" srcset="/img/loading.gif" lazyload alt="1768915077875"></p>
+<p>这使得队列能帮助我们吸收 <strong>瞬时突发流量（Transient Bursts）</strong> 。</p>
+<p><img src="/image/cs168-textbook6/1768915096501.png" srcset="/img/loading.gif" lazyload alt="1768915096501"></p>
+<p>如果输入链路的情况变成下面这样呢？</p>
+<p><img src="/image/cs168-textbook6/1768915139267.png" srcset="/img/loading.gif" lazyload alt="1768915139267"></p>
+<p>现在我们面临的是 <strong>持续过载（Persistent Overload）</strong> 。输出链路的容量根本无法支撑如此高水平的输入流量。<br>我们可以填满队列，但这仍然不足以支撑输入负载。无论如何，交换机最终都会 <strong>丢包（Drop packets）</strong> 。</p>
+<p>我们该如何解决持续过载？网络运营商需要合理地<strong>配置（Provision）<strong>他们的链路和交换机。如果发现某台交换机频繁过载，他们可能会决定升级链路（这可能需要人工部署）。<br>解决过载的一个可能方案是让路由器通知发送方减慢速度（我们稍后在学习</strong>拥塞控制</strong>时会研究这一点）。但归根结底，我们并没有太多办法彻底解决过载，这也是为什么互联网被设计为仅提供**尽力而为（Best-effort Service）**服务的原因。</p>
+<p>现在我们有了队列的概念，需要回头更新我们的分组延迟公式。现在，<strong>分组延迟等于传输延迟、传播延迟与排队延迟之和。</strong></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/v/" class="print-no-link">#~~~///(^v^)\\\~~~</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>cs168-textbook6</div>
+      <div>https://howidobetter.github.io/2026/01/20/cs168-textbook6/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>一剑留名ing</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年1月20日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/01/15/cs168-textbook5/" title="cs168-textbook5">
+                        <span class="hidden-mobile">cs168-textbook5</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+      © 2024 <a href="https://howIdobetter.github.io" target="_blank" rel="nofollow noopener"><span>一剑留名ing</span></a>
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+
+  
+
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  
+<script src="/js/snow.js"></script>
+<script src="/js/glass.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

@@ -1,0 +1,772 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="一剑留名ing">
+  <meta name="keywords" content="技术，博客，学习">
+  
+    <meta name="description" content="Designing Resource Sharing词汇表重要概念Statistical Multiplexing	统计复用	基于概率统计的资源共享。利用“大家不会同时用满带宽”的概率来超卖资源。 Peak Demand	峰值需求	用户在最高负载时刻需要的带宽。 Packet Switching	分组交换	互联网的基石。数据被切成“分组”，像无名包裹一样在路上挤着走。 Circuit Switch">
+<meta property="og:type" content="article">
+<meta property="og:title" content="cs168-textbook5">
+<meta property="og:url" content="https://howidobetter.github.io/2026/01/15/cs168-textbook5/index.html">
+<meta property="og:site_name" content="随便做做">
+<meta property="og:description" content="Designing Resource Sharing词汇表重要概念Statistical Multiplexing	统计复用	基于概率统计的资源共享。利用“大家不会同时用满带宽”的概率来超卖资源。 Peak Demand	峰值需求	用户在最高负载时刻需要的带宽。 Packet Switching	分组交换	互联网的基石。数据被切成“分组”，像无名包裹一样在路上挤着走。 Circuit Switch">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook5/1768460709562.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook5/1768460728302.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook5/1768460794150.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook5/1768460817100.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook5/1768460835246.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook5/1768460876613.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook5/1768460885093.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook5/1768461172684.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook5/1768461202235.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook5/1768461209517.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook5/1768461222984.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook5/1768462028125.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook5/1768462037993.png">
+<meta property="article:published_time" content="2026-01-15T07:00:35.000Z">
+<meta property="article:modified_time" content="2026-01-15T07:30:19.988Z">
+<meta property="article:author" content="一剑留名ing">
+<meta property="article:tag" content="~~~&#x2F;&#x2F;&#x2F;(^v^)\\\~~~">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://howidobetter.github.io/image/cs168-textbook5/1768460709562.png">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>cs168-textbook5 - 随便做做</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+  
+<link rel="stylesheet" href="/css/glass.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"howidobetter.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":100,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100},"height":"3px"},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>随便做做</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="cs168-textbook5"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-01-15 15:00" pubdate>
+          2026年1月15日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          4.1k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          34 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">cs168-textbook5</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="Designing-Resource-Sharing"><a href="#Designing-Resource-Sharing" class="headerlink" title="Designing Resource Sharing"></a>Designing Resource Sharing</h1><h2 id="词汇表"><a href="#词汇表" class="headerlink" title="词汇表"></a>词汇表</h2><h2 id="重要概念"><a href="#重要概念" class="headerlink" title="重要概念"></a>重要概念</h2><p>Statistical Multiplexing	统计复用	基于概率统计的资源共享。利用“大家不会同时用满带宽”的概率来超卖资源。</p>
+<p>Peak Demand	峰值需求	用户在最高负载时刻需要的带宽。</p>
+<p>Packet Switching	分组交换	互联网的基石。数据被切成“分组”，像无名包裹一样在路上挤着走。</p>
+<p>Circuit Switching	电路交换	电话网的遗产。先修路，再开车；路修好了，别人就不能用这条车道。</p>
+<h2 id="资源共享：统计复用"><a href="#资源共享：统计复用" class="headerlink" title="资源共享：统计复用"></a>资源共享：统计复用</h2><p>互联网上的链路和交换机容量是有限的。我们需要解决的一个关键设计问题是：如何由不同的互联网用户共享这些资源？</p>
+<p>让我们把问题形式化：回想一下，“流（Flow）”是两个端主机之间交换的数据包序列（例如你和朋友之间的视频通话）。尽管容量有限，互联网仍需要同时支持许多并发流。</p>
+<p><img src="/image/cs168-textbook5/1768460709562.png" srcset="/img/loading.gif" lazyload alt="1768460709562"></p>
+<p>我们常说网络资源是统计复用的，这意味着我们会根据用户的需求动态分配资源，而不是为用户划分固定的资源份额。</p>
+<p><img src="/image/cs168-textbook5/1768460728302.png" srcset="/img/loading.gif" lazyload alt="1768460728302"></p>
+<p>举个类比：考虑你的个人电脑。电脑并不会预先为 Firefox 分配一半 CPU，为 Zoom 分配另一半，且只允许每个应用使用那一半。相反，你的电脑会根据不同应用的需求动态分配资源。</p>
+<p>统计复用在计算机科学中无处不在。例如在云计算中，不同公司可能会动态共享数据中心资源。</p>
+<p>统计复用是高效共享网络资源的一种绝佳方式，因为用户的需求随时间而变化。你可能不会在 24 小时内的每一秒都保持恒定的 10 Mbps 带宽需求。你清醒时的需求可能更多，睡眠时则较少。</p>
+<p>让统计复用发挥作用的前提是：在实践中，总需求的峰值远小于各项需求峰值的总和。</p>
+<p>让我们拆解一下其中的含义。假设有两个用户 A 和 B。我们可以绘制每个用户随时间变化的需求图。</p>
+<p><img src="/image/cs168-textbook5/1768460794150.png" srcset="/img/loading.gif" lazyload alt="1768460794150"></p>
+<p>为了完全满足两个用户的需求，我们需要分配多少容量？</p>
+<p>糟糕的策略（非统计复用）是计算“各项需求峰值的总和”。我们找到 A 的峰值需求和 B 的峰值需求，然后将它们相加。如果我们分配这么大的容量，肯定能满足需求。A 的峰值是 $X$，我们分给 A 长度为 $X$ 的专属带宽，同理分给 B 长度为 $Y$ 的。然而，这种方法很浪费，因为 A 的峰值和 B 的峰值并没有在同一时间发生。</p>
+<p><img src="/image/cs168-textbook5/1768460817100.png" srcset="/img/loading.gif" lazyload alt="1768460817100"></p>
+<p><img src="/image/cs168-textbook5/1768460835246.png" srcset="/img/loading.gif" lazyload alt="1768460835246"></p>
+<p>更好的策略（统计复用）是首先通过绘制两个用户随时间变化的合并需求图来计算“总需求”。例如，新图表中上午 10 点的需求等于 A 的 10 点需求加上 B 的 10 点需求。然后，我们计算这个总需求的峰值。</p>
+<p><img src="/image/cs168-textbook5/1768460876613.png" srcset="/img/loading.gif" lazyload alt="1768460876613"></p>
+<p>如果我们只分配这么大的容量，我们就不能再静态地为每个用户分配固定部分。然而，通过随时间动态改变分配给每个用户的量，我们仍然可以成功满足他们的需求，即使总容量更小。</p>
+<p><img src="/image/cs168-textbook5/1768460885093.png" srcset="/img/loading.gif" lazyload alt="1768460885093"></p>
+<p>统计复用允许我们用更小的容量支持同样多的用户（成本更低，资源利用率更高）。对于许多分布情况，我们可以证明总需求的峰值实际上更接近平均需求之和，这远小于峰值需求之和。</p>
+<p>在实践中，网络并不会针对“所有事情同时达到峰值”的最坏情况进行准备。相反，我们动态共享资源，并寄希望于峰值不会同时发生。峰值确实仍可能同时发生，这会导致数据包延迟或丢弃（回想一下链路队列）。尽管如此，我们还是选择了统计复用以提高资源利用率，并承担相应的后果（偶尔出现的并发峰值）。</p>
+<p>归根结底，统计复用是一个带有权衡的设计选择。不同的用户可能会有不同的选择。例如，金融交易所交易时有时会决定建立自己的专用网络来支撑峰值需求，因为他们更在意确保高峰期间的连通性，且能承担额外成本。</p>
+<h2 id="资源共享：电路交换vs-分组交换"><a href="#资源共享：电路交换vs-分组交换" class="headerlink" title="资源共享：电路交换vs.分组交换"></a>资源共享：电路交换vs.分组交换</h2><p>我们现在知道可以使用统计复用来决定建设多少容量。接下来的问题是：我们如何真正地在用户之间动态分配资源？</p>
+<p>举个类比：想象一家拥有众多顾客但桌位有限的热门餐厅。我们可以想象两种分配桌位的方法：一是让顾客进行预约（Reservations），二是按**先到先得（First-come first-serve）**的原则安排座位。</p>
+<p>网络中共享资源的两种方法与之类似。一种方法是尽力而为（Best-effort）。每个人都直接将数据发送到网络中，不进行任何预约，并寄希望于一切顺利。这种方式不保证有足够的带宽来满足你的需求。</p>
+<p>尽力而为模式的典范设计被称为分组交换（Packet Switching）。交换机独立地处理每一个数据包，并将其转发到离目的地更近的地方。交换机不考虑“流”或“预约”。除了数据包之间相互独立外，交换机之间也是相互独立的。当一个数据包跨越多个交换机跳转时，每个交换机都独立地处理该包（交换机之间不进行协作）。</p>
+<p><img src="/image/cs168-textbook5/1768461172684.png" srcset="/img/loading.gif" lazyload alt="1768461172684"></p>
+<p>另一种方法基于预约（Reservations）。在“流”开始时，用户明确请求并预约所需的带宽。数据发送完毕后，资源可以释放供他人预约。</p>
+<p>预约模式的典范设计（在研究界和工业界均有探索）被称为电路交换（Circuit Switching）。在“流”开始时，端主机通过某种路由算法识别出穿过网络的一条路径（一系列交换机和链路）。然后，源端向目的地发送一条特殊的预约请求消息。沿途的每个交换机都会收到这个请求。如果每个交换机都接受了请求，那么预约成功，源端和目的地之间就建立了一套交换机“电路”。</p>
+<p><img src="/image/cs168-textbook5/1768461202235.png" srcset="/img/loading.gif" lazyload alt="1768461202235"></p>
+<p>一旦每个交换机都确认了预约，数据就可以发送了。最终，当流结束时，源端向接收方发送一条拆除（Teardown）消息。沿途每个交换机看到此消息后便释放其容量。</p>
+<p><img src="/image/cs168-textbook5/1768461209517.png" srcset="/img/loading.gif" lazyload alt="1768461209517"></p>
+<p>注：我们在这里使用“电路（Circuit）”一词，是因为这个创意源自电话网络，电话网正是利用这一理念让两人互相通话。</p>
+<p>请记住，电路交换和分组交换都体现了统计复用。主要区别在于我们分配资源的粒度：是针对每个“流”进行预约，还是针对每个“包”尽力而为。即使在电路交换中，我们也是根据预约动态分配资源的，而不是预先为所有可能存在的流保留资源。</p>
+<p><img src="/image/cs168-textbook5/1768461222984.png" srcset="/img/loading.gif" lazyload alt="1768461222984"></p>
+<h2 id="电路交换vs-分组交换：权衡与取舍"><a href="#电路交换vs-分组交换：权衡与取舍" class="headerlink" title="电路交换vs.分组交换：权衡与取舍"></a>电路交换vs.分组交换：权衡与取舍</h2><p>现在我们有了两种共享互联网资源的方法。哪种更好？这取决于我们用来评估每种方法的标准。我们可以从四个维度来比较这两种方法。</p>
+<p>目前，我们在互联网上共享资源有两种主要方式。哪种更好？这取决于我们评估时所采用的维度。我们可以从以下四个维度对这两种方法进行对比。</p>
+<ol>
+<li>抽象能力与 API (Abstraction&#x2F;API)<br>这对应用程序开发者来说，是否是一个良好的网络抽象？</li>
+</ol>
+<p>电路交换为开发者提供了更有用的抽象，因为它能提供带宽预留 (Reserved Bandwidth) 的保证。这为开发者带来了更具可预测性且易于理解的网络行为（在一切运行正常的前提下）。</p>
+<p>类比：这就像在云端预留一台机器来运行任务。如果开发者清楚所获机器的具体规格，就更容易推算性能。反之，如果开发者不知道使用的是什么机器，任务虽能运行，但性能却难以预测。</p>
+<p>运营商视角：对于需要向用户分配资源的运营商来说，电路交换也是一种有用的抽象。你可以精确获知每个用户请求的带宽量，并据此计费。如果没有服务质量保证，很难建立直观的商业模式。</p>
+<ol start="2">
+<li>规模化效率 (Efficiency at Scale)<br>这种方法在大规模应用时是否高效？它能利用网络中的所有可用带宽，还是会造成带宽浪费？</li>
+</ol>
+<p>分组交换（也称包交换）通常效率更高，具体领先多少取决于流量源的突发性 (Burstiness)。</p>
+<p>恒定速率：如果每个发送者始终以恒定速率发送数据，那么电路交换和分组交换都能充分利用带宽。</p>
+<p><img src="/image/cs168-textbook5/1768462028125.png" srcset="/img/loading.gif" lazyload alt="1768462028125"></p>
+<p>可变速率（突发流量）：如果发送者的速率随时间波动，分组交换的带宽利用率更高。</p>
+<p><img src="/image/cs168-textbook5/1768462037993.png" srcset="/img/loading.gif" lazyload alt="1768462037993"></p>
+<p>示例说明：假设总带宽为 30 Mbps。在预留机制下，三个流分别请求预留 12、11 和 13 Mbps。由于总量限制，其中一个请求将被拒绝。</p>
+<p>这种做法在两方面浪费了带宽：首先，预留了 12 Mbps 的流在大部分时间内并未实际占满带宽；其次，如果 12 Mbps 和 11 Mbps 的流获得了预留，剩下的 7 Mbps 处于空闲状态，无人使用。</p>
+<p>分组交换对比：在分组交换中，数据包随到随发，只要任意时刻的总带宽需求不超过 30 Mbps，我们就能利用现有带宽支撑所有流。</p>
+<p>关键概念：突发比 (Burstiness Ratio) 定义为峰值速率与平均速率的比值。</p>
+<p>语音通话：通常比例较低（如 3:1），较为平滑（这也是为什么传统电话网采用预留机制）。</p>
+<p>网页浏览：通常具有极高的突发性（如 100:1）。</p>
+<p>开销问题：分组交换更高效的另一个原因是：电路交换需要额外的建立和拆除连接 (Setup and Teardown) 的时间，这对于短连接流量（如下载小文件）来说效率极低。</p>
+<ol start="3">
+<li>规模化失效处理 (Failure at Scale)<br>在大规模环境下，每种方法处理故障的能力如何？</li>
+</ol>
+<p>分组交换在处理大规模故障方面表现更佳。如果某个路由器故障，我们只需将数据包通过网络中的另一条路径发送即可（路由算法非常擅长自动适应故障）。终端主机无需做出任何改变。</p>
+<p>相比之下，在电路交换中，如果路径上的路由器发生故障，尽管网络仍需寻找新路径，但终端主机的负担更重：</p>
+<p>主机必须检测到故障。</p>
+<p>主机必须重新发送预留请求。</p>
+<p>主机还必须设法释放旧路径上的预留资源。</p>
+<p>如果新的预留请求被拒绝了怎么办？</p>
+<p>这种故障模式的扩展性很差：如果一个核心路由器宕机，且有数百万个流正在使用它，那么数百万个预留请求必须同时尝试重新建立。处理电路交换中的失效是一个极其复杂的难题。</p>
+<ol start="4">
+<li>实现复杂度 (Implementation Complexity)<br>在大规模环境下，实现每种方法的复杂度如何？</li>
+</ol>
+<p>如果你尝试设计电路交换协议，许多额外的设计问题会使协议迅速变得异常复杂：</p>
+<p>确认机制：路由器如何知道预留成功了？当节点 2 同意请求时，它如何确定节点 3 和 4 也同意了？（可能方案：反向发送确认包）。</p>
+<p>丢包处理：如果预留请求在途中丢失了怎么办？（可能方案：设置定时器，超时则删除预留）。</p>
+<p>确认包丢失：如果大家都同意了，但返回的确认包丢了怎么办？</p>
+<p>拒绝策略：如果预留被拒绝，主机是应该降低带宽需求重试，还是稍后原样重试？路由器是否应该在拒绝信息中提供建议（如“我给不了 10M，但我能给你 8M”）？</p>
+<p>核心矛盾：状态共识 (State Consensus) 电路交换复杂的根本原因在于所有路由器都必须维护额外的状态 (State)，并且必须对这些状态达成共识。你可能听说过 Paxos 协议，这是一种极其复杂的分布式共识协议。在实践中，人们通常只在 4-5 台服务器的小集群上运行它。而电路交换本质上是要求在互联网规模（数百万路由器和流）上运行这种共识。</p>
+<p>总结 (Summary)<br>电路交换：通过带宽预留为应用提供更好的性能保证，行为更具可预测性。</p>
+<p>分组交换：提供更高效的带宽共享，避免了启动延迟。它在故障恢复方面更简单，且整体实现复杂度更低（路由器处理负担较轻）。</p>
+<h2 id="实践中的电路交换与分组交换"><a href="#实践中的电路交换与分组交换" class="headerlink" title="实践中的电路交换与分组交换"></a>实践中的电路交换与分组交换</h2><p>在现代互联网中，分组交换 (Packet Switching) 是默认的方案。电路交换 (Circuit Switching) 的应用场景则非常有限。</p>
+<p>现代互联网中的电路交换残余<br>RSVP (资源预留协议)：该协议可用于小型局部网络内部，允许路由器之间（而非终端主机之间）预留带宽。</p>
+<p>专用电路 (Dedicated Circuits)：例如 MPLS 电路或租用专线 (Leased Lines)。企业可以专门购买专属于其业务的互联网带宽（有时甚至包括物理基础设施）。相比标准的互联网连接，这种方式价格极其昂贵。</p>
+<p>规模差异：相比于假设的“全互联网规模”电路交换，专用电路的部署规模要小得多。通常由人工手动完成预留，且预留时间跨度极长（如数年之久）。此外，预留的粒度是以“公司”为单位，而非单个“流量流 (Flow)”。</p>
+<p>简要历史回顾<br>初创期 (1970s-1980s)：当互联网还是一个由政府资助的小规模研究项目时，它就采用了分组交换技术。</p>
+<p>商业化时期 (1990s)：随着政府停止资助，互联网控制权移交给商业机构，学术界和工业界曾一度认为我们需要转型为电路交换。</p>
+<p>预测失误：当时的架构师预测语音通话和电视直播将成为互联网的主要重载应用。这两类应用的带宽需求平滑，非常适合电路交换。</p>
+<p>商业动机：由于互联网服务提供商 (ISP) 必须通过商业化手段盈利，他们认为电路交换能提供更直观、更容易计费的商业模式。</p>
+<p>愿景的幻灭与现状<br>尽管研究机构和标准组织为了实现电路交换付出了巨大努力，但最终这一愿景失败了，原因正如我们之前讨论的那样。此外，推动互联网增长的核心驱动力是电子邮件和网页浏览，而非语音通话和电视，这也是电路交换没能成功的重要原因。</p>
+<p>一个有趣的后果是：用户和开发者已经适应了分组交换的现实。 如果你在观看视频时连接质量变差，你已经习惯了应用程序会自动进行自适应调整（如降低画质）。相比之下，传统的广播电视就无法做到这一点。这是一个技术如何改变用户行为的典型案例！</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/v/" class="print-no-link">#~~~///(^v^)\\\~~~</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>cs168-textbook5</div>
+      <div>https://howidobetter.github.io/2026/01/15/cs168-textbook5/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>一剑留名ing</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年1月15日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2026/01/20/cs168-textbook6/" title="cs168-textbook6">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">cs168-textbook6</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/01/15/cs168-textbook4/" title="cs168-textbook4">
+                        <span class="hidden-mobile">cs168-textbook4</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+      © 2024 <a href="https://howIdobetter.github.io" target="_blank" rel="nofollow noopener"><span>一剑留名ing</span></a>
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+
+  
+
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  
+<script src="/js/snow.js"></script>
+<script src="/js/glass.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

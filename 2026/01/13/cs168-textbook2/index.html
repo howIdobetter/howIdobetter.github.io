@@ -1,0 +1,718 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="一剑留名ing">
+  <meta name="keywords" content="技术，博客，学习">
+  
+    <meta name="description" content="Layers of the Internet词汇表Bottom-up : 自底向上Infrastructure : 基础设施Pony Express : 小马快递，历史术语，指 19 世纪美国跨州快速邮件传送系统。此处用以类比早期的物理传输介质。Bits : 比特&#x2F;位Optical Fiber : 光纤 重要概念Physical Layer : 物理层Link Layer : 数据链路层">
+<meta property="og:type" content="article">
+<meta property="og:title" content="cs168-textbook2">
+<meta property="og:url" content="https://howidobetter.github.io/2026/01/13/cs168-textbook2/index.html">
+<meta property="og:site_name" content="随便做做">
+<meta property="og:description" content="Layers of the Internet词汇表Bottom-up : 自底向上Infrastructure : 基础设施Pony Express : 小马快递，历史术语，指 19 世纪美国跨州快速邮件传送系统。此处用以类比早期的物理传输介质。Bits : 比特&#x2F;位Optical Fiber : 光纤 重要概念Physical Layer : 物理层Link Layer : 数据链路层">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook2/1768286805348.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook2/1768286825054.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook2/1768286723965.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook2/1768286705389.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook2/1768287931128.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook2/1768288744476.png">
+<meta property="og:image" content="https://howidobetter.github.io/image/cs168-textbook2/1768289082361.png">
+<meta property="article:published_time" content="2026-01-13T06:17:30.000Z">
+<meta property="article:modified_time" content="2026-01-13T07:38:39.920Z">
+<meta property="article:author" content="一剑留名ing">
+<meta property="article:tag" content="~~~&#x2F;&#x2F;&#x2F;(^v^)\\\~~~">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://howidobetter.github.io/image/cs168-textbook2/1768286805348.png">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>cs168-textbook2 - 随便做做</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+  
+<link rel="stylesheet" href="/css/glass.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"howidobetter.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":100,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100},"height":"3px"},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>随便做做</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="cs168-textbook2"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-01-13 14:17" pubdate>
+          2026年1月13日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          3.7k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          32 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">cs168-textbook2</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="Layers-of-the-Internet"><a href="#Layers-of-the-Internet" class="headerlink" title="Layers of the Internet"></a>Layers of the Internet</h1><h2 id="词汇表"><a href="#词汇表" class="headerlink" title="词汇表"></a>词汇表</h2><p>Bottom-up : 自底向上<br>Infrastructure : 基础设施<br>Pony Express : 小马快递，历史术语，指 19 世纪美国跨州快速邮件传送系统。此处用以类比早期的物理传输介质。<br>Bits : 比特&#x2F;位<br>Optical Fiber : 光纤</p>
+<h2 id="重要概念"><a href="#重要概念" class="headerlink" title="重要概念"></a>重要概念</h2><p>Physical Layer : 物理层<br>Link Layer : 数据链路层，负责在相邻节点（Node）之间传输数据帧（Frame）。它不关心端到端的路径，只关心“下一跳”怎么走。<br>Internet Layer : 网络层<br>Transport Layer	: 传输层。负责主机中进程与进程（Process-to-Process）之间的逻辑通信。<br>Application Layer : 应用层。直接为用户的应用程序提供服务的层，如 HTTP (网页)、SMTP (邮件)、DNS (域名解析)。<br>Session Layer : 会话层。(OSI 第 5 层)负责建立、管理和终止应用程序之间的会话。<br>Presentation Layer : 表示层。(OSI 第 6 层) 负责数据的格式化、加密和压缩（如将二进制转为 JPG 或加密为 TLS）。<br>Wired&#x2F;Wireless : 有线&#x2F;无线。链路层的实现不受物理介质限制。无论是以太网线还是 Wi-Fi，在第二层看来都是一条“链路”。<br>Packets&#x2F;Frames : 分组&#x2F;帧。Frame（帧）是 Layer 2 的官方术语。将连续的比特流加上“头”和“尾”进行定界，就像把散乱的字符装进带封条的信封。<br>ISP (Internet Service Provider) : 互联网服务提供商。为用户提供上网服务的组织（如中国电信、AT&amp;T）。他们是互联网的“庄家”。<br>Router : 路由器。网络的“交通枢纽”。它维护一张路由表，决定数据包前往目的地的“下一跳”地址。<br>Network of Networks : 网络的网络，互联网的定义，它不是一个单一实体，而是由成千上万个自治系统（AS）相互连接而成的集合体。<br>End Hosts : 端系统&#x2F;主机。位于网络边缘、产生或消费数据的设备。它们是网络服务的终点。<br>Modularity : 模块化。将系统分解为可以独立开发和替换的模块。每一层都是一个模块。</p>
+<h2 id="第一层：物理层"><a href="#第一层：物理层" class="headerlink" title="第一层：物理层"></a>第一层：物理层</h2><p>在本节中，我们将自底向上地构建互联网，从最基础的组件开始，逐步将它们组合成互联网的基础设施。我们将使用“邮政系统”作为一个贯穿始终的类比，因为它在许多设计选择上与互联网高度相似。</p>
+<p>首先，我们需要某种方式跨越空间发送信号。在邮政系统中，这可以是邮递员、小马快递、卡车或者信鸽等。</p>
+<p>在互联网中，我们寻找的是一种能跨越空间传输“比特（1和0）”的方法。这种技术可以是电线上的电压、无线电波、光纤电缆中的光脉冲等等。虽然电子工程领域有专门的研究方向致力于信号的跨空间传输，但本课程不会深入探讨这些细节。</p>
+<h2 id="第二层：链路层"><a href="#第二层：链路层" class="headerlink" title="第二层：链路层"></a>第二层：链路层</h2><p>在类比中，既然我们已经有了跨空间发送数据的方法，就可以利用这个基础组件将两户人家连接起来。我们甚至可以尝试将当地的所有房屋都连接在一起。</p>
+<p>在互联网中，一个“链路（Link）”连接着两台机器。这种链路可以使用任何技术（有线、无线、光纤等）。如果我们使用链路将一群邻近的计算机连接起来（例如加州大学伯克利分校的所有电脑），我们就得到了一个局域网（LAN）。</p>
+<p><img src="/image/cs168-textbook2/1768286805348.png" srcset="/img/loading.gif" lazyload alt="1768286805348"></p>
+<p>在第 2 层，我们还可以将比特（Bits）分组为名为“分组&#x2F;数据包”（Packets，在这一层有时也被称为“帧”）的数据单位，并定义一个包在物理信号中开始和结束的位置。我们还可以处理诸如多个人同时使用同一根导线发送数据等问题。</p>
+<h2 id="第三层：网络层"><a href="#第三层：网络层" class="headerlink" title="第三层：网络层"></a>第三层：网络层</h2><p>我们现在已经有了连接局部地区所有人的方法，但是如果不同地区的两个人想要通信该怎么办呢？一种可能的方法是在不同的本地网络之间增加大量的链路，但这看起来效率不高。（但是如果这两个本地网络在不同的州呢？）</p>
+<p><img src="/image/cs168-textbook2/1768286825054.png" srcset="/img/loading.gif" lazyload alt="1768286825054"></p>
+<p>相反，一种更加聪明的方法是在每个网络中引入一个“邮局”，并将两个邮局连接起来。现在，如果网络A的人想给网络B的人发信息，他们可以通过邮局寄到网络A的邮局。该邮局将邮件转发给网络B的邮局，再由后者送达到目的地。</p>
+<p><img src="/image/cs168-textbook2/1768286723965.png" srcset="/img/loading.gif" lazyload alt="1768286723965"></p>
+<p>在互联网中，负责接收并重新定向邮件的“邮局”被称为交换机（switch）或路由器（Router）。如果我们通过在交换机之间建立额外的链路，就可以把各个局域网连接起来。通过足够的链路和局域网，我们可以连接全世界的所有人，从而形成互联网。</p>
+<p><img src="/image/cs168-textbook2/1768286705389.png" srcset="/img/loading.gif" lazyload alt="1768286705389"></p>
+<p>我们需要回答的一个问题是：如何在网络中寻找路径？当一台交换机收到一个数据包时，它如何知道该往哪里转发，才能让它更接近最终目的地？这将是我们“路由（Routing）”单元的学习重点。我们还需要确保这些链路上有足够的容量来承载数据。这将是我们“拥塞控制（Congestion Control）”单元的学习重点。</p>
+<p>这张图景现在展示了互联网的基础设施。但在本课程中，我们还将研究管理这些基础设施的运营方。在类比中，这些人是建立和管理邮局的人。在互联网上，运营方是互联网服务提供商（ISP），如 AT&amp;T、亚马逊网络服务（AWS），甚至是加州大学伯克利分校，他们拥有并运营着互联网结构。除了硬件和软件基础设施外，我们还需要将这些实体视为现实生活中的商业机构和组织，并考虑他们的经济和政治动机。例如，如果 AT&amp;T 铺设了一条海底光缆，他们可能会向通过该光缆发送数据的其他 ISP 收取费用。</p>
+<h2 id="网络的网络"><a href="#网络的网络" class="headerlink" title="网络的网络"></a>网络的网络</h2><p>互联网通常被描述为“网络的网络”。这里有许多小型局域网，其内部事务可以进行本地化管理（例如由加州大学伯克利分校管理）。然后，所有的局域网相互连接，构成了互联网。</p>
+<p>在网络中，不同的链路可能使用不同的第 2 层（Layer 2）技术。有些链路可能使用有线以太网，而其他链路可能使用光纤或无线蜂窝技术。在第 2 层，我们解决的是如何利用该网络特定的技术，在局域网内部的链路上传输数据包。接着，在第 3 层（Layer 3），我们将这种“沿链路发送数据包”的能力作为基础组件，从而实现将数据包发送到互联网的任何地方。当数据包在不同的网络之间“跳跃”时，它可能会通过许多不同类型的链路进行传输。</p>
+<p><img src="/image/cs168-textbook2/1768287931128.png" srcset="/img/loading.gif" lazyload alt="1768287931128"></p>
+<p>在我们的类比中，我们可以看到“住户”和“邮局”之间的区别。住户之间相互收发信件；而邮局本身并不收发自己的邮件，它们的存在是为了帮助连接其他的住户。</p>
+<p>在互联网中，端系统（End Hosts） 是指通过互联网进行通信的机器（例如服务器、笔记本电脑、手机）。相比之下，交换机（Switch，也称为路由器 Router） 是一种不发送或接收自身数据的机器，它的存在是为了帮助端系统相互通信。交换机的例子包括你家里的路由器，或者是互联网服务提供商（如 AT&amp;T）部署的大型路由器。</p>
+<p>在这些笔记中，我们通常将端系统画成圆圈，将路由器画成方块。</p>
+<h2 id="抽象层级"><a href="#抽象层级" class="headerlink" title="抽象层级"></a>抽象层级</h2><p>随着我们逐步构建互联网，你可能已经注意到，我们一直将复杂的问题分解为更小的任务和“抽象”。</p>
+<p>“基于抽象的模块化是处理问题的方法。”（图灵奖得主芭芭拉·利斯科夫，图灵奖演讲）。这就是我们构建和维护大型计算机系统的方式。模块化对于互联网尤为重要，因为互联网由众多设备（主机、路由器）和许多现实实体（用户、科技公司、ISP）组成，让所有人对任务分配达成共识，是使互联网能够大规模运行的基础。</p>
+<p>这种分层的、“网络的网络”方法的一个主要优点是：每个网络都可以自主决定如何移动数据。例如，当你的数据包在互联网的“跳数”间传输时，某些链路可能使用无线技术，而其他链路可能使用有线技术。底层协议可以在不同的“跳”之间改变，而第 3 层协议依然可以正常工作。</p>
+<p>分层还允许创新并行进行。不同的群体（例如硬件芯片设计师、软件开发人员）可以在不同的层级独立追求创新。</p>
+<h2 id="第三层：尽力而为服务模型"><a href="#第三层：尽力而为服务模型" class="headerlink" title="第三层：尽力而为服务模型"></a>第三层：尽力而为服务模型</h2><p>看起来我们已经构建了一个可以将数据发送到世界任何地方的系统，那为什么不在到此为止呢？关于第 3 层，仍有两个问题需要我们解决。</p>
+<p>第一个问题涉及第 3 层的服务模型。如果你利用第 3 层的基础设施跨互联网发送消息，作为用户的你，网络向你提供的是什么样的服务模型？你可以将服务模型看作是网络与用户之间的一份“合同”，它描述了网络支持什么，以及不支持什么。</p>
+<p>实际服务模型的例子可能包括：网络保证数据送达；或者，网络保证数据在某个时间限制内送达；又或者，网络不保证送达，但承诺在失败时报告错误。</p>
+<p>互联网的设计者没有支持以上任何一种模型。相反，互联网仅支持数据的**尽力而为（Best-effort）**交付。如果你通过第 3 层发送数据，互联网会“尽力”去交付它，但不保证数据一定会被送达。互联网也不会告诉你交付是否成功。</p>
+<p>为什么设计者选择如此“软弱”的服务模型？一个主要原因是：构建能够满足这些较低要求的网络要容易得多。</p>
+<h2 id="第三层：分组-数据包抽象"><a href="#第三层：分组-数据包抽象" class="headerlink" title="第三层：分组&#x2F;数据包抽象"></a>第三层：分组&#x2F;数据包抽象</h2><p>到目前为止，在第 3 层之前，我们一直认为每条消息都是独立通过互联网发送的。更正式地说，第 3 层数据传输的主要单位是数据包（Packet），它是由若干字节组成的一小块数据，作为一个单一单元在互联网中传输，并在路由器之间往返跳转。</p>
+<p>第 3 层的第二个问题是：数据包的大小是有限的。如果应用程序有大量数据需要发送（例如一段视频），我们需要以某种方式将这些数据拆分成多个数据包，并独立地通过网络发送每个包。</p>
+<p>有了这种“数据包抽象”，我们现在可以观察一个数据包穿过网络时的生命周期。发送方将数据拆分为独立的数据包。数据包沿着链路传输并到达一台交换机（路由器）。交换机将数据包转发给目的地，或者转发给另一台离目的地更近的交换机。数据包在一个或多个交换机之间“跳跃”，每一个交换机都将其转发得更近，直到它最终到达目的地。请注意，由于采用的是“尽力而为”模型，任何交换机都可能丢弃该数据包，并且无法保证数据包真正到达目的地。</p>
+<p><img src="/image/cs168-textbook2/1768288744476.png" srcset="/img/loading.gif" lazyload alt="1768288744476"></p>
+<h2 id="第四层：传输层"><a href="#第四层：传输层" class="headerlink" title="第四层：传输层"></a>第四层：传输层</h2><p>到目前为止，我们已经发现了第 3 层的两个问题：大数据必须拆分为数据包，且 IP 协议仅提供“尽力而为”的服务。</p>
+<p>为了解决这两个问题，我们将引入一个新层级：传输层。该层以第 3 层为基础，并实现了一套额外的协议，用于重传丢失的数据包、拆分数据、以及对乱序到达的数据包进行重新排序（此外还有其他功能）。</p>
+<p>传输层协议让我们不再需要以“数据包”为单位进行思考，而是开始以**“流（Flows）”**的概念进行思考——即在两个端点之间交换的一连串连续的数据包流。</p>
+<h2 id="第七层：应用层"><a href="#第七层：应用层" class="headerlink" title="第七层：应用层"></a>第七层：应用层</h2><p>将应用层构建在互联网之上是一个极其强大的设计选择。如果在底层，我们专门为在端系统之间传输视频构建基础设施，那么电子邮件客户端就必须构建另一套独立的基础设施来传输邮件。互联网的设计使其能够成为一个适用于任何类型应用数据的通用通信网络。</p>
+<p>在本课程中，我们将更多地关注支撑应用层的基础设施（例如邮递员、邮局），而较少关注应用本身（例如邮件的内容）。不过，我们会在课程结束前介绍一些常见的应用层协议。</p>
+<p>现在我们已经了解了所有层级，请注意，每一层都依赖于其直接下层提供的服务，并为其直接上层提供服务。例如，编写第 7 层（应用层）协议的人可以假设他们拥有来自第 4 层的可靠数据传输服务。他们不必担心单个数据包丢失，因为这已经是第 4 层处理过的问题了。</p>
+<p>相邻的两层通过它们之间的接口直接交互。实际上，没有办法跳过层级，比如直接在第 3 层上构建第 7 层。</p>
+<p>注：你可能已经注意到我们跳过了第 5 层和第 6 层。在 20 世纪 70 年代层级首次标准化时，设计者认为这些层是必要的，但在现代互联网中它们已经过时了。如果你感兴趣，会话层（5）原本应该将不同的流组合成一个会话（例如加载各种图像和广告以形成网页），而表示层（6）原本应该帮助用户实现数据可视化。如今，这些层的功能大部分已在第 7 层中实现。</p>
+<p><img src="/image/cs168-textbook2/1768289082361.png" srcset="/img/loading.gif" lazyload alt="1768289082361"></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/v/" class="print-no-link">#~~~///(^v^)\\\~~~</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>cs168-textbook2</div>
+      <div>https://howidobetter.github.io/2026/01/13/cs168-textbook2/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>一剑留名ing</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年1月13日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2026/01/13/cs168-textbook3/" title="cs168-textbook3">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">cs168-textbook3</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/01/12/cs168-textbook1/" title="cs168 textbook1">
+                        <span class="hidden-mobile">cs168 textbook1</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+      © 2024 <a href="https://howIdobetter.github.io" target="_blank" rel="nofollow noopener"><span>一剑留名ing</span></a>
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+
+  
+
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  
+<script src="/js/snow.js"></script>
+<script src="/js/glass.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
