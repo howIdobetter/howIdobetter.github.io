@@ -72,7 +72,7 @@
     if (reduceMotion) return;
     if (!('IntersectionObserver' in window)) return;
 
-    var revealTargets = qsa('.index-card, .post-content, .post, .archive-post, .category-list, .tagcloud');
+    var revealTargets = qsa('.index-card, .archive-post, .category-list, .tagcloud');
     revealTargets.forEach(function (el) {
       el.classList.add('gh-reveal');
     });
