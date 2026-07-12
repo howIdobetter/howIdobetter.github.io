@@ -1,0 +1,630 @@
+<!DOCTYPE html><html dir="ltr" lang="zh-CN" class="overflow-y-scroll scroll-smooth"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="canonical" href="https://howidobetter.github.io/posts/cs168-routing-09-bgp/"><meta name="generator" content="Astro v6.4.2"><!-- Primary meta --><title>边界网关协议（BGP） | 随便做做</title><meta name="title" content="边界网关协议（BGP） | 随便做做"><meta name="description" content="从路径向量与策略选择出发，理解 BGP 如何传播和筛选域间路由。"><meta name="author" content="一剑留名ing"><link rel="sitemap" href="/sitemap-index.xml"><!-- Open Graph --><meta property="og:type" content="article"><meta property="og:site_name" content="随便做做"><meta property="og:title" content="边界网关协议（BGP） | 随便做做"><meta property="og:description" content="从路径向量与策略选择出发，理解 BGP 如何传播和筛选域间路由。"><meta property="og:url" content="https://howidobetter.github.io/posts/cs168-routing-09-bgp/"><meta property="og:image" content="https://howidobetter.github.io/default-og.png"><!-- Twitter / X --><meta property="twitter:card" content="summary_large_image"><meta property="twitter:url" content="https://howidobetter.github.io/posts/cs168-routing-09-bgp/"><meta property="twitter:title" content="边界网关协议（BGP） | 随便做做"><meta property="twitter:description" content="从路径向量与策略选择出发，理解 BGP 如何传播和筛选域间路由。"><meta property="twitter:image" content="https://howidobetter.github.io/default-og.png"><!-- RSS autodiscovery --><link rel="alternate" type="application/rss+xml" title="随便做做" href="https://howidobetter.github.io/rss.xml"><!-- Filled at runtime by theme.ts to match the current background colour --><meta name="theme-color" content=""><!-- Extra head content injected by child layouts (e.g. JSON-LD, article meta) --><meta property="article:published_time" content="2026-07-12T00:00:00.000Z"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"边界网关协议（BGP） | 随便做做","description":"从路径向量与策略选择出发，理解 BGP 如何传播和筛选域间路由。","url":"https://howidobetter.github.io/posts/cs168-routing-09-bgp/","image":"https://howidobetter.github.io/default-og.png","datePublished":"2026-07-12T00:00:00.000Z","author":[{"@type":"Person","name":"一剑留名ing","url":"https://github.com/howIdobetter"}]}</script> <!--
+      Inline FOUC-prevention script: sets data-theme on <html> before
+      the browser paints. Runs synchronously, no defer/async.
+    --><script>
+      (function () {
+        const stored = localStorage.getItem("theme");
+        const prefersDark = window.matchMedia(
+          "(prefers-color-scheme: dark)"
+        ).matches;
+        const theme = stored ?? (prefersDark ? "dark" : "light");
+        const root = document.firstElementChild;
+        root?.setAttribute("data-theme", theme);
+        root?.classList.toggle("dark", theme === "dark");
+        // Expose value so theme.ts can skip re-detection.
+        window.__theme = { value: theme };
+      })();
+    </script><meta name="astro-view-transitions-enabled" content="true"><meta name="astro-view-transitions-fallback" content="animate"><script type="module" src="/_astro/ClientRouter.astro_astro_type_script_index_0_lang.CAqDO0tx.js"></script><link rel="stylesheet" href="/_astro/Footer.W6Wz50NF.css">
+<style>@keyframes astroFadeInOut{0%{opacity:1}to{opacity:0}}@keyframes astroFadeIn{0%{opacity:0;mix-blend-mode:plus-lighter}to{opacity:1;mix-blend-mode:plus-lighter}}@keyframes astroFadeOut{0%{opacity:1;mix-blend-mode:plus-lighter}to{opacity:0;mix-blend-mode:plus-lighter}}@keyframes astroSlideFromRight{0%{transform:translate(100%)}}@keyframes astroSlideFromLeft{0%{transform:translate(-100%)}}@keyframes astroSlideToRight{to{transform:translate(100%)}}@keyframes astroSlideToLeft{to{transform:translate(-100%)}}@media(prefers-reduced-motion){::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}[data-astro-transition-scope]{animation:none!important}}
+</style><style>[data-astro-transition-scope="astro-36ssibgs-1"] { view-transition-name: networking; }@layer astro { ::view-transition-old(networking) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(networking) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(networking) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(networking) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-1"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-1"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-1"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-1"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style><style>[data-astro-transition-scope="astro-36ssibgs-2"] { view-transition-name: cs168; }@layer astro { ::view-transition-old(cs168) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(cs168) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(cs168) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(cs168) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style><style>[data-astro-transition-scope="astro-36ssibgs-3"] { view-transition-name: course-notes; }@layer astro { ::view-transition-old(course-notes) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(course-notes) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(course-notes) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(course-notes) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style><style>[data-astro-transition-scope="astro-36ssibgs-4"] { view-transition-name: routing; }@layer astro { ::view-transition-old(routing) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(routing) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(routing) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(routing) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style></head> <body class="bg-background font-app text-foreground selection:bg-accent/75 selection:text-accent-foreground flex min-h-svh flex-col">    <a id="skip-to-content" href="#main-content" class="bg-background text-accent absolute inset-s-4 -top-full z-50 border px-3 py-2 transition-[top] focus:top-3"> 跳到正文 </a> <header class="border-border bg-background/90 relative z-30 border-b backdrop-blur"> <div class="app-layout relative flex min-h-18 w-full items-baseline justify-between sm:items-center"> <a href="/" class="absolute inline-flex items-baseline gap-3 py-1 text-lg leading-8 font-semibold whitespace-nowrap sm:static sm:my-auto sm:text-xl sm:leading-none"> <span>随便做做</span> <span class="text-muted-foreground hidden font-mono text-[0.68rem] font-normal sm:inline">
+howIdobetter
+</span> </a> <nav id="nav-menu" class="flex w-full flex-col items-center sm:ms-2 sm:flex-row sm:justify-end sm:py-0"> <button id="menu-btn" class="focus-outline self-end p-3 sm:hidden" aria-label="打开菜单" aria-expanded="false" aria-controls="menu-items" data-label-open="打开菜单" data-label-close="关闭菜单"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="hidden" viewBox="0 0 24 24" id="close-icon"><path stroke="none" d="M0 0h24v24H0z" /><path d="M18 6 6 18M6 6l12 12" /></svg> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="icon icon-tabler icons-tabler-outline icon-tabler-menu-deep" viewBox="0 0 24 24" id="menu-icon"><path stroke="none" d="M0 0h24v24H0z" /><path d="M4 6h16M7 12h13M10 18h10" /></svg> </button> <ul id="menu-items" class="border-border [&>li>a]:hover:text-accent mt-3 hidden w-full grid-cols-2 place-content-center gap-1 border-t py-3 sm:mt-0 sm:flex sm:w-auto sm:items-center sm:gap-x-1 sm:border-0 sm:py-0 [&>li>a]:block [&>li>a]:px-4 [&>li>a]:py-3 [&>li>a]:text-center [&>li>a]:font-medium [&>li>a]:transition-colors sm:[&>li>a]:px-3 sm:[&>li>a]:py-2"> <li class="col-span-2"> <a href="/posts/" class="active-nav"> 文章 </a> </li> <li class="col-span-2"> <a href="/tags/"> 标签 </a> </li> <li class="col-span-2"> <a href="/about/"> 关于 </a> </li> <li class="col-span-2"> <a href="/archives/" title="归档" aria-label="归档" class="group inline-flex items-center gap-1 hover:text-accent focus-outline flex size-full justify-center p-3 sm:relative sm:size-10 sm:p-0">  <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="hidden sm:absolute sm:top-1/2 sm:left-1/2 sm:block sm:size-6 sm:-translate-x-1/2 sm:-translate-y-1/2" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v0a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8M10 12h4" /></svg> <span class="sm:sr-only">归档</span>  </a> </li> <li class="col-span-1 flex items-center justify-center"> <a href="/search/" title="搜索" aria-label="搜索" class="group inline-flex items-center gap-1 hover:text-accent focus-outline relative size-11 sm:size-10">  <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="absolute top-1/2 left-1/2 size-6 -translate-x-1/2 -translate-y-1/2" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M3 10a7 7 0 1 0 14 0 7 7 0 1 0-14 0M21 21l-6-6" /></svg> <span class="sr-only">搜索</span>  </a> </li> <li class="col-span-1 flex items-center justify-center"> <div class="border-border flex overflow-hidden rounded-full border text-xs font-semibold" aria-label="Language"> <a href="/posts/cs168-routing-09-bgp/" title="中文" aria-current="true" class="px-2 py-1 transition-colors bg-accent text-accent-foreground"> 中 </a><a href="/en/posts/cs168-routing-09-bgp/" title="English" class="px-2 py-1 transition-colors hover:text-accent"> EN </a> </div> </li> <li class="col-span-1 flex items-center justify-center"> <button id="theme-btn" class="focus-outline hover:[&>svg]:stroke-accent relative size-12 rounded-full p-4 transition-colors sm:size-10" title="切换主题" aria-label="auto" aria-live="polite" data-label-light="切换为浅色主题" data-label-dark="切换为深色主题"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="absolute top-[50%] left-[50%] translate-[-50%] scale-100 rotate-0 transition-[transform,opacity] dark:scale-0 dark:-rotate-90" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M12 3h.393a7.5 7.5 0 0 0 7.92 12.446A9 9 0 1 1 12 2.992z" /></svg> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="absolute top-[50%] left-[50%] translate-[-50%] scale-0 rotate-90 transition-[transform,opacity] dark:scale-100 dark:rotate-0" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M14.828 14.828a4 4 0 1 0-5.656-5.656 4 4 0 0 0 5.656 5.656M6.343 17.657l-1.414 1.414M6.343 6.343 4.929 4.929M17.657 6.343l1.414-1.414M17.657 17.657l1.414 1.414M4 12H2M12 4V2M20 12h2M12 20v2" /></svg> </button> </li> </ul> </nav> </div> </header> <script type="module">function c(){const e=document.querySelector("#menu-btn"),t=document.querySelector("#menu-items"),n=document.querySelector("#menu-icon"),s=document.querySelector("#close-icon");if(!e||!t||!n||!s)return;const a=e.dataset.labelOpen??"Open menu",l=e.dataset.labelClose??"Close menu";e.addEventListener("click",()=>{const o=e.getAttribute("aria-expanded")==="true";e.setAttribute("aria-expanded",o?"false":"true"),e.setAttribute("aria-label",o?a:l),t.classList.toggle("hidden"),t.classList.toggle("grid"),n.classList.toggle("hidden"),s.classList.toggle("hidden")})}c();document.addEventListener("astro:after-swap",c);</script> <div class="reading-progress" aria-hidden="true"> <div class="reading-progress-bar"></div> </div> <div class="app-layout flex items-center justify-start"><a id="back-button" href="/" class="group inline-flex items-center gap-1 hover:text-accent focus-outline hover:text-foreground/75 -ms-2 mt-8 mb-2"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block size-6 rtl:rotate-180" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="m15 6-6 6 6 6" /></svg><span>返回</span> </a></div><script type="module">function o(){const t=document.querySelector("#back-button"),e=sessionStorage.getItem("backUrl");e&&t&&(t.href=e)}document.addEventListener("astro:page-load",o);o();</script> <main id="main-content" class="app-layout pb-8" data-pagefind-body> <header class="border-border max-w-readable border-b pt-8 pb-8 sm:pt-12"> <h1 style="view-transition-name:u008fb9u00754cu007f51u005173u00534fu008baeu00ff08bgpu00ff09" class="text-foreground text-3xl leading-tight font-semibold text-balance sm:text-5xl"> 边界网关协议（BGP） </h1> <p class="text-muted-foreground mt-4 text-lg leading-8 text-pretty"> 从路径向量与策略选择出发，理解 BGP 如何传播和筛选域间路由。 </p> <div class="mt-5 flex flex-wrap items-center gap-3"> <div class="text-muted-foreground flex items-center gap-x-2 font-mono"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block size-5 min-w-5" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" /><path d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM16 3v4M8 3v4M4 11h16M7 14h.013M10.01 14h.005M13.01 14h.005M16.015 14h.005M13.015 17h.005M7.01 17h.005M10.01 17h.005" /></svg>  <time class="text-sm sm:text-base" datetime="2026-07-12T00:00:00.000Z"> 2026年7月12日 </time> </div> <a href="https://github.com/howIdobetter/My-Blog/edit/main/src/content/posts/cs168-routing-09-bgp.md" target="_blank" rel="noopener noreferrer" class="hover:text-accent text-muted-foreground flex justify-baseline gap-1.5 max-sm:hidden"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M7 7H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-1" /><path d="M20.385 6.585a2.1 2.1 0 0 0-2.97-2.97L9 12v3h3zM16 5l3 3" /></svg><span>编辑文章</span></a> </div> </header> <aside class="border-border mt-8 border-y"> <details class="group py-4 sm:hidden"> <summary class="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4"> <span> <span class="mono-label block"> CS168 · 路由 </span> <span class="text-accent mt-1 block text-sm font-semibold"> 9 / 11 </span> </span> <span aria-hidden="true" class="text-muted-foreground text-xl transition-transform group-open:rotate-45">
++
+</span> </summary> <ol class="border-border mt-3 border-t pt-2"> <li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-routing-01-introduction/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 01 </span> <span>路由简介</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-routing-02-intradomain-model/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 02 </span> <span>域内路由模型</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-routing-03-routing-states/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 03 </span> <span>路由状态</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-routing-04-distance-vector/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 04 </span> <span>距离向量协议</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-routing-05-link-state/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 05 </span> <span>链路状态协议</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-routing-06-addressing/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 06 </span> <span>寻址</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-routing-07-router-hardware/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 07 </span> <span>路由器硬件</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-routing-08-interdomain-model/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 08 </span> <span>域间路由模型</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-routing-09-bgp/" aria-current="page" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm text-accent font-semibold"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 09 </span> <span>边界网关协议（BGP）</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-routing-10-bgp-implementation/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 10 </span> <span>BGP 的实现与问题</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-routing-11-ip-header/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 11 </span> <span>IP 首部</span> </a> </li> </ol> </details> <div class="hidden py-5 sm:block"> <div class="flex items-baseline justify-between gap-4"> <p class="mono-label">CS168 · 路由</p> <p class="text-accent text-sm font-semibold"> 9 / 11 </p> </div> <ol class="border-border mt-4 grid border-t sm:grid-cols-3 lg:grid-cols-6"> <li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-routing-01-introduction/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 01 </span> <span class="mt-1 block"> 路由简介 </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-routing-02-intradomain-model/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 02 </span> <span class="mt-1 block"> 域内路由模型 </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-routing-03-routing-states/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 03 </span> <span class="mt-1 block"> 路由状态 </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-routing-04-distance-vector/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 04 </span> <span class="mt-1 block"> 距离向量协议 </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-routing-05-link-state/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 05 </span> <span class="mt-1 block"> 链路状态协议 </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-routing-06-addressing/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 06 </span> <span class="mt-1 block"> 寻址 </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-routing-07-router-hardware/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 07 </span> <span class="mt-1 block"> 路由器硬件 </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-routing-08-interdomain-model/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 08 </span> <span class="mt-1 block"> 域间路由模型 </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-routing-09-bgp/" aria-current="page" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors bg-muted/60 text-accent font-semibold"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 09 </span> <span class="mt-1 block"> 边界网关协议（BGP） </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-routing-10-bgp-implementation/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 10 </span> <span class="mt-1 block"> BGP 的实现与问题 </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-routing-11-ip-header/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 11 </span> <span class="mt-1 block"> IP 首部 </span> </a> </li> </ol> </div> </aside> <article id="article" class="mt-8 w-full app-prose max-w-readable prose-pre:bg-(--shiki-light-bg) dark:prose-pre:bg-(--shiki-dark-bg)"> <aside class="border-border bg-muted/35 mb-8 border-s-2 px-5 py-4 text-sm leading-6"> <p class="m-0">
+本文译自  <a href="https://textbook.cs168.io/routing/bgp.html">Border Gateway Protocol (BGP)</a> 
+，依照 <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh-hans"> CC BY-SA 4.0 </a> 
+许可发布
+
+。<span> 中文翻译，保留原文结构与图表引用。</span> </p> </aside> <h2 id="边界网关协议bgp">边界网关协议（BGP）</h2>
+<h2 id="bgp-简史">BGP 简史</h2>
+<p>最低成本路由协议与图论中的最短路径问题密切相关，而早在互联网出现之前，计算机科学领域就已经开始研究这个问题。Dijkstra 算法诞生于 1956 年，Bellman-Ford 算法诞生于 1958 年。在开发早期路由协议时，设计者可以借鉴这些算法的思想。</p>
+<p>早期的互联网是一个由政府资助的项目，网络由美国国防部集中控制。当时还不存在自治系统（autonomous system，AS）的概念，并且最低成本算法能够扩展到早期互联网那样的小规模。后来，随着互联网不断发展，政府将控制权移交给不同的商业实体，而这些实体不得不在实践中逐步开发域间路由协议（inter-domain routing protocol）。</p>
+<p>与早期的最低成本路由协议不同，让每个自治系统都拥有自己的私有策略这一概念，在计算机科学中没有先例。域间路由协议背后的思想只能随着这些新兴互联网公司的需求，在实践中逐步形成。</p>
+<p>BGP 创建于 1989 至 1995 年，其临时应需式的开发过程意味着这个协议并不完美。如果今天能够从头重写该协议，结果可能会有所不同。不过，该协议已被证明既有效又有韧性，至今仍是正在使用的域间路由协议。（请记住，每个人都必须同意使用同一种域间路由协议，因此这样的协议只有一个。）</p>
+<h2 id="bgp-基于距离向量">BGP 基于距离向量</h2>
+<p>回想一下，我们见过两类域内路由算法：距离向量算法（distance-vector algorithm）和链路状态算法（link-state algorithm）。在设计 BGP 时，哪一类算法更适合作为设计的起点？</p>
+<p>请记住，在 BGP 中，我们需要尊重各个 AS 的隐私。如果使用链路状态协议，那么每个 AS 都必须将自己的策略告知整个网络，让所有人都掌握完整信息，以便自行计算路由。</p>
+<p>此外，在 BGP 中，我们还需要尊重自治性，允许每个 AS 自行作出策略决策。然而，链路状态协议要求所有人以某种一致的方式计算路由（例如，所有人都同意使用最低成本路径）。</p>
+<p>链路状态算法并不尊重 AS 的隐私或自治性，因此以链路状态算法为基础设计 BGP 并不是一个好选择。相比之下，距离向量允许每个 AS 自行决定接受或拒绝哪些路由，以及通告哪些路由。此外，由于距离向量并非全局协议，每个 AS 无须了解其他所有 AS 的策略，也能计算出有效路由。</p>
+<p>距离向量协议中的许多核心思想仍然适用于 BGP。我们发送和接收的通告（advertisement）仍然针对单个目的地。与前几节一样，我们将考虑单个目的地的通告与路由，但要知道，该协议实际上会同时针对多个目的地运行。</p>
+<p>在距离向量协议和 BGP 中，每个 AS 都只使用从收到的通告中获得的信息来计算路由，而看不到网络拓扑的全貌。此外，在这两类协议中，AS 都会持续不断地发送和接收通告，直到所有 AS 都收敛（converge）到一组路由。</p>
+<p>BGP 遵循与距离向量协议相同的核心思想，但术语略有变化。我们不再说每个 AS 宣布或通告路由，而是说该 AS 正在**导出（exporting）<strong>路由。随后，每个 AS 监听通告并选择自己偏好的路由，我们称之为</strong>导入（importing）**路由。</p>
+<p>距离向量是一个很好的起点，但还缺少什么？</p>
+<p>距离向量协议旨在寻找最低成本路由，但在 BGP 中，我们希望根据各个 AS 自身的策略来决定路由。</p>
+<h2 id="基于策略的导入与导出">基于策略的导入与导出</h2>
+<p>从高层来看，为了支持策略，我们将改变导入和导出路由的规则。每个 AS 只会导出（通告）自己喜欢的路由（依据其策略）。此外，在导入（选择）路由时，AS 将依据策略而非距离来选择最佳路由。</p>
+<p>当一个 AS 收到针对同一目的地的多个通告时，它不再选择最短路由，而是依据策略选择（导入）一条路由。</p>
+<img width="500px" src="/image/cs168-textbook/routing/2-153-import-export.png">
+<p>请记住，通告从目的地向外传播，而报文则被转发得越来越靠近目的地（方向与通告相反）。导入决策决定了一个 AS 将其出站流量发送到哪里。例如，如果 S 从 A、B 和 C 处听到关于同一目的地的通告，那么 S 的导入决策（A、B 或 C）就决定了发往该目的地的数据包会被转发到哪里。</p>
+<img width="900px" src="/image/cs168-textbook/routing/2-154-import-policy.png">
+<p>在距离向量协议中，当我收到一个通告并安装一条新路由时，总会把这条新路由通告给我的所有邻居。</p>
+<p>现在，AS 拥有自己的策略，可以选择是否参与一条路由。如果某个 AS 有一条自己可能不喜欢的路由，它现在可以选择不将该路由导出给某些邻居。</p>
+<p>例如，假设我的策略是不想承载 C 的流量。这可能是出于经济原因，也可能是我作出的其他策略决定。当我接受一个通告并安装一条路由后，不把该路由通告给 C 也是可以的。</p>
+<p>再次提醒，数据流动的方向与通告相反。导出决策决定了一个 AS 愿意承载哪些入站流量。如果我导出一条路由，就表示我同意参与这条路由，并允许其他人沿这条路由把数据包转发给我。</p>
+<p>这条规则带来的一个后果是：即使底层图是连通的（任意两个节点之间都存在一条路径），也不能保证每个 AS 都能到达其他所有 AS。在实践中，我们可以通过对 AS 的策略和 AS 图的结构建立一些约定来保证可达性。</p>
+<h2 id="实施-gao-rexford-规则">实施 Gao-Rexford 规则</h2>
+<p>一般而言，BGP 支持任意策略，但任意策略无法保证互联网完全连通（数据包能够从任意源到达任意目的地）。</p>
+<p>回想一下，**Gao-Rexford 规则（Gao-Rexford rules）**基于常见的、以经济关系为基础的导入与导出策略，规定了一组限制更严格的策略。没有人强制要求 AS 必须遵守这些规则。不过，如果各个 AS 同意遵守这些规则，我们就能对互联网连通性作出更有力的假设。</p>
+<p>简史：这些规则以 20 世纪 90 年代供职于 AT&#x26;T 的 Lixin Gao 和 Jennifer Rexford 命名。当时，每个 AS 都在实践中自行制定策略。Gao 和 Rexford 调查了各个 AS 的策略，据此归纳出这些规则，并用它们证明了关于互联网的若干保证。</p>
+<p>在导入路由时，Gao-Rexford 规则规定，AS 优先导入由客户通告的路由，其次是由对等方（peer）通告的路由，最后是由提供商（provider）通告的路由。</p>
+<img width="900px" src="/image/cs168-textbook/routing/2-154-import-policy.png">
+<p>在实践中，除 Gao-Rexford 规则外，AS 还会实施额外的决胜规则（tiebreaking rule）。例如，如果我收到来自两个客户的通告，就需要某种额外的决胜规则来偏好其中一个。性能是一种常见的决胜因素，我们会选择带宽更高或路径更短的路由。</p>
+<p>根据 Gao-Rexford 规则，我们应该如何导出路径？回想一下，如果一条路由中至少有一侧的邻居是客户，AS 就会同意参与该路由。因此，AS 应当只通告这样的路由：如果生成的路由被接受，那么该路由的一侧有一个客户邻居。</p>
+<p>让我们逐一考察所有具体情况。</p>
+<p>我从一个客户处收到并安装了一条路由。这意味着该路由的下一跳（next hop）就是这个客户。我应该把这条路由导出给谁？我已经能够保证一侧有一个客户向我付费，因此可以将这条路由导出给所有人（客户、提供商和对等方）。</p>
+<img width="900px" src="/image/cs168-textbook/routing/2-155-export-policy1.png">
+<img width="900px" src="/image/cs168-textbook/routing/2-156-export-policy2.png">
+<p>我从一个对等方处收到并安装了一条路由（下一跳是一个对等方）。我应该把这条路由导出给谁？目前还没有人向我付费，所以我应该只把这条路由导出给客户。如果我把这条路由导出给一个对等方或提供商，而对方接受了它，那么我就创建了一条两侧都没有人向我付费的路由。</p>
+<img width="900px" src="/image/cs168-textbook/routing/2-157-export-policy3.png">
+<img width="900px" src="/image/cs168-textbook/routing/2-158-export-policy3.png">
+<p>类似地，如果我从一个提供商处收到并安装了一条路由，就应该只把这条路由导出给客户，因为我需要至少有一侧向我付费，而提供商并不会付费给我。</p>
+<img width="900px" src="/image/cs168-textbook/routing/2-159-export-policy5.png">
+<img width="900px" src="/image/cs168-textbook/routing/2-160-export-policy3.png">
+<img width="800px" src="/image/cs168-textbook/routing/2-161-export-policy7.png">
+<p>Gao-Rexford 规则使我们能够严格证明以下陈述成立：假设 AS 图是分层且无环的，并且所有 AS 都遵守 Gao-Rexford 规则，那么我们就能保证稳态下的可达性与收敛性。</p>
+<p>逐一解释该陈述中的具体术语：可达性（reachability）意味着图中的任意两个 AS 都能通信。收敛性（convergence）意味着所有 AS 最终都会停止更新其路径，网络将进入任意两个 AS 之间都存在有效路径的稳态（steady state）。“在稳态下”意味着，如果网络拓扑发生变化，路径可能需要一段时间才能完成改变并再次达到稳态。</p>
+<p>回想一下，分层（hierarchical）意味着从任意 AS 出发，沿层次结构向上移动（从客户移向提供商），最终都会到达一个一级 AS（Tier 1 AS）。无环（acyclic）意味着客户—提供商关系（有向边）中不存在环。</p>
+<p>该陈述的证明要求所有 AS 都遵守 Gao-Rexford 规则。如果各个 AS 运行各自的任意策略，这些保证就不再成立。</p>
+<h2 id="修改bgp-聚合目的地">修改：BGP 聚合目的地</h2>
+<p>我们还需要对距离向量协议作出两项修改。</p>
+<p>在距离向量协议中，我们说明了每个目的地都有唯一地址，而转发表（forwarding table）将每个目的地映射到一个下一跳和距离。</p>
+<p>在 BGP 中，每个 AS 都用一个前缀（prefix）来寻址，该前缀表示该 AS 内的所有机器共享同一个前缀。</p>
+<p>这些转发表可能变得非常庞大（设想一个提供商有数百个客户），而且每个目的地都需要在单独的通告中描述。有没有办法更简洁地表达这个转发表？</p>
+<p>为提高可扩展性，BGP 允许 AS 将多个目的地**聚合（aggregate）**到单个转发表项中，并通告一个包含所有这些目的地的、更一般化的前缀。</p>
+<img width="900px" src="/image/cs168-textbook/routing/2-162-bgp-aggregation.png">
+<p>请注意，在实践中，BGP 对所通告前缀的大小有约定。例如，AS 不会为单个 IP 地址发布通告。24 位前缀（包含 256 个地址的地址块）通常是通告地址时采用的最小单位。</p>
+<h2 id="修改路径向量协议">修改：路径向量协议</h2>
+<p>在距离向量等最低成本协议中，我们无须担心环路。每台路由器都在尝试寻找最低成本路由，而根据定义，最低成本路由不会包含环路。</p>
+<p>现在，每个 AS 都依据自己的偏好选择路由，我们便失去了不存在环路这一保证。例如，假设 B 喜欢经过 C 的路径，而 C 喜欢经过 B 的路径。这样就产生了路由环路（routing loop）！</p>
+<img width="800px" src="/image/cs168-textbook/routing/2-163-bgp-loop.png">
+<p>为解决这个问题，BGP 通告不再包含到目的地的距离，而是包含通往目的地的完整 AS 路径。这使协议从距离向量协议变成了**路径向量（path-vector）**协议。</p>
+<p>例如，在距离向量协议中，A 会通告：“我能以成本 1 到达目的地。”随后，B 会通告：“我能以成本 2 到达目的地。”</p>
+<p>在路径向量协议中，A 会通告：“我能通过路径 [A] 到达目的地。”随后，B 会通告：“我能通过路径 [B, A] 到达目的地。”</p>
+<p>经过这项修改，AS 可以通过逐一查看通告中的路径，判断所通告的路径是否包含环路。具体来说，如果我收到一个通告，只需检查路径是否包含我自己。如果包含，数据包就会被发回给我，从而形成环路，因此我会忽略该通告，既不接受也不通告这条带有环路的路由。</p>
+<p>注意：如果所有人都同意丢弃带有环路的路由，就能保证通告不会包含环路。所通告的路由能够形成环路的唯一情形，就是我看到一条已经包含我自己的路由，而再次加入我自己正是形成环路的原因。</p>
+<p>从距离向量改为路径向量，也使 AS 能够实施任意策略。在距离向量协议中，我可能有一项策略，比如“尽可能避开 AS#2063”。如果我收到一条“我能以成本 12 到达目的地”的通告，就完全无法知道所通告的路径是否经过 AS#2063。相反，如果通告包含完整路径，我就可以先检查路径是否经过 AS#2063，再决定接受还是拒绝它。</p>
+<p>注意：我们之前看到的传统 BGP 导入策略（相比经过对等方和提供商的路由，优先选择通往客户的路由）只取决于下一跳，而不取决于整条路径。尽管如此，改用路径向量仍有助于检测环路，并让我们能够将协议推广到任意策略。</p>
+<h2 id="桩-as-使用默认路由">桩 AS 使用默认路由</h2>
+<p>有些 AS 无须运行 BGP 来确定如何在网络中转发数据包。特别是，如果一个桩 AS（stub AS）只连接到一个提供商，那么所有以其他 AS 为目的地的数据包都应发送给这唯一的提供商。该桩 AS 可以为其他 AS 中的所有目的地安装一条硬编码的<strong>默认路由（default route）</strong>。</p>
+<p>那么，其他 AS 尝试向这个桩 AS 发送数据包时怎么办？桩 AS 可以请求提供商安装一条<strong>静态路由（static route）</strong>，告诉提供商如何把数据包发送到这个桩 AS。这样，提供商就可以运行 BGP，并向互联网的其余部分通告这条静态路由。桩 AS 可以请求提供商把静态路由硬编码下来，而桩 AS 本身永远不必运行 BGP，因为提供商会代表桩 AS 通告通往它的路由。</p>
+<img width="600px" src="/image/cs168-textbook/routing/2-164-stub-routes.png">
+<p>互联网中的大多数小型 AS 都是使用默认路由和静态路由的桩 AS。</p>
+<p>桩 AS 类似于域内路由中的端主机（end host）。它们为自己的 AS 发送和接收数据包，但不替其他 AS 转发数据包，也不参与路由过程。与域内路由中的处理方式一样，我们通常会忽略桩 AS，只考虑真正参与 BGP 的传输 AS（transit AS）。</p> </article> <hr class="my-8 border-dashed"> <a href="https://github.com/howIdobetter/My-Blog/edit/main/src/content/posts/cs168-routing-09-bgp.md" target="_blank" rel="noopener noreferrer" class="hover:text-accent text-muted-foreground flex justify-baseline gap-1.5 sm:hidden"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M7 7H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-1" /><path d="M20.385 6.585a2.1 2.1 0 0 0-2.97-2.97L9 12v3h3zM16 5l3 3" /></svg><span>编辑文章</span></a> <div id="btt-btn-container" class="fixed inset-e-4 bottom-8 z-50 md:sticky md:inset-e-auto md:float-end md:me-1 translate-y-14 opacity-0 transition duration-500"> <button data-button="back-to-top" aria-label="回到顶部" class="group bg-background relative px-2 py-1 size-14 rounded-full shadow-xl md:h-8 md:w-fit md:rounded-md md:shadow-none md:focus-visible:rounded-none md:bg-background/35 md:bg-clip-padding md:backdrop-blur-lg"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block rotate-90 md:hidden" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 12h14M5 12l6 6M5 12l6-6" /></svg> <span class="group-hover:text-accent sr-only text-sm md:not-sr-only"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block size-4" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" /><path d="M12 5v14M16 9l-4-4M8 9l4-4" /></svg> 回到顶部 </span> </button> </div> <script data-astro-rerun>
+  function backToTop() {
+    const btnContainer = document.querySelector("#btt-btn-container");
+    const backToTopBtn = document.querySelector("[data-button='back-to-top']");
+    const pageHeader = document.querySelector("body > header");
+
+    if (!btnContainer || !backToTopBtn || !pageHeader) return;
+
+    backToTopBtn.addEventListener("click", () => {
+      document.body.scrollTop = 0;
+      document.documentElement.scrollTop = 0;
+    });
+
+    const observer = new IntersectionObserver(([entry]) => {
+      const isVisible = !entry.isIntersecting;
+      if (entry) {
+        btnContainer.classList.toggle("opacity-100", isVisible);
+        btnContainer.classList.toggle("translate-y-0", isVisible);
+        btnContainer.classList.toggle("opacity-0", !isVisible);
+        btnContainer.classList.toggle("translate-y-14", !isVisible);
+      }
+    });
+    observer.observe(pageHeader);
+  }
+  backToTop();
+</script> <ul class="mt-4 mb-8 flex flex-wrap gap-4 sm:my-8"> <li> <a href="/tags/networking/" class="border-border flex items-center gap-1 rounded-full border transition-colors hover:border-accent hover:text-accent focus-visible:text-accent focus-visible:no-underline px-3 py-1.5 text-sm" data-astro-transition-scope="astro-36ssibgs-1"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="text-accent opacity-80 size-3.5" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 9h14M5 15h14M11 4 7 20M17 4l-4 16" /></svg> networking </a> </li><li> <a href="/tags/cs168/" class="border-border flex items-center gap-1 rounded-full border transition-colors hover:border-accent hover:text-accent focus-visible:text-accent focus-visible:no-underline px-3 py-1.5 text-sm" data-astro-transition-scope="astro-36ssibgs-2"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="text-accent opacity-80 size-3.5" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 9h14M5 15h14M11 4 7 20M17 4l-4 16" /></svg> cs168 </a> </li><li> <a href="/tags/course-notes/" class="border-border flex items-center gap-1 rounded-full border transition-colors hover:border-accent hover:text-accent focus-visible:text-accent focus-visible:no-underline px-3 py-1.5 text-sm" data-astro-transition-scope="astro-36ssibgs-3"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="text-accent opacity-80 size-3.5" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 9h14M5 15h14M11 4 7 20M17 4l-4 16" /></svg> course-notes </a> </li><li> <a href="/tags/routing/" class="border-border flex items-center gap-1 rounded-full border transition-colors hover:border-accent hover:text-accent focus-visible:text-accent focus-visible:no-underline px-3 py-1.5 text-sm" data-astro-transition-scope="astro-36ssibgs-4"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="text-accent opacity-80 size-3.5" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 9h14M5 15h14M11 4 7 20M17 4l-4 16" /></svg> routing </a> </li> </ul>  <hr class="my-8 border-dashed"> <div data-pagefind-ignore class="my-8 grid grid-cols-1 gap-4 sm:grid-cols-2"> <a href="/posts/cs168-routing-08-interdomain-model/" class="soft-panel hover:border-accent/70 hover:text-accent flex w-full gap-3 p-4 transition"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block flex-none rtl:rotate-180" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 12h14M5 12l6 6M5 12l6-6" /></svg> <div> <span class="mono-label">上一篇</span> <div class="mt-1 text-sm leading-6">域间路由模型</div> </div> </a> <a href="/posts/cs168-routing-10-bgp-implementation/" class="soft-panel hover:border-accent/70 hover:text-accent flex w-full justify-end gap-3 p-4 text-end transition sm:col-start-2"> <div> <span class="mono-label">下一篇</span> <div class="mt-1 text-sm leading-6">BGP 的实现与问题</div> </div> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block flex-none rtl:rotate-180" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 12h14M13 18l6-6M13 6l6 6" /></svg> </a> </div> </main> <footer class="app-layout mt-auto"> <div class="border-border text-muted-foreground flex flex-col items-start justify-between gap-6 border-t py-9 text-sm sm:flex-row sm:items-end"> <div> <p class="text-foreground font-semibold">随便做做</p> <p class="mt-1">先记下来，再慢慢改对。</p> </div> <div class="flex items-center gap-5"> <div class="flex flex-wrap items-center gap-1"> <a href="https://github.com/howIdobetter" title="GitHub" class="group inline-flex items-center gap-1 hover:text-accent p-2 hover:rotate-6 sm:p-1">  <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block size-6 scale-125 fill-transparent stroke-current stroke-2 opacity-90 group-hover:fill-transparent sm:scale-110" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" /><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21" /></svg> <span class="sr-only">GitHub</span>  </a> </div> <span class="whitespace-nowrap">© 2026 一剑留名ing</span> </div> </div> </footer>   <script type="module">const a="theme",n="light",r="dark";function i(){const e=localStorage.getItem(a);return e||(window.matchMedia("(prefers-color-scheme: dark)").matches?r:n)}let o=window.__theme?.value??i();function s(){localStorage.setItem(a,o),m()}function m(){const e=document.firstElementChild;e?.setAttribute("data-theme",o),e?.classList.toggle("dark",o===r);const t=document.querySelector("#theme-btn"),c=o===n?t?.dataset.labelDark:t?.dataset.labelLight;c&&(t?.setAttribute("aria-label",c),t?.setAttribute("title",c));const l=window.getComputedStyle(document.body).backgroundColor;document.querySelector("meta[name='theme-color']")?.setAttribute("content",l)}function d(){m(),document.querySelector("#theme-btn")?.addEventListener("click",()=>{o=o===n?r:n,s()})}d();document.addEventListener("astro:after-swap",d);document.addEventListener("astro:before-swap",e=>{const t=document.querySelector("meta[name='theme-color']")?.getAttribute("content");t&&e.newDocument.querySelector("meta[name='theme-color']")?.setAttribute("content",t)});window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change",({matches:e})=>{o=e?r:n,s()});</script> </body> </html> <script data-astro-rerun>
+  function addHeadingLinks() {
+    const isZh = document.documentElement.lang === "zh-CN";
+    const headings = Array.from(
+      document.querySelectorAll("h2, h3, h4, h5, h6")
+    );
+    for (const heading of headings) {
+      heading.classList.add("group");
+      const link = document.createElement("a");
+      link.className =
+        "heading-link ms-2 no-underline opacity-75 md:opacity-0 md:group-hover:opacity-100 md:focus:opacity-100";
+      link.href = "#" + heading.id;
+      link.setAttribute(
+        "aria-label",
+        isZh
+          ? `链接到本节：${heading.textContent}`
+          : `Link to section: ${heading.textContent}`
+      );
+
+      const span = document.createElement("span");
+      span.ariaHidden = "true";
+      span.innerText = "#";
+      link.appendChild(span);
+      heading.appendChild(link);
+    }
+  }
+  addHeadingLinks();
+
+  function attachCopyButtons() {
+    const isZh = document.documentElement.lang === "zh-CN";
+    const copyButtonLabel = isZh ? "复制" : "Copy";
+    const copiedButtonLabel = isZh ? "已复制" : "Copied";
+    const codeBlocks = Array.from(document.querySelectorAll("pre"));
+
+    for (const codeBlock of codeBlocks) {
+      const wrapper = document.createElement("div");
+      wrapper.style.position = "relative";
+
+      const computedStyle = getComputedStyle(codeBlock);
+      const hasFileNameOffset =
+        computedStyle.getPropertyValue("--file-name-offset").trim() !== "";
+
+      const topClass = hasFileNameOffset
+        ? "top-(--file-name-offset)"
+        : "-top-3";
+
+      const copyButton = document.createElement("button");
+      copyButton.className = `copy-code absolute end-3 ${topClass} rounded bg-muted border border-muted px-2 py-1 text-xs leading-4 text-foreground font-medium`;
+      copyButton.innerHTML = copyButtonLabel;
+      copyButton.setAttribute("aria-label", copyButtonLabel);
+      copyButton.setAttribute("aria-live", "polite");
+      codeBlock.setAttribute("tabindex", "0");
+      codeBlock.appendChild(copyButton);
+
+      codeBlock?.parentNode?.insertBefore(wrapper, codeBlock);
+      wrapper.appendChild(codeBlock);
+
+      copyButton.addEventListener("click", async () => {
+        await copyCode(codeBlock, copyButton);
+      });
+    }
+
+    async function copyCode(block, button) {
+      const code = block.querySelector("code");
+      const text = code?.innerText;
+
+      await navigator.clipboard.writeText(text ?? "");
+
+      button.innerText = copiedButtonLabel;
+      button.setAttribute("aria-label", copiedButtonLabel);
+
+      setTimeout(() => {
+        button.innerText = copyButtonLabel;
+        button.setAttribute("aria-label", copyButtonLabel);
+      }, 700);
+    }
+  }
+  attachCopyButtons();
+
+  /** Accessible image lightbox for article images. */
+  function initLightbox() {
+    const article = document.getElementById("article");
+    if (!article) return;
+
+    const prefersReducedMotion = () =>
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    let overlay = null;
+    let lastFocused = null;
+
+    // Defer attribute mutations so they don't push the LCP timestamp.
+    // Event listeners below use delegation and don't need the attributes to exist yet.
+    requestAnimationFrame(() => {
+      const images = Array.from(article.querySelectorAll("img"));
+      for (const image of images) {
+        if (image.closest("a")) continue;
+        image.setAttribute("role", "button");
+        image.setAttribute("tabindex", "0");
+        image.setAttribute("aria-haspopup", "dialog");
+        image.setAttribute(
+          "aria-label",
+          image.alt ? `Zoom image: ${image.alt}` : "Zoom image"
+        );
+      }
+    });
+
+    function open(src, alt, trigger) {
+      if (overlay) return;
+      lastFocused = trigger ?? document.activeElement;
+
+      overlay = document.createElement("div");
+      overlay.setAttribute("role", "dialog");
+      overlay.setAttribute("aria-modal", "true");
+      overlay.setAttribute(
+        "aria-label",
+        alt ? `Image preview: ${alt}` : "Image preview"
+      );
+      overlay.className =
+        "fixed inset-0 z-50 flex cursor-zoom-out items-center justify-center bg-black/70 backdrop-blur-sm opacity-0 transition-opacity duration-200 motion-reduce:transition-none";
+
+      const closeButton = document.createElement("button");
+      closeButton.type = "button";
+      closeButton.setAttribute("aria-label", "Close image preview");
+      closeButton.className =
+        "absolute end-4 top-4 rounded p-2 text-3xl leading-none text-white";
+      closeButton.innerHTML = "&#10005;";
+      closeButton.addEventListener("click", close);
+
+      const image = document.createElement("img");
+      image.src = src;
+      image.alt = "";
+      image.className =
+        "max-h-[90dvh] max-w-[90dvw] cursor-default object-contain";
+
+      overlay.append(closeButton, image);
+      overlay.addEventListener("click", e => {
+        if (e.target === overlay && currentScale <= 1) close();
+      });
+
+      let currentScale = 1;
+      let translateX = 0;
+      let translateY = 0;
+      let initialDist = 0;
+      let initialScale = 1;
+      let panStartX = 0;
+      let panStartY = 0;
+      let panStartTranslateX = 0;
+      let panStartTranslateY = 0;
+      let lastTapTime = 0;
+
+      function applyTransform() {
+        image.style.transform = `scale(${currentScale}) translate(${translateX}px, ${translateY}px)`;
+      }
+
+      function resetTransform() {
+        currentScale = 1;
+        translateX = 0;
+        translateY = 0;
+        image.style.transform = "";
+      }
+
+      overlay.addEventListener(
+        "touchstart",
+        e => {
+          const t = e.touches;
+          if (t.length === 2) {
+            initialDist = Math.hypot(
+              t[1].clientX - t[0].clientX,
+              t[1].clientY - t[0].clientY
+            );
+            initialScale = currentScale;
+          } else if (t.length === 1) {
+            const now = Date.now();
+            if (now - lastTapTime < 300) {
+              e.preventDefault();
+              if (currentScale > 1) {
+                resetTransform();
+              } else {
+                currentScale = 2;
+                translateX = 0;
+                translateY = 0;
+                applyTransform();
+              }
+              lastTapTime = 0;
+              panStartX = t[0].clientX;
+              panStartY = t[0].clientY;
+              panStartTranslateX = translateX;
+              panStartTranslateY = translateY;
+            } else {
+              lastTapTime = now;
+              if (currentScale > 1) {
+                panStartX = t[0].clientX;
+                panStartY = t[0].clientY;
+                panStartTranslateX = translateX;
+                panStartTranslateY = translateY;
+              }
+            }
+          }
+        },
+        { passive: false }
+      );
+
+      overlay.addEventListener(
+        "touchmove",
+        e => {
+          const t = e.touches;
+          if (t.length === 2) {
+            e.preventDefault();
+            const dist = Math.hypot(
+              t[1].clientX - t[0].clientX,
+              t[1].clientY - t[0].clientY
+            );
+            currentScale = Math.min(
+              4,
+              Math.max(1, initialScale * (dist / initialDist))
+            );
+            applyTransform();
+          } else if (t.length === 1) {
+            if (currentScale > 1) {
+              e.preventDefault();
+              translateX =
+                panStartTranslateX + (t[0].clientX - panStartX) / currentScale;
+              translateY =
+                panStartTranslateY + (t[0].clientY - panStartY) / currentScale;
+              const maxX = Math.max(
+                0,
+                (image.clientWidth - overlay.clientWidth / currentScale) / 2
+              );
+              const maxY = Math.max(
+                0,
+                (image.clientHeight - overlay.clientHeight / currentScale) / 2
+              );
+              translateX = Math.min(maxX, Math.max(-maxX, translateX));
+              translateY = Math.min(maxY, Math.max(-maxY, translateY));
+              applyTransform();
+            } else {
+              e.preventDefault();
+            }
+          }
+        },
+        { passive: false }
+      );
+
+      overlay.addEventListener("touchend", e => {
+        if (e.touches.length === 0 && currentScale <= 1.05) {
+          resetTransform();
+        }
+      });
+
+      overlay.addEventListener("touchcancel", e => {
+        if (e.touches.length === 0 && currentScale <= 1.05) {
+          resetTransform();
+        }
+      });
+
+      document.body.appendChild(overlay);
+      document.body.style.overflow = "hidden";
+      document.addEventListener("keydown", onKeyDown);
+      window.__closeLightbox = close;
+
+      requestAnimationFrame(() => overlay?.classList.add("opacity-100"));
+      closeButton.focus();
+    }
+
+    function close() {
+      if (!overlay) return;
+      const el = overlay;
+      overlay = null;
+      window.__closeLightbox = null;
+
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = "";
+      lastFocused?.focus();
+      lastFocused = null;
+
+      if (prefersReducedMotion()) {
+        el.remove();
+        return;
+      }
+      const remove = () => el.remove();
+      el.addEventListener("transitionend", remove, { once: true });
+      setTimeout(remove, 250); // fallback in case transitionend never fires
+      el.classList.remove("opacity-100");
+    }
+
+    function onKeyDown(e) {
+      if (e.key === "Escape") {
+        close();
+      } else if (e.key === "Tab") {
+        trapFocus(e);
+      }
+    }
+
+    // Keep keyboard focus inside the open dialog.
+    function trapFocus(e) {
+      if (!overlay) return;
+      const focusables = overlay.querySelectorAll(
+        'a[href], button, [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+
+    function triggerFromEvent(e) {
+      const image = e.target.closest("img");
+      if (!image || !article.contains(image) || image.closest("a")) return null;
+      return image;
+    }
+
+    function activate(image) {
+      open(image.currentSrc || image.src, image.alt, image);
+    }
+
+    article.addEventListener("click", e => {
+      const image = triggerFromEvent(e);
+      if (!image) return;
+      e.preventDefault();
+      activate(image);
+    });
+
+    article.addEventListener("keydown", e => {
+      if (e.key !== "Enter" && e.key !== " " && e.key !== "Spacebar") return;
+      const image = triggerFromEvent(e);
+      if (!image) return;
+      e.preventDefault();
+      activate(image);
+    });
+  }
+  initLightbox();
+
+  if (!window.__lightboxSwapBound) {
+    window.__lightboxSwapBound = true;
+    document.addEventListener("astro:before-swap", () =>
+      window.__closeLightbox?.()
+    );
+  }
+
+  document.addEventListener("astro:after-swap", () =>
+    window.scrollTo({ left: 0, top: 0, behavior: "instant" })
+  );
+</script>

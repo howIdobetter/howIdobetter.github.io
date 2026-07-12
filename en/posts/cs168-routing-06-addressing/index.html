@@ -1,0 +1,667 @@
+<!DOCTYPE html><html dir="ltr" lang="en" class="overflow-y-scroll scroll-smooth"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="canonical" href="https://howidobetter.github.io/en/posts/cs168-routing-06-addressing/"><meta name="generator" content="Astro v6.4.2"><!-- Primary meta --><title>寻址 | 随便做做</title><meta name="title" content="寻址 | 随便做做"><meta name="description" content="从 IP 地址、前缀与子网出发，理解分层寻址如何让互联网路由扩展。"><meta name="author" content="一剑留名ing"><link rel="sitemap" href="/sitemap-index.xml"><!-- Open Graph --><meta property="og:type" content="article"><meta property="og:site_name" content="随便做做"><meta property="og:title" content="寻址 | 随便做做"><meta property="og:description" content="从 IP 地址、前缀与子网出发，理解分层寻址如何让互联网路由扩展。"><meta property="og:url" content="https://howidobetter.github.io/en/posts/cs168-routing-06-addressing/"><meta property="og:image" content="https://howidobetter.github.io/default-og.png"><!-- Twitter / X --><meta property="twitter:card" content="summary_large_image"><meta property="twitter:url" content="https://howidobetter.github.io/en/posts/cs168-routing-06-addressing/"><meta property="twitter:title" content="寻址 | 随便做做"><meta property="twitter:description" content="从 IP 地址、前缀与子网出发，理解分层寻址如何让互联网路由扩展。"><meta property="twitter:image" content="https://howidobetter.github.io/default-og.png"><!-- RSS autodiscovery --><link rel="alternate" type="application/rss+xml" title="随便做做" href="https://howidobetter.github.io/rss.xml"><!-- Filled at runtime by theme.ts to match the current background colour --><meta name="theme-color" content=""><!-- Extra head content injected by child layouts (e.g. JSON-LD, article meta) --><meta property="article:published_time" content="2026-07-12T00:00:00.000Z"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"寻址 | 随便做做","description":"从 IP 地址、前缀与子网出发，理解分层寻址如何让互联网路由扩展。","url":"https://howidobetter.github.io/en/posts/cs168-routing-06-addressing/","image":"https://howidobetter.github.io/default-og.png","datePublished":"2026-07-12T00:00:00.000Z","author":[{"@type":"Person","name":"一剑留名ing","url":"https://github.com/howIdobetter"}]}</script> <!--
+      Inline FOUC-prevention script: sets data-theme on <html> before
+      the browser paints. Runs synchronously, no defer/async.
+    --><script>
+      (function () {
+        const stored = localStorage.getItem("theme");
+        const prefersDark = window.matchMedia(
+          "(prefers-color-scheme: dark)"
+        ).matches;
+        const theme = stored ?? (prefersDark ? "dark" : "light");
+        const root = document.firstElementChild;
+        root?.setAttribute("data-theme", theme);
+        root?.classList.toggle("dark", theme === "dark");
+        // Expose value so theme.ts can skip re-detection.
+        window.__theme = { value: theme };
+      })();
+    </script><meta name="astro-view-transitions-enabled" content="true"><meta name="astro-view-transitions-fallback" content="animate"><script type="module" src="/_astro/ClientRouter.astro_astro_type_script_index_0_lang.CAqDO0tx.js"></script><link rel="stylesheet" href="/_astro/Footer.W6Wz50NF.css">
+<style>@keyframes astroFadeInOut{0%{opacity:1}to{opacity:0}}@keyframes astroFadeIn{0%{opacity:0;mix-blend-mode:plus-lighter}to{opacity:1;mix-blend-mode:plus-lighter}}@keyframes astroFadeOut{0%{opacity:1;mix-blend-mode:plus-lighter}to{opacity:0;mix-blend-mode:plus-lighter}}@keyframes astroSlideFromRight{0%{transform:translate(100%)}}@keyframes astroSlideFromLeft{0%{transform:translate(-100%)}}@keyframes astroSlideToRight{to{transform:translate(100%)}}@keyframes astroSlideToLeft{to{transform:translate(-100%)}}@media(prefers-reduced-motion){::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}[data-astro-transition-scope]{animation:none!important}}
+</style><style>[data-astro-transition-scope="astro-36ssibgs-1"] { view-transition-name: networking; }@layer astro { ::view-transition-old(networking) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(networking) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(networking) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(networking) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-1"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-1"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-1"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-1"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style><style>[data-astro-transition-scope="astro-36ssibgs-2"] { view-transition-name: cs168; }@layer astro { ::view-transition-old(cs168) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(cs168) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(cs168) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(cs168) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style><style>[data-astro-transition-scope="astro-36ssibgs-3"] { view-transition-name: course-notes; }@layer astro { ::view-transition-old(course-notes) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(course-notes) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(course-notes) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(course-notes) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style><style>[data-astro-transition-scope="astro-36ssibgs-4"] { view-transition-name: routing; }@layer astro { ::view-transition-old(routing) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(routing) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(routing) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(routing) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style></head> <body class="bg-background font-app text-foreground selection:bg-accent/75 selection:text-accent-foreground flex min-h-svh flex-col">    <a id="skip-to-content" href="#main-content" class="bg-background text-accent absolute inset-s-4 -top-full z-50 border px-3 py-2 transition-[top] focus:top-3"> Skip to content </a> <header class="border-border bg-background/90 relative z-30 border-b backdrop-blur"> <div class="app-layout relative flex min-h-18 w-full items-baseline justify-between sm:items-center"> <a href="/en/" class="absolute inline-flex items-baseline gap-3 py-1 text-lg leading-8 font-semibold whitespace-nowrap sm:static sm:my-auto sm:text-xl sm:leading-none"> <span>随便做做</span> <span class="text-muted-foreground hidden font-mono text-[0.68rem] font-normal sm:inline">
+howIdobetter
+</span> </a> <nav id="nav-menu" class="flex w-full flex-col items-center sm:ms-2 sm:flex-row sm:justify-end sm:py-0"> <button id="menu-btn" class="focus-outline self-end p-3 sm:hidden" aria-label="Open menu" aria-expanded="false" aria-controls="menu-items" data-label-open="Open menu" data-label-close="Close menu"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="hidden" viewBox="0 0 24 24" id="close-icon"><path stroke="none" d="M0 0h24v24H0z" /><path d="M18 6 6 18M6 6l12 12" /></svg> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="icon icon-tabler icons-tabler-outline icon-tabler-menu-deep" viewBox="0 0 24 24" id="menu-icon"><path stroke="none" d="M0 0h24v24H0z" /><path d="M4 6h16M7 12h13M10 18h10" /></svg> </button> <ul id="menu-items" class="border-border [&>li>a]:hover:text-accent mt-3 hidden w-full grid-cols-2 place-content-center gap-1 border-t py-3 sm:mt-0 sm:flex sm:w-auto sm:items-center sm:gap-x-1 sm:border-0 sm:py-0 [&>li>a]:block [&>li>a]:px-4 [&>li>a]:py-3 [&>li>a]:text-center [&>li>a]:font-medium [&>li>a]:transition-colors sm:[&>li>a]:px-3 sm:[&>li>a]:py-2"> <li class="col-span-2"> <a href="/en/posts/" class="active-nav"> Posts </a> </li> <li class="col-span-2"> <a href="/en/tags/"> Tags </a> </li> <li class="col-span-2"> <a href="/en/about/"> About </a> </li> <li class="col-span-2"> <a href="/en/archives/" title="Archives" aria-label="Archives" class="group inline-flex items-center gap-1 hover:text-accent focus-outline flex size-full justify-center p-3 sm:relative sm:size-10 sm:p-0">  <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="hidden sm:absolute sm:top-1/2 sm:left-1/2 sm:block sm:size-6 sm:-translate-x-1/2 sm:-translate-y-1/2" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v0a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8M10 12h4" /></svg> <span class="sm:sr-only">Archives</span>  </a> </li> <li class="col-span-1 flex items-center justify-center"> <a href="/en/search/" title="Search" aria-label="Search" class="group inline-flex items-center gap-1 hover:text-accent focus-outline relative size-11 sm:size-10">  <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="absolute top-1/2 left-1/2 size-6 -translate-x-1/2 -translate-y-1/2" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M3 10a7 7 0 1 0 14 0 7 7 0 1 0-14 0M21 21l-6-6" /></svg> <span class="sr-only">Search</span>  </a> </li> <li class="col-span-1 flex items-center justify-center"> <div class="border-border flex overflow-hidden rounded-full border text-xs font-semibold" aria-label="Language"> <a href="/posts/cs168-routing-06-addressing/" title="中文" class="px-2 py-1 transition-colors hover:text-accent"> 中 </a><a href="/en/posts/cs168-routing-06-addressing/" title="English" aria-current="true" class="px-2 py-1 transition-colors bg-accent text-accent-foreground"> EN </a> </div> </li> <li class="col-span-1 flex items-center justify-center"> <button id="theme-btn" class="focus-outline hover:[&>svg]:stroke-accent relative size-12 rounded-full p-4 transition-colors sm:size-10" title="Toggle theme" aria-label="auto" aria-live="polite" data-label-light="Switch to light theme" data-label-dark="Switch to dark theme"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="absolute top-[50%] left-[50%] translate-[-50%] scale-100 rotate-0 transition-[transform,opacity] dark:scale-0 dark:-rotate-90" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M12 3h.393a7.5 7.5 0 0 0 7.92 12.446A9 9 0 1 1 12 2.992z" /></svg> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="absolute top-[50%] left-[50%] translate-[-50%] scale-0 rotate-90 transition-[transform,opacity] dark:scale-100 dark:rotate-0" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M14.828 14.828a4 4 0 1 0-5.656-5.656 4 4 0 0 0 5.656 5.656M6.343 17.657l-1.414 1.414M6.343 6.343 4.929 4.929M17.657 6.343l1.414-1.414M17.657 17.657l1.414 1.414M4 12H2M12 4V2M20 12h2M12 20v2" /></svg> </button> </li> </ul> </nav> </div> </header> <script type="module">function c(){const e=document.querySelector("#menu-btn"),t=document.querySelector("#menu-items"),n=document.querySelector("#menu-icon"),s=document.querySelector("#close-icon");if(!e||!t||!n||!s)return;const a=e.dataset.labelOpen??"Open menu",l=e.dataset.labelClose??"Close menu";e.addEventListener("click",()=>{const o=e.getAttribute("aria-expanded")==="true";e.setAttribute("aria-expanded",o?"false":"true"),e.setAttribute("aria-label",o?a:l),t.classList.toggle("hidden"),t.classList.toggle("grid"),n.classList.toggle("hidden"),s.classList.toggle("hidden")})}c();document.addEventListener("astro:after-swap",c);</script> <div class="reading-progress" aria-hidden="true"> <div class="reading-progress-bar"></div> </div> <div class="app-layout flex items-center justify-start"><a id="back-button" href="/en/" class="group inline-flex items-center gap-1 hover:text-accent focus-outline hover:text-foreground/75 -ms-2 mt-8 mb-2"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block size-6 rtl:rotate-180" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="m15 6-6 6 6 6" /></svg><span>Back</span> </a></div><script type="module">function o(){const t=document.querySelector("#back-button"),e=sessionStorage.getItem("backUrl");e&&t&&(t.href=e)}document.addEventListener("astro:page-load",o);o();</script> <main id="main-content" class="app-layout pb-8" data-pagefind-body> <header class="border-border max-w-readable border-b pt-8 pb-8 sm:pt-12"> <h1 style="view-transition-name:u005bfbu005740" class="text-foreground text-3xl leading-tight font-semibold text-balance sm:text-5xl"> 寻址 </h1> <p class="text-muted-foreground mt-4 text-lg leading-8 text-pretty"> 从 IP 地址、前缀与子网出发，理解分层寻址如何让互联网路由扩展。 </p> <div class="mt-5 flex flex-wrap items-center gap-3"> <div class="text-muted-foreground flex items-center gap-x-2 font-mono"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block size-5 min-w-5" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" /><path d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM16 3v4M8 3v4M4 11h16M7 14h.013M10.01 14h.005M13.01 14h.005M16.015 14h.005M13.015 17h.005M7.01 17h.005M10.01 17h.005" /></svg>  <time class="text-sm sm:text-base" datetime="2026-07-12T00:00:00.000Z"> July 12, 2026 </time> </div> <a href="https://github.com/howIdobetter/My-Blog/edit/main/src/content/posts/cs168-routing-06-addressing.md" target="_blank" rel="noopener noreferrer" class="hover:text-accent text-muted-foreground flex justify-baseline gap-1.5 max-sm:hidden"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M7 7H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-1" /><path d="M20.385 6.585a2.1 2.1 0 0 0-2.97-2.97L9 12v3h3zM16 5l3 3" /></svg><span>Edit post</span></a> </div> </header> <aside class="border-border mt-8 border-y"> <details class="group py-4 sm:hidden"> <summary class="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4"> <span> <span class="mono-label block"> CS168 · 路由 </span> <span class="text-accent mt-1 block text-sm font-semibold"> 6 / 11 </span> </span> <span aria-hidden="true" class="text-muted-foreground text-xl transition-transform group-open:rotate-45">
++
+</span> </summary> <ol class="border-border mt-3 border-t pt-2"> <li class="border-border border-b last:border-b-0"> <a href="/en/posts/cs168-routing-01-introduction/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 01 </span> <span>路由简介</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/en/posts/cs168-routing-02-intradomain-model/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 02 </span> <span>域内路由模型</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/en/posts/cs168-routing-03-routing-states/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 03 </span> <span>路由状态</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/en/posts/cs168-routing-04-distance-vector/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 04 </span> <span>距离向量协议</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/en/posts/cs168-routing-05-link-state/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 05 </span> <span>链路状态协议</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/en/posts/cs168-routing-06-addressing/" aria-current="page" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm text-accent font-semibold"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 06 </span> <span>寻址</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/en/posts/cs168-routing-07-router-hardware/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 07 </span> <span>路由器硬件</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/en/posts/cs168-routing-08-interdomain-model/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 08 </span> <span>域间路由模型</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/en/posts/cs168-routing-09-bgp/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 09 </span> <span>边界网关协议（BGP）</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/en/posts/cs168-routing-10-bgp-implementation/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 10 </span> <span>BGP 的实现与问题</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/en/posts/cs168-routing-11-ip-header/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 11 </span> <span>IP 首部</span> </a> </li> </ol> </details> <div class="hidden py-5 sm:block"> <div class="flex items-baseline justify-between gap-4"> <p class="mono-label">CS168 · 路由</p> <p class="text-accent text-sm font-semibold"> 6 / 11 </p> </div> <ol class="border-border mt-4 grid border-t sm:grid-cols-3 lg:grid-cols-6"> <li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/en/posts/cs168-routing-01-introduction/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 01 </span> <span class="mt-1 block"> 路由简介 </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/en/posts/cs168-routing-02-intradomain-model/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 02 </span> <span class="mt-1 block"> 域内路由模型 </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/en/posts/cs168-routing-03-routing-states/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 03 </span> <span class="mt-1 block"> 路由状态 </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/en/posts/cs168-routing-04-distance-vector/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 04 </span> <span class="mt-1 block"> 距离向量协议 </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/en/posts/cs168-routing-05-link-state/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 05 </span> <span class="mt-1 block"> 链路状态协议 </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/en/posts/cs168-routing-06-addressing/" aria-current="page" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors bg-muted/60 text-accent font-semibold"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 06 </span> <span class="mt-1 block"> 寻址 </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/en/posts/cs168-routing-07-router-hardware/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 07 </span> <span class="mt-1 block"> 路由器硬件 </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/en/posts/cs168-routing-08-interdomain-model/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 08 </span> <span class="mt-1 block"> 域间路由模型 </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/en/posts/cs168-routing-09-bgp/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 09 </span> <span class="mt-1 block"> 边界网关协议（BGP） </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/en/posts/cs168-routing-10-bgp-implementation/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 10 </span> <span class="mt-1 block"> BGP 的实现与问题 </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/en/posts/cs168-routing-11-ip-header/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 11 </span> <span class="mt-1 block"> IP 首部 </span> </a> </li> </ol> </div> </aside> <article id="article" class="mt-8 w-full app-prose max-w-readable prose-pre:bg-(--shiki-light-bg) dark:prose-pre:bg-(--shiki-dark-bg)"> <aside class="border-border bg-muted/35 mb-8 border-s-2 px-5 py-4 text-sm leading-6"> <p class="m-0">
+本文译自  <a href="https://textbook.cs168.io/routing/addressing.html">Addressing</a> 
+，依照 <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh-hans"> CC BY-SA 4.0 </a> 
+许可发布
+
+。<span> 中文翻译，保留原文结构与图表引用。</span> </p> </aside> <h2 id="寻址">寻址</h2>
+<h2 id="扩展路由">扩展路由</h2>
+<p>到目前为止，我们的转发表中每个目的地都有一个条目。这种做法无法扩展到整个互联网。</p>
+<p>如果在整个互联网上运行距离向量（distance-vector），我们就必须为互联网上的每台主机发送一则通告。如果在整个互联网上运行链路状态（link-state），每台路由器就必须知道完整的互联网网络图。在这两种情况下，只要有任何主机加入或离开互联网，我们都必须重新进行计算，才能收敛到新的路由状态。</p>
+<p>让路由具备可扩展性的诀窍在于我们如何为主机寻址。到目前为止，我们一直用某个名称来称呼每台主机和路由器（例如 R1、R2、A、B），但在实际中，我们会采用一种更巧妙的寻址方案。</p>
+<img width="750px" src="/image/cs168-textbook/routing/2-099-scaling-routing.png">
+<h2 id="ip-寻址">IP 寻址</h2>
+<p>回想一下，在邮政系统的类比中，我们针对不同情境采用了不同的寻址方案。邮递员使用的是诸如 2551 Hearst Ave. 这样的街道地址。楼内的秘书使用的是诸如 413 Soda Hall 这样的房间号。地址是按照某种结构化方式分配的。例如，三楼所有房间号都以数字 3 开头，四楼所有房间号都以数字 4 开头。</p>
+<p>与邮政系统一样，互联网在每一层使用不同的寻址方案。在本节中，我们将重点讨论可用于网络层（第 3 层）路由的 IP 地址（IP address）。</p>
+<p>网络上的每台主机（例如你的计算机、Google 的服务器）都会被分配一个 IP 地址。在本节中，你可以假定每台主机都有一个唯一的 IP 地址。</p>
+<p><strong>IP 地址</strong>是唯一标识一台主机的数字。与邮政系统一样，这个数字在选取时会包含一些关于主机所在位置的上下文信息。</p>
+<p>请注意，IP 地址不一定是静态的。在类比中，如果你搬到另一所房子，你的地址就会改变。同样，如果你的计算机移动到另一个位置，它加入网络时可能会被分配一个不同的 IP 地址（而你的旧 IP 地址最终会过期）。</p>
+<p>IP 地址的长度取决于所使用的 IP 版本。IPv4 地址为 32 位，IPv6 地址为 128 位。两个版本的路由概念相似，但我们会尽可能使用 IPv4，因为较短的地址更容易阅读。</p>
+<h2 id="分层寻址">分层寻址</h2>
+<p>回想一下，互联网是由网络组成的网络。互联网中有许多局部网络，我们在局部网络之间添加链路，从而形成更广阔的互联网。这为我们提供了一种自然的层次结构，可以用来组织寻址方案。</p>
+<img width="900px" src="/image/cs168-textbook/routing/2-100-address-intuition1.png">
+<p>下面是一个直观的寻址示意。我们可以为每个网络分配一个数字。然后，在网络 3 内，可以为主机分配 3.1、3.2、3.3 等编号，其他网络中的主机也可以采用类似方式。</p>
+<img width="900px" src="/image/cs168-textbook/routing/2-101-address-intuition2.png">
+<p>现在，考虑路由器 R9 中的转发表。以前，我们会为网络 1 中的每台主机分别设置一个条目，而这些条目的下一跳全都是 R6。采用分层寻址后，我们可以改为用一个条目表示整个局部网络，说明所有 1._ 地址（其中 _ 表示任意数字）的下一跳都是 R6。我们还可以说明，所有 2.* 地址的下一跳都是 R8。</p>
+<p>这种使用通配符匹配来汇总路由的分层模型，可以让转发表变得更小。</p>
+<p>此外，这种模型也能让转发表更加稳定。</p>
+<img width="900px" src="/image/cs168-textbook/routing/2-102-address-intuition3.png">
+<p>如果网络 1 内部的拓扑发生变化，我们不需要更新 R9 的转发表（也不需要更新其他网络中的任何转发表）。实际中，局部网络内部的变化（例如新主机加入网络）远比网络之间的变化（例如铺设新的地下电缆）频繁，因此，让局部变化只影响局部转发表是一件好事。</p>
+<p>更一般地说，我们的地址由两部分组成：网络 ID（network ID）和主机 ID（host ID）。这使域间路由协议（inter-domain routing protocol）能够关注网络 ID，以寻找网络之间的路由；也使域内路由协议（intra-domain routing protocol）能够关注主机 ID，以寻找网络内部的路由。随着网络发生变化，这也能让路由协议更加稳定。域间协议不关心网络内部的变化，而域内协议不关心其他网络中的变化。</p>
+<img width="900px" src="/image/cs168-textbook/routing/2-103-address-intuition4.png">
+<p>请注意，R9 中的转发表仍然需要为其自身网络（即网络 2）内的每台主机设置条目。</p>
+<p>同样，R4 是一台不与其他网络直接相连的内部路由器，它既需要为网络 3 内的各台主机设置条目，也需要为其他网络设置聚合条目（例如，2.* 的下一跳是 R9）。转发表的规模取决于同一网络中内部主机的数量与外部网络的数量之和。</p>
+<h2 id="默认路由">默认路由</h2>
+<p>现在我们知道，条目可以表示整个地址范围，而不必总是表示单个地址。我们还可以进一步扩展这个想法，以提高可扩展性。</p>
+<img width="900px" src="/image/cs168-textbook/routing/2-104-aggregation1.png">
+<p>考虑 R4。它为每个外部网络（1.*、3.* 和 4.*）都设置了一个条目，而这些条目的下一跳全都是 R9。我们可以把所有外部网络聚合成一个条目。我们仍然会为每台内部主机（2.1、2.2 等）保留条目，但在最后注明：对于转发表中没有列出的所有其他主机，下一跳都是 R9。</p>
+<img width="900px" src="/image/cs168-textbook/routing/2-105-aggregation2.png">
+<p>在 R2 上，我们可以进行更为激进的聚合。同样，所有外部网络的下一跳都是 R3。不过，2.1、2.2、2.3、2.6 和 2.7 的下一跳也都是 R3。因此，转发表只需要为 2.4 和 2.5 设置静态条目。然后我们可以注明：对于转发表中没有列出的所有其他主机（包括一些内部主机和一些外部主机），下一跳都是 R3。</p>
+<p>为了表示表中没有列出的所有主机，我们可以使用匹配一切的通配符 <em>.</em>。向给定目的地转发时，路由器首先检查具体主机（例如 3.1）或地址范围（例如 2._）是否匹配。如果路由器找不到任何匹配项，最终就会匹配 _.* 通配符。这称为<strong>默认路由（default route）</strong>。</p>
+<p>大多数主机只有一条硬编码的默认路由。例如，主机 2.4 的转发表只有一个条目，说明所有流量都发送给 R2。实际中，你的家用计算机只有一个条目，说明所有流量都发送给家用路由器。这就是主机不需要参与路由协议的原因。</p>
+<h2 id="分配分层-ip-地址早期互联网">分配分层 IP 地址：早期互联网</h2>
+<p>为了让路由更具可扩展性，我们需要以某种分层方式分配地址。地址需要包含一些与其位置有关的信息（例如，邻近主机的地址需要有某些相同部分）。</p>
+<p>在早期互联网中，IPv4 地址有 8 位网络 ID 和 24 位主机 ID，与我们直观模型中的情况一样。</p>
+<img width="800px" src="/image/cs168-textbook/routing/2-106-cidr1.png">
+<p>例如，AT&#x26;T 的网络 ID 是 12，Apple 的网络 ID 是 17，而美国国防部拥有 13 个不同的网络 ID。</p>
+<p>8 位网络 ID 意味着我们只能分配 256 个不同的网络 ID，但现实中，可能运营自己局部网络的组织远不止 256 个。此外，24 位主机 ID 意味着每个网络都会得到 2^24 = 16,777,216 个地址。小型网络（例如只有 10 名员工的公司）很可能不需要 1600 万个地址。随着互联网不断扩大，我们需要一种新的寻址方法。</p>
+<h2 id="分配分层-ip-地址分类寻址">分配分层 IP 地址：分类寻址</h2>
+<p>首次解决这一问题的尝试是<strong>分类寻址（classful addressing）</strong>，它根据需要分配不同规模的网络。在这种方法中，地址分为 3 类，每一类分配给网络 ID 和主机 ID 的位数各不相同。开头的 1 至 3 位用于标识所使用的类别。</p>
+<img width="900px" src="/image/cs168-textbook/routing/2-107-cidr2.png">
+<p>A 类地址以起始位 0 开头。接下来的 7 位是网络 ID（128 个网络），再接下来的 24 位是主机 ID（1600 万台主机）。</p>
+<p>B 类地址以起始位 10 开头。接下来的 14 位是网络 ID（16,000 个网络），再接下来的 16 位是主机 ID（65,000 台主机）。</p>
+<p>C 类地址以起始位 110 开头。接下来的 21 位是网络 ID（200 万个网络），再接下来的 8 位是主机 ID（256 台主机）。</p>
+<p>采用这种方法后，我们可以拥有 200 万 + 16,000 + 128 个不同的局部网络。主机较多的大型组织可以获得一个 A 类网络，较小的组织则可以获得 B 类或 C 类网络。与之前一样，在同一个网络内，开头的类别位和网络 ID 位都相同，而每台主机都会获得不同的主机 ID。</p>
+<p>分类寻址的一个主要问题是各类别的规模。A 类（1600 万台主机）对大多数组织而言过大，而 C 类（256 台主机）对大多数组织而言又过小。因此，大多数网络都需要使用 B 类。</p>
+<p>遗憾的是，B 类网络 ID 只有 16,000 个；到 1994 年时，B 类网络即将耗尽。我们又一次需要新的寻址方法。</p>
+<p>注意：分类寻址在现代互联网中已经过时。</p>
+<p>注意：严格来说，每个网络的主机数要少 2，因为全零地址和全一地址保留用于特殊用途。例如，在 C 类网络中，每个网络实际上有 254 台主机，而不是 256 台。</p>
+<h2 id="分配分层-ip-地址cidr">分配分层 IP 地址：CIDR</h2>
+<p>我们的第三种分层寻址方法，也是现代互联网仍在使用的方法，是 <strong>CIDR（无类别域间路由，Classless Inter-Domain Routing）</strong>。在 CIDR 中，我们仍然采用可变长度的网络 ID，但不再只允许 3 种不同的网络 ID 长度（A 类、B 类、C 类），而是允许固定任意数量的位。</p>
+<p>例如，考虑前面那家只有 10 名员工的小公司。在分类寻址中，它会得到一个拥有 256 个主机地址的 C 类网络。如果它只需要 10 个主机地址，我们可以给它分配更长的网络 ID，从而分配更少的地址。</p>
+<p>如果分配 28 位网络 ID，主机 ID 的长度就是 4 位（16 个可能的地址）。如果分配 29 位网络 ID，主机 ID 的长度就是 3 位（8 个可能的地址）。我们无法恰好分配 10 个地址，但 28 位网络 ID 足以满足这家公司的需要。这里存在少量浪费（6 个未使用的地址），但仍然比分配 256 个地址好得多。</p>
+<p>再举一个例子，考虑一个需要 450 个主机地址的组织。在分类寻址中，C 类（256 个地址）不够用，因此它会获得一个拥有 65,000 个主机地址的 B 类网络，而其中大多数地址都不会被使用。有了任意长度的网络 ID，我们可以分配 23 位网络 ID，从而留下 9 位用于主机寻址（512 个地址）。这既能满足该组织的需要，又会少浪费许多地址。</p>
+<h2 id="多层次的分层分配">多层次的分层分配</h2>
+<p>现实中的层次结构可能有多层。例如，在一个网络内部，组织可以选择将特定的地址范围分配给特定的下属组织（例如公司或大学中的院系）。</p>
+<p>实际中，我们会利用现实里的多层组织和地理层次结构来分配地址。ICANN（互联网名称与数字地址分配机构，Internet Corporation for Names and Numbers）是拥有全部 IP 地址的全球性组织。</p>
+<p>ICANN 将地址块发放给代表特定国家或大洲的区域互联网注册管理机构（Regional Internet Registry，RIR）。例如，RIPE 获得欧盟的所有地址，ARIN 获得北美的地址，APNIC 获得亚洲／太平洋地区的地址，LACNIC 获得南美洲的地址，AFRINIC 获得非洲的地址。示例：ICANN 将所有以 1101 开头的地址交给 ARIN。</p>
+<p>然后，每个 RIR 会把自己地址范围的一部分发放给大型组织（例如公司、大学）或互联网服务提供商（Internet Service Provider，ISP）。这些组织或 ISP 称为本地互联网注册管理机构（Local Internet Registry）。示例：ARIN 控制所有以 1101 开头的地址，并将所有以 1101 11001 开头的地址交给 AT&#x26;T。</p>
+<p>最后，每个本地互联网注册管理机构会把单独的 IP 地址分配给特定主机。为了增加层次，本地注册管理机构也可以将 IP 地址范围分配给小型组织，再由这些小型组织分配单独的 IP 地址。</p>
+<img width="700px" src="/image/cs168-textbook/routing/2-108-cidr3.png">
+<p>在每一层，新增固定的位数由待分配的地址数量决定。例如，ARIN 可能想给 AT&#x26;T 800 万个地址，并计算出固定 9 位可得到 800 万个主机地址。ARIN 已经固定了 4 位，因此它再固定 5 位，并将所有以这 9 位开头的地址分配给 AT&#x26;T。随后，AT&#x26;T 可能将前缀 1101 11001 110100010 交给加州大学伯克利分校（UC Berkeley），为其提供 16,000 个地址。随着我们向下属组织分配地址，固定的位数会越来越多，同时始终保留上级组织固定的位。</p>
+<h2 id="ip-地址的书写方式">IP 地址的书写方式</h2>
+<p>我们可以把 IP 地址写成由 1 和 0 组成的 32 位序列，也可以写成一个大整数。实际中，为了便于阅读，我们把每组 8 位写成一个整数（介于 0 和 255 之间）。例如，IP 地址 00010001 00100010 10011110 00000101 可以写成 17.34.158.5。这有时称为<strong>点分四组表示法（dotted quad representation）</strong>。</p>
+<p>到目前为止，我们一直以比特形式书写地址范围（例如所有以 1101 开头的 IP 地址）。要书写一个地址范围，可以使用<strong>斜线表示法（slash notation）</strong>。我们先写出固定前缀，然后将所有剩余的未固定位写为 0，再把得到的 32 位值转换成点分四组 IP 地址。之后，在斜线后写上固定位的数量。</p>
+<p>例如，如果前缀是 11000000，我们在所有未固定位上补零，得到 11000000 00000000 00000000 00000000。作为 32 位地址，它是 192.0.0.0。然后，因为固定了 8 位，所以我们把这个范围写成 192.0.0.0/8。</p>
+<p>要把单个地址写成一个范围，可以写成 192.168.1.1/32，这表示全部 32 位都是固定的。此外，默认路由 <em>.</em> 可以写成 0.0.0.0/0。</p>
+<p>斜线表示法有时看起来会有些令人困惑，因为我们任意地按 8 位分组，并用十进制书写数字。例如，8 位前缀 11000000 和 12 位前缀 11000000 0000 会分别写成 192.0.0.0/8 和 192.0.0.0/12（同一个 IP 地址表示不同的范围）。再举一个例子，如果我拥有 4 位前缀 1100，就可以分配 5 位前缀 11001。作为范围，它们分别写成 192.0.0.0/4 和 200.0.0.0/5。乍看之下，很难看出第二个范围实际上是第一个范围的子集，我们必须把比特位写出来才能确认。</p>
+<p>斜线表示法中的斜线部分（例如 /16）也可以替换为<strong>网络掩码（netmask）</strong>。与斜线后的数字一样，网络掩码告诉我们哪些位是固定的。书写网络掩码时，我们将所有固定位写成 1，把所有未固定位写成 0，再将结果转换为点分四组形式。例如，如果地址范围是 192.168.1.0/29，可以写出 29 个 1（固定位）和 3 个 0（未固定位）。11111111 11111111 11111111 11111000 的点分四组形式是 255.255.255.248。这个范围用网络掩码表示法写作 IP 地址 192.168.1.0、网络掩码 255.255.255.248（即用网络掩码替换了斜线）。</p>
+<p>在这些讲义中，我们通常会使用斜线表示法，因为它阅读起来更加方便。实际中，网络掩码可能很有用，因为给定一个具体 IP 地址后，如果在该 IP 地址和网络掩码之间执行按位与（bitwise AND），所有主机位都会被清零，只留下网络位。</p>
+<h2 id="使用-cidr-聚合路由">使用 CIDR 聚合路由</h2>
+<p>在最初使用网络 ID 和主机 ID 的模型中，我们可以把同一网络内的所有主机聚合为转发表中的一条路由（例如，用 2.* 表示网络 2 中的一切）。</p>
+<p>多层次的分层寻址意味着，我们也可以把多个网络聚合为一条路由。</p>
+<img width="900px" src="/image/cs168-textbook/routing/2-109-aggregation1.png">
+<p>考虑这张网络示意图。在最初的模型中，R6 需要分别为 AT&#x26;T、UCB 和 Stanford 设置转发条目。</p>
+<img width="900px" src="/image/cs168-textbook/routing/2-110-aggregation2.png">
+<p>然而，如果采用分层寻址，那么 UCB 的地址范围（4.12.0.0/16）和 Stanford 的地址范围（4.29.0.0/16）都是 AT&#x26;T 地址范围（4.0.0.0/8）的子集。如果 AT&#x26;T 将这些地址范围分配给其下属客户 UCB 和 Stanford，就会出现这种情况。</p>
+<p>现在，R6 只需要用一个条目表示 AT&#x26;T、UCB 和 Stanford。我们已经把两个较小的范围聚合进二者共同所属的较大范围中。</p>
+<h2 id="多宿主">多宿主</h2>
+<p>地址范围聚合并非总是有效。假设我们添加一条从 R6 直接连接到 Stanford 的链路。</p>
+<img width="900px" src="/image/cs168-textbook/routing/2-111-aggregation3.png">
+<p>我们的聚合路由说明，所有发往 AT&#x26;T（及其下属组织）的数据包都以 R2 为下一跳。我们需要增加一个条目，说明 Stanford 的下一跳是 R7。</p>
+<p>请注意，现在转发表中的地址范围出现了重叠。一个目的地可能匹配多个范围。为了选择路由，我们会执行<strong>最长前缀匹配（longest prefix matching）</strong>，也就是使用与目的 IP 地址相匹配的最具体范围。例如，如果有一个数据包要发往 UCM 的主机，我们会使用 UCM 专用条目，因为它具有更长的 19 位前缀。尽管 9 位的 AT&#x26;T 条目也与目的地匹配，但它的前缀更短，因此我们不会使用这条路由。</p>
+<p>如果有一个数据包要发往 UCB 的主机，我们就不能使用 Stanford 专用条目，因为它的 16 位前缀与 UCB 主机不匹配。不过，我们仍然可以使用 8 位的 AT&#x26;T 条目，它会与目的地匹配。</p>
+<h2 id="ipv6-简史">IPv6 简史</h2>
+<p>IPv4 地址为 32 位，这意味着我们大约有 40 亿个可用地址。这够用吗？</p>
+<img width="900px" src="/image/cs168-textbook/routing/2-112-ipv6-1.png">
+<p>这张图绘制了各区域注册管理机构随时间推移剩余的未分配 IP 地址数量（y 轴）。</p>
+<p>到 2017 年，每个机构可用的地址都不足一个 /8 地址块（即少于 2^24 = 1600 万个地址）。每个区域注册管理机构都保留了一个备用的 /8 地址块以防万一，但到 2017 年，所有机构都不得不开始使用自己的备用地址。到 2021 年，就连备用地址也即将耗尽。</p>
+<p>趣闻：2011 年 2 月，最后一个 /8 地址块获分配时还举行了一场现场仪式，甚至还颁发了一张特别的纸质证书。</p>
+<p>随着互联网的发展，我们开始意识到地址终有一天会耗尽。幸运的是，人们很早就发现了这个问题，并于 1998 年开发出 IPv6，以应对 IP 地址耗尽。</p>
+<p>从根本上说，IPv6 的寻址结构与 IPv4 相同。IPv6 确实需要一些细微的实现改动，但这些改动与此处无关。</p>
+<p>IPv6 的主要新特性是地址更长。IPv6 地址长 128 位，这意味着大约有 $$3.4 \times 10^{38}$$ 个可能的地址。这是一个天文数字，所以我们永远不会用尽地址。宇宙已经存在了 $$10^{21}$$ 秒，因此，即使每秒分配一个地址，我们仍然只会用掉全部可用地址的 0.000000000000001%。</p>
+<img width="900px" src="/image/cs168-textbook/routing/2-113-ipv6-2.png">
+<p>IPv6 开发于 20 世纪 90 年代，但并没有立即得到所有计算机的采用。即使到了 2010 年，也基本上没有人使用 IPv6。截至 2024 年，约 45% 的最终用户使用 IPv6，其中大多数用户位于互联网普及程度较高的发达国家。IPv6 得到越来越广泛采用的主要原因，是 IPv4 地址即将耗尽。</p>
+<p>为什么 IPv6 的采用速度如此缓慢？用户、服务器和互联网运营商必须升级软件和硬件（例如路由器、链路、计算机上的设备驱动程序），以支持 IPv6。路由器现在需要两张转发表，一张包含 IPv4 地址，另一张包含 IPv6 地址。</p>
+<p>IPv6 升级必须向后兼容。如果服务器只有 IPv6 地址，那些仅支持 IPv4 的旧计算机用户便无法使用这台服务器。IPv4 和 IPv6 本质上是两个独立的寻址系统，IPv4 地址与 IPv6 地址之间无法相互转换。截至 2024 年，许多计算机仍不支持 IPv6，因此许多服务需要同时支持 IPv4 和 IPv6。</p>
+<p>同时支持 IPv4 和 IPv6 的计算机还必须考虑使用哪一种。一个是否比另一个更好？实际中，IPv6 更快，但许多其他实现细节也可能影响你的选择。</p>
+<h2 id="ipv6-地址表示法">IPv6 地址表示法</h2>
+<p>IPv6 地址通常使用十六进制而不是十进制书写。例如：</p>
+<p>2001:0D08:CAFE:BEEF:DEAD:1234:5678:9012</p>
+<p>是一个 IPv6 地址（32 个十六进制数字 = 128 位）。为了便于阅读，我们在每 4 个十六进制数字（16 位）之间添加冒号。</p>
+<p>为了便于阅读，可以省略一个 4 位数字块内的前导零。例如：</p>
+<p>2001:0DB8:0000:0000:0000:0000:0000:0001</p>
+<p>可以缩写为 2001:DB8:0:0:0:0:0:1。</p>
+<p>为了便于阅读，我们还可以省略一长串零，例如 2001:DB8::1。双冒号表示用 0000 补齐所有缺失的 4 位数字块。每个地址中只能这样做一次。（省略两个范围会产生歧义，因为我们不知道每个范围中分别有多少个零。）</p>
+<p>斜线表示法仍然可以用于 IPv6。单个地址使用 /128（所有位均固定）。一个 32 位前缀可能写成 2001:0DB8::/32。</p>
+<p>由于地址空间如此庞大，在 IPv6 中，可以将网络 ID 固定为 64 位、主机 ID 设为 64 位，而且仍然永远不会用尽网络 ID 或主机 ID。事实上，存在一些特殊协议，让网络和主机可以自行选择 64 位网络 ID 和主机 ID（并检查是否有其他对象正在使用它），而不需要由某个组织分配具体 ID。</p>
+<p>实际中，区域注册管理机构通常向 ISP 分配 32 位前缀，而 ISP 通常向组织分配 48 位前缀。随后，组织可以向更小的子网分配 64 位前缀。在 IPv6 中，我们通常看不到长于 /64 的前缀。即便是组织内部最小的子网，也拥有 64 位前缀，以及用于寻址特定主机的 64 位。使用这些标准化的前缀长度，可以让前缀包含更多信息。例如，在 IPv6 中，很难看出 /19 前缀代表什么，但在 IPv6 中，我们知道 /32 前缀通常代表一个 ISP。TODO 再次确认这一点</p> </article> <hr class="my-8 border-dashed"> <a href="https://github.com/howIdobetter/My-Blog/edit/main/src/content/posts/cs168-routing-06-addressing.md" target="_blank" rel="noopener noreferrer" class="hover:text-accent text-muted-foreground flex justify-baseline gap-1.5 sm:hidden"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M7 7H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-1" /><path d="M20.385 6.585a2.1 2.1 0 0 0-2.97-2.97L9 12v3h3zM16 5l3 3" /></svg><span>Edit post</span></a> <div id="btt-btn-container" class="fixed inset-e-4 bottom-8 z-50 md:sticky md:inset-e-auto md:float-end md:me-1 translate-y-14 opacity-0 transition duration-500"> <button data-button="back-to-top" aria-label="Back to top" class="group bg-background relative px-2 py-1 size-14 rounded-full shadow-xl md:h-8 md:w-fit md:rounded-md md:shadow-none md:focus-visible:rounded-none md:bg-background/35 md:bg-clip-padding md:backdrop-blur-lg"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block rotate-90 md:hidden" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 12h14M5 12l6 6M5 12l6-6" /></svg> <span class="group-hover:text-accent sr-only text-sm md:not-sr-only"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block size-4" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" /><path d="M12 5v14M16 9l-4-4M8 9l4-4" /></svg> Back to top </span> </button> </div> <script data-astro-rerun>
+  function backToTop() {
+    const btnContainer = document.querySelector("#btt-btn-container");
+    const backToTopBtn = document.querySelector("[data-button='back-to-top']");
+    const pageHeader = document.querySelector("body > header");
+
+    if (!btnContainer || !backToTopBtn || !pageHeader) return;
+
+    backToTopBtn.addEventListener("click", () => {
+      document.body.scrollTop = 0;
+      document.documentElement.scrollTop = 0;
+    });
+
+    const observer = new IntersectionObserver(([entry]) => {
+      const isVisible = !entry.isIntersecting;
+      if (entry) {
+        btnContainer.classList.toggle("opacity-100", isVisible);
+        btnContainer.classList.toggle("translate-y-0", isVisible);
+        btnContainer.classList.toggle("opacity-0", !isVisible);
+        btnContainer.classList.toggle("translate-y-14", !isVisible);
+      }
+    });
+    observer.observe(pageHeader);
+  }
+  backToTop();
+</script> <ul class="mt-4 mb-8 flex flex-wrap gap-4 sm:my-8"> <li> <a href="/en/tags/networking/" class="border-border flex items-center gap-1 rounded-full border transition-colors hover:border-accent hover:text-accent focus-visible:text-accent focus-visible:no-underline px-3 py-1.5 text-sm" data-astro-transition-scope="astro-36ssibgs-1"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="text-accent opacity-80 size-3.5" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 9h14M5 15h14M11 4 7 20M17 4l-4 16" /></svg> networking </a> </li><li> <a href="/en/tags/cs168/" class="border-border flex items-center gap-1 rounded-full border transition-colors hover:border-accent hover:text-accent focus-visible:text-accent focus-visible:no-underline px-3 py-1.5 text-sm" data-astro-transition-scope="astro-36ssibgs-2"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="text-accent opacity-80 size-3.5" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 9h14M5 15h14M11 4 7 20M17 4l-4 16" /></svg> cs168 </a> </li><li> <a href="/en/tags/course-notes/" class="border-border flex items-center gap-1 rounded-full border transition-colors hover:border-accent hover:text-accent focus-visible:text-accent focus-visible:no-underline px-3 py-1.5 text-sm" data-astro-transition-scope="astro-36ssibgs-3"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="text-accent opacity-80 size-3.5" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 9h14M5 15h14M11 4 7 20M17 4l-4 16" /></svg> course-notes </a> </li><li> <a href="/en/tags/routing/" class="border-border flex items-center gap-1 rounded-full border transition-colors hover:border-accent hover:text-accent focus-visible:text-accent focus-visible:no-underline px-3 py-1.5 text-sm" data-astro-transition-scope="astro-36ssibgs-4"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="text-accent opacity-80 size-3.5" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 9h14M5 15h14M11 4 7 20M17 4l-4 16" /></svg> routing </a> </li> </ul>  <hr class="my-8 border-dashed"> <div data-pagefind-ignore class="my-8 grid grid-cols-1 gap-4 sm:grid-cols-2"> <a href="/en/posts/cs168-routing-05-link-state/" class="soft-panel hover:border-accent/70 hover:text-accent flex w-full gap-3 p-4 transition"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block flex-none rtl:rotate-180" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 12h14M5 12l6 6M5 12l6-6" /></svg> <div> <span class="mono-label">Previous</span> <div class="mt-1 text-sm leading-6">链路状态协议</div> </div> </a> <a href="/en/posts/cs168-routing-07-router-hardware/" class="soft-panel hover:border-accent/70 hover:text-accent flex w-full justify-end gap-3 p-4 text-end transition sm:col-start-2"> <div> <span class="mono-label">Next</span> <div class="mt-1 text-sm leading-6">路由器硬件</div> </div> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block flex-none rtl:rotate-180" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 12h14M13 18l6-6M13 6l6 6" /></svg> </a> </div> </main> <footer class="app-layout mt-auto"> <div class="border-border text-muted-foreground flex flex-col items-start justify-between gap-6 border-t py-9 text-sm sm:flex-row sm:items-end"> <div> <p class="text-foreground font-semibold">随便做做</p> <p class="mt-1">Write it down first. Fix it properly over time.</p> </div> <div class="flex items-center gap-5"> <div class="flex flex-wrap items-center gap-1"> <a href="https://github.com/howIdobetter" title="GitHub" class="group inline-flex items-center gap-1 hover:text-accent p-2 hover:rotate-6 sm:p-1">  <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block size-6 scale-125 fill-transparent stroke-current stroke-2 opacity-90 group-hover:fill-transparent sm:scale-110" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" /><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21" /></svg> <span class="sr-only">GitHub</span>  </a> </div> <span class="whitespace-nowrap">© 2026 一剑留名ing</span> </div> </div> </footer>   <script type="module">const a="theme",n="light",r="dark";function i(){const e=localStorage.getItem(a);return e||(window.matchMedia("(prefers-color-scheme: dark)").matches?r:n)}let o=window.__theme?.value??i();function s(){localStorage.setItem(a,o),m()}function m(){const e=document.firstElementChild;e?.setAttribute("data-theme",o),e?.classList.toggle("dark",o===r);const t=document.querySelector("#theme-btn"),c=o===n?t?.dataset.labelDark:t?.dataset.labelLight;c&&(t?.setAttribute("aria-label",c),t?.setAttribute("title",c));const l=window.getComputedStyle(document.body).backgroundColor;document.querySelector("meta[name='theme-color']")?.setAttribute("content",l)}function d(){m(),document.querySelector("#theme-btn")?.addEventListener("click",()=>{o=o===n?r:n,s()})}d();document.addEventListener("astro:after-swap",d);document.addEventListener("astro:before-swap",e=>{const t=document.querySelector("meta[name='theme-color']")?.getAttribute("content");t&&e.newDocument.querySelector("meta[name='theme-color']")?.setAttribute("content",t)});window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change",({matches:e})=>{o=e?r:n,s()});</script> </body> </html> <script data-astro-rerun>
+  function addHeadingLinks() {
+    const isZh = document.documentElement.lang === "zh-CN";
+    const headings = Array.from(
+      document.querySelectorAll("h2, h3, h4, h5, h6")
+    );
+    for (const heading of headings) {
+      heading.classList.add("group");
+      const link = document.createElement("a");
+      link.className =
+        "heading-link ms-2 no-underline opacity-75 md:opacity-0 md:group-hover:opacity-100 md:focus:opacity-100";
+      link.href = "#" + heading.id;
+      link.setAttribute(
+        "aria-label",
+        isZh
+          ? `链接到本节：${heading.textContent}`
+          : `Link to section: ${heading.textContent}`
+      );
+
+      const span = document.createElement("span");
+      span.ariaHidden = "true";
+      span.innerText = "#";
+      link.appendChild(span);
+      heading.appendChild(link);
+    }
+  }
+  addHeadingLinks();
+
+  function attachCopyButtons() {
+    const isZh = document.documentElement.lang === "zh-CN";
+    const copyButtonLabel = isZh ? "复制" : "Copy";
+    const copiedButtonLabel = isZh ? "已复制" : "Copied";
+    const codeBlocks = Array.from(document.querySelectorAll("pre"));
+
+    for (const codeBlock of codeBlocks) {
+      const wrapper = document.createElement("div");
+      wrapper.style.position = "relative";
+
+      const computedStyle = getComputedStyle(codeBlock);
+      const hasFileNameOffset =
+        computedStyle.getPropertyValue("--file-name-offset").trim() !== "";
+
+      const topClass = hasFileNameOffset
+        ? "top-(--file-name-offset)"
+        : "-top-3";
+
+      const copyButton = document.createElement("button");
+      copyButton.className = `copy-code absolute end-3 ${topClass} rounded bg-muted border border-muted px-2 py-1 text-xs leading-4 text-foreground font-medium`;
+      copyButton.innerHTML = copyButtonLabel;
+      copyButton.setAttribute("aria-label", copyButtonLabel);
+      copyButton.setAttribute("aria-live", "polite");
+      codeBlock.setAttribute("tabindex", "0");
+      codeBlock.appendChild(copyButton);
+
+      codeBlock?.parentNode?.insertBefore(wrapper, codeBlock);
+      wrapper.appendChild(codeBlock);
+
+      copyButton.addEventListener("click", async () => {
+        await copyCode(codeBlock, copyButton);
+      });
+    }
+
+    async function copyCode(block, button) {
+      const code = block.querySelector("code");
+      const text = code?.innerText;
+
+      await navigator.clipboard.writeText(text ?? "");
+
+      button.innerText = copiedButtonLabel;
+      button.setAttribute("aria-label", copiedButtonLabel);
+
+      setTimeout(() => {
+        button.innerText = copyButtonLabel;
+        button.setAttribute("aria-label", copyButtonLabel);
+      }, 700);
+    }
+  }
+  attachCopyButtons();
+
+  /** Accessible image lightbox for article images. */
+  function initLightbox() {
+    const article = document.getElementById("article");
+    if (!article) return;
+
+    const prefersReducedMotion = () =>
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    let overlay = null;
+    let lastFocused = null;
+
+    // Defer attribute mutations so they don't push the LCP timestamp.
+    // Event listeners below use delegation and don't need the attributes to exist yet.
+    requestAnimationFrame(() => {
+      const images = Array.from(article.querySelectorAll("img"));
+      for (const image of images) {
+        if (image.closest("a")) continue;
+        image.setAttribute("role", "button");
+        image.setAttribute("tabindex", "0");
+        image.setAttribute("aria-haspopup", "dialog");
+        image.setAttribute(
+          "aria-label",
+          image.alt ? `Zoom image: ${image.alt}` : "Zoom image"
+        );
+      }
+    });
+
+    function open(src, alt, trigger) {
+      if (overlay) return;
+      lastFocused = trigger ?? document.activeElement;
+
+      overlay = document.createElement("div");
+      overlay.setAttribute("role", "dialog");
+      overlay.setAttribute("aria-modal", "true");
+      overlay.setAttribute(
+        "aria-label",
+        alt ? `Image preview: ${alt}` : "Image preview"
+      );
+      overlay.className =
+        "fixed inset-0 z-50 flex cursor-zoom-out items-center justify-center bg-black/70 backdrop-blur-sm opacity-0 transition-opacity duration-200 motion-reduce:transition-none";
+
+      const closeButton = document.createElement("button");
+      closeButton.type = "button";
+      closeButton.setAttribute("aria-label", "Close image preview");
+      closeButton.className =
+        "absolute end-4 top-4 rounded p-2 text-3xl leading-none text-white";
+      closeButton.innerHTML = "&#10005;";
+      closeButton.addEventListener("click", close);
+
+      const image = document.createElement("img");
+      image.src = src;
+      image.alt = "";
+      image.className =
+        "max-h-[90dvh] max-w-[90dvw] cursor-default object-contain";
+
+      overlay.append(closeButton, image);
+      overlay.addEventListener("click", e => {
+        if (e.target === overlay && currentScale <= 1) close();
+      });
+
+      let currentScale = 1;
+      let translateX = 0;
+      let translateY = 0;
+      let initialDist = 0;
+      let initialScale = 1;
+      let panStartX = 0;
+      let panStartY = 0;
+      let panStartTranslateX = 0;
+      let panStartTranslateY = 0;
+      let lastTapTime = 0;
+
+      function applyTransform() {
+        image.style.transform = `scale(${currentScale}) translate(${translateX}px, ${translateY}px)`;
+      }
+
+      function resetTransform() {
+        currentScale = 1;
+        translateX = 0;
+        translateY = 0;
+        image.style.transform = "";
+      }
+
+      overlay.addEventListener(
+        "touchstart",
+        e => {
+          const t = e.touches;
+          if (t.length === 2) {
+            initialDist = Math.hypot(
+              t[1].clientX - t[0].clientX,
+              t[1].clientY - t[0].clientY
+            );
+            initialScale = currentScale;
+          } else if (t.length === 1) {
+            const now = Date.now();
+            if (now - lastTapTime < 300) {
+              e.preventDefault();
+              if (currentScale > 1) {
+                resetTransform();
+              } else {
+                currentScale = 2;
+                translateX = 0;
+                translateY = 0;
+                applyTransform();
+              }
+              lastTapTime = 0;
+              panStartX = t[0].clientX;
+              panStartY = t[0].clientY;
+              panStartTranslateX = translateX;
+              panStartTranslateY = translateY;
+            } else {
+              lastTapTime = now;
+              if (currentScale > 1) {
+                panStartX = t[0].clientX;
+                panStartY = t[0].clientY;
+                panStartTranslateX = translateX;
+                panStartTranslateY = translateY;
+              }
+            }
+          }
+        },
+        { passive: false }
+      );
+
+      overlay.addEventListener(
+        "touchmove",
+        e => {
+          const t = e.touches;
+          if (t.length === 2) {
+            e.preventDefault();
+            const dist = Math.hypot(
+              t[1].clientX - t[0].clientX,
+              t[1].clientY - t[0].clientY
+            );
+            currentScale = Math.min(
+              4,
+              Math.max(1, initialScale * (dist / initialDist))
+            );
+            applyTransform();
+          } else if (t.length === 1) {
+            if (currentScale > 1) {
+              e.preventDefault();
+              translateX =
+                panStartTranslateX + (t[0].clientX - panStartX) / currentScale;
+              translateY =
+                panStartTranslateY + (t[0].clientY - panStartY) / currentScale;
+              const maxX = Math.max(
+                0,
+                (image.clientWidth - overlay.clientWidth / currentScale) / 2
+              );
+              const maxY = Math.max(
+                0,
+                (image.clientHeight - overlay.clientHeight / currentScale) / 2
+              );
+              translateX = Math.min(maxX, Math.max(-maxX, translateX));
+              translateY = Math.min(maxY, Math.max(-maxY, translateY));
+              applyTransform();
+            } else {
+              e.preventDefault();
+            }
+          }
+        },
+        { passive: false }
+      );
+
+      overlay.addEventListener("touchend", e => {
+        if (e.touches.length === 0 && currentScale <= 1.05) {
+          resetTransform();
+        }
+      });
+
+      overlay.addEventListener("touchcancel", e => {
+        if (e.touches.length === 0 && currentScale <= 1.05) {
+          resetTransform();
+        }
+      });
+
+      document.body.appendChild(overlay);
+      document.body.style.overflow = "hidden";
+      document.addEventListener("keydown", onKeyDown);
+      window.__closeLightbox = close;
+
+      requestAnimationFrame(() => overlay?.classList.add("opacity-100"));
+      closeButton.focus();
+    }
+
+    function close() {
+      if (!overlay) return;
+      const el = overlay;
+      overlay = null;
+      window.__closeLightbox = null;
+
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = "";
+      lastFocused?.focus();
+      lastFocused = null;
+
+      if (prefersReducedMotion()) {
+        el.remove();
+        return;
+      }
+      const remove = () => el.remove();
+      el.addEventListener("transitionend", remove, { once: true });
+      setTimeout(remove, 250); // fallback in case transitionend never fires
+      el.classList.remove("opacity-100");
+    }
+
+    function onKeyDown(e) {
+      if (e.key === "Escape") {
+        close();
+      } else if (e.key === "Tab") {
+        trapFocus(e);
+      }
+    }
+
+    // Keep keyboard focus inside the open dialog.
+    function trapFocus(e) {
+      if (!overlay) return;
+      const focusables = overlay.querySelectorAll(
+        'a[href], button, [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+
+    function triggerFromEvent(e) {
+      const image = e.target.closest("img");
+      if (!image || !article.contains(image) || image.closest("a")) return null;
+      return image;
+    }
+
+    function activate(image) {
+      open(image.currentSrc || image.src, image.alt, image);
+    }
+
+    article.addEventListener("click", e => {
+      const image = triggerFromEvent(e);
+      if (!image) return;
+      e.preventDefault();
+      activate(image);
+    });
+
+    article.addEventListener("keydown", e => {
+      if (e.key !== "Enter" && e.key !== " " && e.key !== "Spacebar") return;
+      const image = triggerFromEvent(e);
+      if (!image) return;
+      e.preventDefault();
+      activate(image);
+    });
+  }
+  initLightbox();
+
+  if (!window.__lightboxSwapBound) {
+    window.__lightboxSwapBound = true;
+    document.addEventListener("astro:before-swap", () =>
+      window.__closeLightbox?.()
+    );
+  }
+
+  document.addEventListener("astro:after-swap", () =>
+    window.scrollTo({ left: 0, top: 0, behavior: "instant" })
+  );
+</script>

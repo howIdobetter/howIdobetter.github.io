@@ -1,0 +1,692 @@
+<!DOCTYPE html><html dir="ltr" lang="zh-CN" class="overflow-y-scroll scroll-smooth"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="canonical" href="https://howidobetter.github.io/posts/cs168-applications-02-http/"><meta name="generator" content="Astro v6.4.2"><!-- Primary meta --><title>HTTP | 随便做做</title><meta name="title" content="HTTP | 随便做做"><meta name="description" content="HTTP 的历史、请求响应格式、头部、流水线、缓存、CDN 部署与后续版本。"><meta name="author" content="一剑留名ing"><link rel="sitemap" href="/sitemap-index.xml"><!-- Open Graph --><meta property="og:type" content="article"><meta property="og:site_name" content="随便做做"><meta property="og:title" content="HTTP | 随便做做"><meta property="og:description" content="HTTP 的历史、请求响应格式、头部、流水线、缓存、CDN 部署与后续版本。"><meta property="og:url" content="https://howidobetter.github.io/posts/cs168-applications-02-http/"><meta property="og:image" content="https://howidobetter.github.io/default-og.png"><!-- Twitter / X --><meta property="twitter:card" content="summary_large_image"><meta property="twitter:url" content="https://howidobetter.github.io/posts/cs168-applications-02-http/"><meta property="twitter:title" content="HTTP | 随便做做"><meta property="twitter:description" content="HTTP 的历史、请求响应格式、头部、流水线、缓存、CDN 部署与后续版本。"><meta property="twitter:image" content="https://howidobetter.github.io/default-og.png"><!-- RSS autodiscovery --><link rel="alternate" type="application/rss+xml" title="随便做做" href="https://howidobetter.github.io/rss.xml"><!-- Filled at runtime by theme.ts to match the current background colour --><meta name="theme-color" content=""><!-- Extra head content injected by child layouts (e.g. JSON-LD, article meta) --><meta property="article:published_time" content="2026-07-12T00:00:00.000Z"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"HTTP | 随便做做","description":"HTTP 的历史、请求响应格式、头部、流水线、缓存、CDN 部署与后续版本。","url":"https://howidobetter.github.io/posts/cs168-applications-02-http/","image":"https://howidobetter.github.io/default-og.png","datePublished":"2026-07-12T00:00:00.000Z","author":[{"@type":"Person","name":"一剑留名ing","url":"https://github.com/howIdobetter"}]}</script> <!--
+      Inline FOUC-prevention script: sets data-theme on <html> before
+      the browser paints. Runs synchronously, no defer/async.
+    --><script>
+      (function () {
+        const stored = localStorage.getItem("theme");
+        const prefersDark = window.matchMedia(
+          "(prefers-color-scheme: dark)"
+        ).matches;
+        const theme = stored ?? (prefersDark ? "dark" : "light");
+        const root = document.firstElementChild;
+        root?.setAttribute("data-theme", theme);
+        root?.classList.toggle("dark", theme === "dark");
+        // Expose value so theme.ts can skip re-detection.
+        window.__theme = { value: theme };
+      })();
+    </script><meta name="astro-view-transitions-enabled" content="true"><meta name="astro-view-transitions-fallback" content="animate"><script type="module" src="/_astro/ClientRouter.astro_astro_type_script_index_0_lang.CAqDO0tx.js"></script><link rel="stylesheet" href="/_astro/Footer.W6Wz50NF.css">
+<style>@keyframes astroFadeInOut{0%{opacity:1}to{opacity:0}}@keyframes astroFadeIn{0%{opacity:0;mix-blend-mode:plus-lighter}to{opacity:1;mix-blend-mode:plus-lighter}}@keyframes astroFadeOut{0%{opacity:1;mix-blend-mode:plus-lighter}to{opacity:0;mix-blend-mode:plus-lighter}}@keyframes astroSlideFromRight{0%{transform:translate(100%)}}@keyframes astroSlideFromLeft{0%{transform:translate(-100%)}}@keyframes astroSlideToRight{to{transform:translate(100%)}}@keyframes astroSlideToLeft{to{transform:translate(-100%)}}@media(prefers-reduced-motion){::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}[data-astro-transition-scope]{animation:none!important}}
+</style><style>[data-astro-transition-scope="astro-36ssibgs-1"] { view-transition-name: networking; }@layer astro { ::view-transition-old(networking) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(networking) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(networking) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(networking) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-1"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-1"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-1"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-1"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style><style>[data-astro-transition-scope="astro-36ssibgs-2"] { view-transition-name: cs168; }@layer astro { ::view-transition-old(cs168) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(cs168) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(cs168) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(cs168) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style><style>[data-astro-transition-scope="astro-36ssibgs-3"] { view-transition-name: course-notes; }@layer astro { ::view-transition-old(course-notes) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(course-notes) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(course-notes) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(course-notes) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style><style>[data-astro-transition-scope="astro-36ssibgs-4"] { view-transition-name: applications; }@layer astro { ::view-transition-old(applications) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(applications) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(applications) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(applications) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style></head> <body class="bg-background font-app text-foreground selection:bg-accent/75 selection:text-accent-foreground flex min-h-svh flex-col">    <a id="skip-to-content" href="#main-content" class="bg-background text-accent absolute inset-s-4 -top-full z-50 border px-3 py-2 transition-[top] focus:top-3"> 跳到正文 </a> <header class="border-border bg-background/90 relative z-30 border-b backdrop-blur"> <div class="app-layout relative flex min-h-18 w-full items-baseline justify-between sm:items-center"> <a href="/" class="absolute inline-flex items-baseline gap-3 py-1 text-lg leading-8 font-semibold whitespace-nowrap sm:static sm:my-auto sm:text-xl sm:leading-none"> <span>随便做做</span> <span class="text-muted-foreground hidden font-mono text-[0.68rem] font-normal sm:inline">
+howIdobetter
+</span> </a> <nav id="nav-menu" class="flex w-full flex-col items-center sm:ms-2 sm:flex-row sm:justify-end sm:py-0"> <button id="menu-btn" class="focus-outline self-end p-3 sm:hidden" aria-label="打开菜单" aria-expanded="false" aria-controls="menu-items" data-label-open="打开菜单" data-label-close="关闭菜单"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="hidden" viewBox="0 0 24 24" id="close-icon"><path stroke="none" d="M0 0h24v24H0z" /><path d="M18 6 6 18M6 6l12 12" /></svg> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="icon icon-tabler icons-tabler-outline icon-tabler-menu-deep" viewBox="0 0 24 24" id="menu-icon"><path stroke="none" d="M0 0h24v24H0z" /><path d="M4 6h16M7 12h13M10 18h10" /></svg> </button> <ul id="menu-items" class="border-border [&>li>a]:hover:text-accent mt-3 hidden w-full grid-cols-2 place-content-center gap-1 border-t py-3 sm:mt-0 sm:flex sm:w-auto sm:items-center sm:gap-x-1 sm:border-0 sm:py-0 [&>li>a]:block [&>li>a]:px-4 [&>li>a]:py-3 [&>li>a]:text-center [&>li>a]:font-medium [&>li>a]:transition-colors sm:[&>li>a]:px-3 sm:[&>li>a]:py-2"> <li class="col-span-2"> <a href="/posts/" class="active-nav"> 文章 </a> </li> <li class="col-span-2"> <a href="/tags/"> 标签 </a> </li> <li class="col-span-2"> <a href="/about/"> 关于 </a> </li> <li class="col-span-2"> <a href="/archives/" title="归档" aria-label="归档" class="group inline-flex items-center gap-1 hover:text-accent focus-outline flex size-full justify-center p-3 sm:relative sm:size-10 sm:p-0">  <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="hidden sm:absolute sm:top-1/2 sm:left-1/2 sm:block sm:size-6 sm:-translate-x-1/2 sm:-translate-y-1/2" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v0a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8M10 12h4" /></svg> <span class="sm:sr-only">归档</span>  </a> </li> <li class="col-span-1 flex items-center justify-center"> <a href="/search/" title="搜索" aria-label="搜索" class="group inline-flex items-center gap-1 hover:text-accent focus-outline relative size-11 sm:size-10">  <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="absolute top-1/2 left-1/2 size-6 -translate-x-1/2 -translate-y-1/2" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M3 10a7 7 0 1 0 14 0 7 7 0 1 0-14 0M21 21l-6-6" /></svg> <span class="sr-only">搜索</span>  </a> </li> <li class="col-span-1 flex items-center justify-center"> <div class="border-border flex overflow-hidden rounded-full border text-xs font-semibold" aria-label="Language"> <a href="/posts/cs168-applications-02-http/" title="中文" aria-current="true" class="px-2 py-1 transition-colors bg-accent text-accent-foreground"> 中 </a><a href="/en/posts/cs168-applications-02-http/" title="English" class="px-2 py-1 transition-colors hover:text-accent"> EN </a> </div> </li> <li class="col-span-1 flex items-center justify-center"> <button id="theme-btn" class="focus-outline hover:[&>svg]:stroke-accent relative size-12 rounded-full p-4 transition-colors sm:size-10" title="切换主题" aria-label="auto" aria-live="polite" data-label-light="切换为浅色主题" data-label-dark="切换为深色主题"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="absolute top-[50%] left-[50%] translate-[-50%] scale-100 rotate-0 transition-[transform,opacity] dark:scale-0 dark:-rotate-90" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M12 3h.393a7.5 7.5 0 0 0 7.92 12.446A9 9 0 1 1 12 2.992z" /></svg> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="absolute top-[50%] left-[50%] translate-[-50%] scale-0 rotate-90 transition-[transform,opacity] dark:scale-100 dark:rotate-0" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M14.828 14.828a4 4 0 1 0-5.656-5.656 4 4 0 0 0 5.656 5.656M6.343 17.657l-1.414 1.414M6.343 6.343 4.929 4.929M17.657 6.343l1.414-1.414M17.657 17.657l1.414 1.414M4 12H2M12 4V2M20 12h2M12 20v2" /></svg> </button> </li> </ul> </nav> </div> </header> <script type="module">function c(){const e=document.querySelector("#menu-btn"),t=document.querySelector("#menu-items"),n=document.querySelector("#menu-icon"),s=document.querySelector("#close-icon");if(!e||!t||!n||!s)return;const a=e.dataset.labelOpen??"Open menu",l=e.dataset.labelClose??"Close menu";e.addEventListener("click",()=>{const o=e.getAttribute("aria-expanded")==="true";e.setAttribute("aria-expanded",o?"false":"true"),e.setAttribute("aria-label",o?a:l),t.classList.toggle("hidden"),t.classList.toggle("grid"),n.classList.toggle("hidden"),s.classList.toggle("hidden")})}c();document.addEventListener("astro:after-swap",c);</script> <div class="reading-progress" aria-hidden="true"> <div class="reading-progress-bar"></div> </div> <div class="app-layout flex items-center justify-start"><a id="back-button" href="/" class="group inline-flex items-center gap-1 hover:text-accent focus-outline hover:text-foreground/75 -ms-2 mt-8 mb-2"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block size-6 rtl:rotate-180" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="m15 6-6 6 6 6" /></svg><span>返回</span> </a></div><script type="module">function o(){const t=document.querySelector("#back-button"),e=sessionStorage.getItem("backUrl");e&&t&&(t.href=e)}document.addEventListener("astro:page-load",o);o();</script> <main id="main-content" class="app-layout pb-8" data-pagefind-body> <header class="border-border max-w-readable border-b pt-8 pb-8 sm:pt-12"> <h1 style="view-transition-name:http" class="text-foreground text-3xl leading-tight font-semibold text-balance sm:text-5xl"> HTTP </h1> <p class="text-muted-foreground mt-4 text-lg leading-8 text-pretty"> HTTP 的历史、请求响应格式、头部、流水线、缓存、CDN 部署与后续版本。 </p> <div class="mt-5 flex flex-wrap items-center gap-3"> <div class="text-muted-foreground flex items-center gap-x-2 font-mono"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block size-5 min-w-5" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" /><path d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM16 3v4M8 3v4M4 11h16M7 14h.013M10.01 14h.005M13.01 14h.005M16.015 14h.005M13.015 17h.005M7.01 17h.005M10.01 17h.005" /></svg>  <time class="text-sm sm:text-base" datetime="2026-07-12T00:00:00.000Z"> 2026年7月12日 </time> </div> <a href="https://github.com/howIdobetter/My-Blog/edit/main/src/content/posts/cs168-applications-02-http.md" target="_blank" rel="noopener noreferrer" class="hover:text-accent text-muted-foreground flex justify-baseline gap-1.5 max-sm:hidden"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M7 7H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-1" /><path d="M20.385 6.585a2.1 2.1 0 0 0-2.97-2.97L9 12v3h3zM16 5l3 3" /></svg><span>编辑文章</span></a> </div> </header> <aside class="border-border mt-8 border-y"> <details class="group py-4 sm:hidden"> <summary class="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4"> <span> <span class="mono-label block"> CS168 · 应用 </span> <span class="text-accent mt-1 block text-sm font-semibold"> 2 / 2 </span> </span> <span aria-hidden="true" class="text-muted-foreground text-xl transition-transform group-open:rotate-45">
++
+</span> </summary> <ol class="border-border mt-3 border-t pt-2"> <li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-applications-01-dns/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 01 </span> <span>DNS</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-applications-02-http/" aria-current="page" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm text-accent font-semibold"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 02 </span> <span>HTTP</span> </a> </li> </ol> </details> <div class="hidden py-5 sm:block"> <div class="flex items-baseline justify-between gap-4"> <p class="mono-label">CS168 · 应用</p> <p class="text-accent text-sm font-semibold"> 2 / 2 </p> </div> <ol class="border-border mt-4 grid border-t sm:grid-cols-3 lg:grid-cols-6"> <li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-applications-01-dns/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 01 </span> <span class="mt-1 block"> DNS </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-applications-02-http/" aria-current="page" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors bg-muted/60 text-accent font-semibold"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 02 </span> <span class="mt-1 block"> HTTP </span> </a> </li> </ol> </div> </aside> <article id="article" class="mt-8 w-full app-prose max-w-readable prose-pre:bg-(--shiki-light-bg) dark:prose-pre:bg-(--shiki-dark-bg)"> <aside class="border-border bg-muted/35 mb-8 border-s-2 px-5 py-4 text-sm leading-6"> <p class="m-0">
+本文译自  <a href="https://textbook.cs168.io/applications/http.html">HTTP</a> 
+，依照 <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh-hans"> CC BY-SA 4.0 </a> 
+许可发布
+
+。<span> 中文翻译；为适应中文阅读习惯调整了部分术语表达，未改变原意。</span> </p> </aside> <h2 id="http">HTTP</h2>
+<h2 id="http-简史">HTTP 简史</h2>
+<p>1989 年，Tim Berners-Lee 在 CERN（瑞士研究实验室）工作，需要在科学家之间交换信息。当时已有 FTP 等通过互联网传输文件的协议。然而，一个文件常常包含指向互联网其他资源的链接。他的目标是创建一种协议和文件格式，使页面能够互相链接，并能获取这些页面。</p>
+<p>最初的 HTTP 规范版本号为 HTTP/0.9，于 1991 年发布。HTTP/1.0 于 1996 年标准化，HTTP/1.1 于 1997 年标准化。除非另有说明，本节所说的 HTTP 都是 HTTP/1.1，因为它是当今最常用的版本。较新的版本确实存在（见本节末尾），但该协议的基本原理在 20 多年里一直没有改变。</p>
+<h2 id="http-基础">HTTP 基础</h2>
+<p>HTTP 运行在 TCP 之上。希望通过 HTTP 发送数据的双方会先建立 TCP 连接，再利用其字节流（bytestream）抽象可靠地交换任意长度的数据。运行 HTTP 的主机无需担心数据包重新排序、丢失等问题。</p>
+<img width="900px" src="/image/cs168-textbook/applications/4-13-http-bytestream.png">
+<p>HTTP 是一种**客户端—服务器（client-server）**协议。我们把一方指定为客户端（例如作为终端用户的你），另一方指定为服务器（例如 Google、银行网站等）。客户端几乎总是在 Web 浏览器（例如 Firefox 或 Chrome）中运行 HTTP，不过也可以用其他方式运行（例如直接在终端中运行）。</p>
+<p>建立 HTTP 连接时，服务器必须在众所周知且固定的 80 端口上监听连接请求。（较新的安全版本 HTTPS 使用 443 端口。）客户端可以随机选择任意临时端口来发起连接，服务器则可把回复发送到该端口。</p>
+<p>HTTP 是一种**请求—响应（request-response）**协议。客户端每发送一个请求，服务器都恰好发送一个对应的响应。</p>
+<h2 id="http-请求">HTTP 请求</h2>
+<p>HTTP 请求消息使用便于人类阅读的纯文本格式，因此你可以在终端中直接输入原始 HTTP 请求。请求包含三个部分：方法、URL、版本和可选内容。</p>
+<p>消息以换行结束（严格地说是 CRLF，感兴趣可以自行查阅），可以把它理解成用户在终端中输完 HTTP 请求后按下 Enter 键。</p>
+<p>版本号指明使用哪个 HTTP 版本，例如 HTTP/0.9、HTTP/1.0、HTTP/1.1 等。</p>
+<p>请求的 URL 标识服务器上的资源。可以把 URL 看成你试图从远程服务器获取之物的文件路径。例如，在 URL <a href="http://cs168.io/assets/lectures/lecture1.pdf">http://cs168.io/assets/lectures/lecture1.pdf</a> 中，我们要从 cs168.io 远程服务器上获取 assets/lectures 文件夹内名为 lecture1.pdf 的文件。（服务器不一定非得这样工作，但这种直觉很有用。）</p>
+<p>方法标识用户希望执行的操作。最初 HTTP 只有一种方法 GET，它允许客户端从服务器获取 URL 指定的页面。</p>
+<p>后来 HTTP 得到扩展，加入了其他方法。特别是新增的 POST 方法，它还允许客户端向服务器提供信息。例如，用户填写表单并点击“提交”后，这些数据会通过 POST 请求发送给服务器。</p>
+<p>还有一些较少使用的方法。HEAD 获取响应的头部（元数据），但不获取响应的实际内容。PUT、CONNECT、DELETE、OPTIONS、PATCH 和 TRACE 等方法把 HTTP 扩展成允许用户与服务器内容交互的协议。用户现在可以修改内容，而最初的设计只允许用户获取内容。这些额外方法使 HTTP 能非常灵活地服务于各种应用。</p>
+<p>请注意，使用 POST 等其他方法时，仍必须提供 URL 来说明应该如何解释所发送的数据。在银行网站上，把一个姓名发送到 <code>/send-money</code> URL，与把同一个姓名发送到 <code>/request-money</code> URL，效果很可能不同。</p>
+<p>GET 请求的内容通常为空，因为我们是在向服务器索取页面，而不是发送自己的信息。与之相对，POST 请求的内容则包含希望发送给服务器的数据。</p>
+<h2 id="http-响应">HTTP 响应</h2>
+<p>每个 HTTP 请求对应一个 HTTP 响应。响应同样使用便于人类阅读的纯文本，因此可以在终端中读取原始 HTTP 响应。响应包含四个部分：版本、状态码、可选消息和内容。</p>
+<p>和之前一样，版本指明所用 HTTP 版本。</p>
+<p>内容部分用于放置服务器返回的数据，例如用户在 GET 请求中索取的页面。</p>
+<p>状态码是一个数字，服务器用它表示客户端请求的结果。每个状态码都有一条对应的、便于人类阅读的消息。</p>
+<p>状态码按数值分成不同类别：</p>
+<p>100 = 信息性响应。</p>
+<p>200 = 成功响应。200 OK 表示请求成功；“成功”的定义取决于请求方法和使用 HTTP 的应用（请记住，无论请求采用 GET、POST 还是其他方法，每个响应都有状态码）。201 Created 表示请求成功并创建了某项新资源，通常见于 POST 或 PUT 请求。</p>
+<p>300 = 重定向消息。服务器借此告诉客户端，应该到其他地方寻找 URL 指定的资源。两种常见状态是 301 Moved Permanently 和 302 Found（“临时移动”用了一个奇怪的名称）。有时仅凭状态码无法提供足够语境（这些重定向就是如此），所以响应还会包含资源移动到何处的额外信息（例如另一个 URL）。</p>
+<p>更具体的状态码使客户端能够据此决定后续行为。例如，301 Moved Permanently 告诉客户端不要再查找原位置，而 302 Found（临时移动）可能让客户端稍后返回并再次检查。</p>
+<p>400 = 由客户端操作导致的错误。401 Unauthorized 表示客户端无权访问该内容，但若验证身份（例如登录），或许就能访问。403 Forbidden 表示客户端已完成身份验证，服务器也知道其身份，但仍不允许访问该内容。</p>
+<p>同样，更具体的状态码能让客户端决定后续行为。401 Unauthorized 可能促使客户端浏览器显示登录窗口，而 403 Forbidden 可能使浏览器显示错误消息（因为用户已经登录）。</p>
+<p>500 = 由服务器操作导致的错误。常见状态包括 500 Internal Server Error 和 503 Service Unavailable。对于这些错误，客户端除了稍后重试，几乎无能为力。</p>
+<p>404（File Not Found）和 503（Service Unavailable）等错误码辨识度很高。</p>
+<p>有时应该使用哪个状态码并不明确。例如，如果使用 0.9 版本向 Google 发送 HTTP 请求，恰当的响应可能是 505（HTTP Version Not Supported）。但 Google 实际返回 400（Bad Request）。通常，目标是给出正确类别（例如 400 和 500 都表示错误）且能促使客户端采取正确行为的错误。</p>
+<h2 id="http-头部">HTTP 头部</h2>
+<p>如果客户端还有额外信息要发送给服务器，可以加入称为**头部（header）**的额外元数据。在 HTTP/1.1 中，没有任何头部是强制的，所以完全不带头部也是合法的（不过服务器或客户端可能期待某个头部，并在缺失时出错）。</p>
+<p>例如，Location 头部可以在 HTTP 300 响应中指明资源移到了哪里。</p>
+<p>有时头部信息是可选的。例如，请求中的 User-Agent 头部让客户端向服务器说明客户端浏览器或程序（例如 Firefox 或 Chrome）。服务器可以根据该头部字段用不同方式处理请求（例如区分用户使用 Chrome 还是终端）。</p>
+<p>其他时候，头部信息更为关键。例如，Content-Type 告诉我们载荷是 HTML 页面、图像还是视频等，从而让浏览器知道如何显示 HTTP 响应。如果一台服务器托管多个网站，请求可以使用 Host 头部指定要访问的网站。</p>
+<p>有些头部适用于请求，让客户端可以把信息传给服务器。例如，Accept 头部让客户端告诉服务器它期待哪种内容类型（例如供人阅读的页面使用 HTML，供机器解析的数据使用 JSON）。User-Agent 头部表示所用客户端的类型，Host 头部表示正在访问的具体主机（以应对一台服务器托管多个网站的情形）。Referer 头部表示客户端如何发出请求（例如是否点击 Facebook 上的链接发出本次请求）。</p>
+<p>另一些头部适用于响应。请记住，头部是关于内容的元数据，而不是内容本身。例如，Content-Encoding 告诉我们应该如何解释响应中的位（例如供人阅读的文本使用 Unicode/ASCII，压缩文件使用 gzip）。Date 头部告诉我们服务器何时生成响应。</p>
+<p>还有些头部是表示头部（representation header），在请求和响应中都会使用，用来描述内容的表示方式。例如，Content-Type 头部指定文档类型（例如文本、图像），既可出现在 POST 请求中，也可出现在 GET 响应中。表示头部让 HTTP 能承载不同类型的内容，使该协议可以泛化并用于各种应用。</p>
+<h2 id="http-示例">HTTP 示例</h2>
+<p>你可以在终端输入 <code>telnet google.com 80</code>，连接 Google 服务器的 80 端口（HTTP）。随后终端允许你输入带头部的原始 HTTP 请求，例如：</p>
+<p><code>GET / HTTP/1.1</code></p>
+<p><code>User-Agent: robjs</code></p>
+<p>这是一个针对服务器根页面、使用 HTTP 1.1 版本的 GET 请求。User-Agent 头部表示所用客户端的类型。</p>
+<p>同样，响应也可供人阅读。</p>
+<p><code>HTTP/1.1 200 OK</code></p>
+<p><code>Date: Sat, 16 Mar 2024 18:33:08 GMT</code></p>
+<p><code>Content-Type: text/html; charset=ISO-8859-1</code></p>
+<p><code>&#x3C;!doctype html>&#x3C;html lang="en">&#x3C;head>&#x3C;meta content="Search the world's information, including webpages, images, videos and more. Google has many special features to help you find exactly what you're looking for." name="description">...</code></p>
+<p><code>HTTP/1.1 200 OK</code> 告诉我们版本、状态码（200）及其对应消息（OK）。其后附有两个头部：响应日期和内容类型。接着，内容部分包含网页的原始 HTML。若在 Web 浏览器中打开这段 HTML，它看起来就是一个实际网页。</p>
+<img width="800px" src="/image/cs168-textbook/applications/4-14-httpexample1.png">
+<img width="800px" src="/image/cs168-textbook/applications/4-15-httpexample2.png">
+<p>这里还有一些其他示例。注意，GET 请求的内容部分为空，而 POST 和 PUT 请求中包含数据。反过来，POST 和 PUT 响应没有内容，GET 响应则有。</p>
+<p>状态码和头部向我们提供了有关请求的有用元数据。例如，状态 201 Created 表示所发送的文件已成功存储在服务器上；头部则告诉我们该文件存储在服务器的哪个位置（稍后可以用该位置取回文件）。</p>
+<h2 id="使用流水线加速-http">使用流水线加速 HTTP</h2>
+<p>在 Web 浏览器中加载一个页面可能需要多个 HTTP 请求。请求一段 YouTube 视频时，浏览器必须分别请求视频本身、包含网页其他文字（例如视频标题、评论）的 HTML、相关视频的缩略图等。其中许多请求很可能发往同一台服务器（本例中即 YouTube 的服务器）。</p>
+<p>回想一下，HTTP 运行在 TCP 之上。在朴素做法中，每个独立请求都要通过三次握手建立新的 TCP 连接。请求结束后，我们关闭连接，又立即为下一个请求重新握手。</p>
+<img width="900px" src="/image/cs168-textbook/applications/4-16-no-pipeline.png">
+<p>HTTP 1.1 允许在同一连接上以流水线（pipelining）方式传输多个 HTTP 请求和响应，从而优化了这一过程。现在不再需要为每个请求单独建立 TCP 连接并单独握手。</p>
+<img width="900px" src="/image/cs168-textbook/applications/4-17-pipeline.png">
+<p>这项优化的一个缺点是，服务器必须同时保持更多打开的连接。服务器需要某种连接超时机制。如果打开的连接令服务器过载，客户端可能收到 503 Service Unavailable 等错误。攻击者也可以在拒绝服务攻击中利用这一点。</p>
+<h2 id="使用缓存加速-http类型">使用缓存加速 HTTP：类型</h2>
+<p>另一种加速 HTTP 的策略是缓存响应，避免针对同一数据重复发出请求。</p>
+<p>如果不使用缓存，每个请求都必须到达服务器。</p>
+<img width="900px" src="/image/cs168-textbook/applications/4-18-nocache.png">
+<p>HTTP 缓存分为三类：</p>
+<p>**私有缓存（private cache）**与连接服务器的特定终端客户端相关联（例如你自己浏览器中的缓存）。同一用户第二次请求相同资源时，就可以从本地缓存获取。不过，私有缓存不在用户之间共享。</p>
+<img width="900px" src="/image/cs168-textbook/applications/4-19-privatecache.png">
+<p>**代理缓存（proxy cache）**位于网络中（而非终端主机上），由网络运营商而不是应用提供商控制。这些缓存可供许多用户共享，因此用户即使第一次请求某项资源，也可能从代理缓存而非源服务器取得数据。</p>
+<img width="900px" src="/image/cs168-textbook/applications/4-20-proxycache.png">
+<p>代理缓存的一个问题是，客户端需要某种方式被重定向到代理缓存。代理缓存不是由应用运营的，所以源服务器不一定知道它的存在。网络运营商需要通过某种方式控制终端客户端，把代理缓存告知客户端。</p>
+<p>一种常见做法是在 DNS 响应中撒谎；如果网络运营商同时控制代理缓存和递归解析器，就可以这样做。客户端向源服务器发出请求时，必须查询源服务器的 IP 地址。递归解析器可以谎称：“源服务器的 IP 地址是 1.2.3.4（代理缓存的 IP 地址）。”于是发往源服务器的请求转而到达代理缓存，由它提供已缓存的响应。如果请求的资源不在代理缓存中，代理缓存也可以向源服务器发出请求，再把响应提供给用户。</p>
+<p>代理缓存的另一个问题是，它并不由应用管理。源服务器必须相信代理缓存会采取正确行为（例如遵守缓存到期时间、提供正确数据）。</p>
+<p>**托管缓存（managed cache）**位于网络中，由应用提供商控制。请注意，托管缓存服务器是独立部署的，并不是最初生成内容的源服务器。由于这些缓存由应用提供商控制，应用便拥有更多控制权。</p>
+<img width="900px" src="/image/cs168-textbook/applications/4-21-managedcache.png">
+<p>由于应用同时控制源服务器和缓存，它可以自行把用户重定向到缓存。例如，从源服务器请求 YouTube 视频页面时，回复可能包含 HTML（视频标题、评论）。该 HTML 随后可以包含专门从代理缓存获取视频和图像的链接（例如从 static.youtube.com 而非 <a href="http://www.youtube.com">www.youtube.com</a> 加载）。</p>
+<h2 id="使用缓存加速-http优势与缺点">使用缓存加速 HTTP：优势与缺点</h2>
+<p>缓存对所有人都有好处。客户端能更快加载页面，因为可以避免重复请求并使用附近的代理。ISP 也会受益，因为网络中传输的 HTTP 请求和响应减少，它们需要建设的带宽也更少。服务器同样受益，因为用户请求变少，服务器无需处理那么多请求。</p>
+<p>客户端、ISP 和服务器都在意为客户端提供良好性能。客户端希望观看高质量视频，ISP 和应用也会通过提供良好性能吸引更多客户。缓存帮助各方实现这一点：客户端可以由更近的缓存（本地或网络内）以更低延迟、更高效率地满足请求。还要回想，TCP 吞吐量与往返时间（RTT）成反比，所以通往较近服务器的 RTT 越短，吞吐量就越高。这对视频等大型内容尤其有用。</p>
+<p>考虑缓存时，必须判断内容在后续请求中是否会改变。有些 HTTP 资源是静态的；请求 Google 徽标时，多次请求得到的内容都相同。</p>
+<p>另一些 HTTP 资源是动态的。发出 Google 搜索请求时，响应可能因请求者和请求时间而异，服务器需要为每个请求动态生成不同的响应。</p>
+<p>有些资源是静态的，可以缓存并由代理缓存或托管缓存提供；另一些资源则必须动态生成。例如，发起 Google 搜索时，HTML 响应很可能必须由源服务器动态生成。不过，该 HTML 可以包含一个链接，从某台托管缓存服务器获取作为静态资源的 Google 徽标。</p>
+<p>有利的是，图像和视频等较大资源通常是静态的，可以积极缓存；定制 HTML 页面等动态内容往往更小。客户端可以从较远的源服务器请求动态内容，并通过较近的缓存和代理获取所有静态内容。</p>
+<h2 id="使用缓存加速-http实现">使用缓存加速 HTTP：实现</h2>
+<p>为实现缓存，需要用头部携带缓存相关元数据（例如数据可以缓存多久）。这再次说明，头部能让原始协议（最初并不支持缓存）获得可扩展性。</p>
+<p>HTTP/1.0 中最初的旧式缓存功能使用 Expires 头部，它只指定数据可以缓存多久。HTTP/1.1 引入了更复杂的 Cache-Control 头部。为了保持兼容，一些 Web 服务器会同时带着两个头部返回数据。HTTP/1.0 客户端不理解较新的 Cache-Control 头部，因此会忽略它；HTTP/1.1 客户端则会优先采用新的 Cache-Control 头部，而不是旧的 Expires 头部。</p>
+<p>Cache-Control 头部指定哪些类型的缓存可以缓存数据，以及可以缓存多久。例如，如果资源是动态的，会因用户而异，但对特定用户而言随时间保持不变，服务器可以回复：Cache-Control: private, max-age:86400。这表示内容只能存储在用户本地缓存中（不能存入共享的代理缓存或托管缓存），并可保存一天（86400 秒）。</p>
+<p>有些数据不能缓存（例如频繁变化的动态内容）。这时，服务器可以设置 Cache-Control: no-store，表明客户端和代理不能缓存该内容。</p>
+<p>Cache-Control 头部是可选的，所以无法保证客户端会读取或遵守它。可以把这个头部看成服务器提出的缓存某项内容的请求。对于不由应用提供商运营的代理缓存，这一点尤其值得担忧。相比之下，私有缓存由客户端（即其浏览器）运行，违反规则只会影响客户端自己；托管缓存由同一个应用提供商运行，因此它们可以强制托管缓存遵守源服务器制定的规则。</p>
+<p>该头部也可用于更复杂的策略。例如，服务器可以说：你可以缓存这份数据，但使用前请发出 HTTP HEAD 请求来重新请求头部并重新验证数据。如果头部表明数据已改变，就让缓存失效。</p>
+<h2 id="内容分发网络cdn">内容分发网络（CDN）</h2>
+<p>前面看到，托管缓存是进行缓存并改善用户性能的好策略。与私有缓存不同，它们在用户之间共享（例如用户第一次请求某项内容时就可由缓存满足）。与代理缓存也不同，它们由应用提供商控制，使应用拥有更多控制权。应用可以确保缓存遵循源服务器设定的规则，源服务器也可以控制用户被重定向到哪一个缓存。</p>
+<p>在网络各处部署托管缓存，就引出了<strong>内容分发网络（content delivery network，CDN）</strong>：它是网络中一组负责提供内容（例如 HTTP 资源）的服务器。</p>
+<p>为了获得良好性能，我们尽量把 CDN 放在终端用户附近。这里的“附近”既指地理位置接近，也指从网络角度接近（跳数更少）。</p>
+<p>CDN 带来了缓存的全部优势。由于服务器更近，用户能以更高性能获取内容。用户的大多数请求会发往附近服务器，而非可能非常遥远的单一源服务器，所以所需网络带宽和基础设施都能减少。</p>
+<p>CDN 还让提供商更容易扩展服务器基础设施。如果只有一台源服务器，只能把它变得异常强大并为其提供极高带宽来扩展。使用 CDN 后，只需在互联网各处增加更多小型服务器即可扩展。</p>
+<p>CDN 还为提供商带来更好的冗余。单一源服务器宕机可能导致服务不可用；使用 CDN 时，一台服务器宕机后，仍可把用户重定向到其他服务器。</p>
+<h2 id="cdn-部署">CDN 部署</h2>
+<p>回想我们的互联网模型：客户端请求经过 ISP 所有的广域网（WAN）路由器转发，直至到达对等互联位置。随后请求进入应用提供商网络中的对等互联位置，再经过应用的 WAN，最终到达源服务器所在的数据中心网络。</p>
+<p>如果不部署 CDN，每个请求都必须到达源服务器。与随后使用 CDN 的方案相比，这种方式延迟最高、性能最低；请求还要经过最多的网络带宽，因此必须建设更多带宽；最后，源服务器也必须扩展到足以处理每个请求。</p>
+<img width="900px" src="/image/cs168-textbook/applications/4-21-cdn1.png">
+<p>更好的选择是在应用提供商网络的边缘部署一些 CDN 服务器。例如，如果 Google 的网络在纽约与 ISP 网络对等互联，我们就可以在那里放置一些 CDN。</p>
+<p>这样，在应用提供商网络上传输的带宽会大幅减少。源服务器只向 CDN 发送一次视频，CDN 就能把该视频提供给许多用户。应用网络不再需要扩展其 WAN。</p>
+<p>而且如前所述，现在可以增加更多 CDN 来扩展，而不是升级单一源服务器；我们也获得了更多冗余。</p>
+<img width="900px" src="/image/cs168-textbook/applications/4-22-cdn2.png">
+<p>还可以做得更好，把缓存进一步推入网络深处。此时应用会在 ISP 的网络内部部署服务器。</p>
+<img width="900px" src="/image/cs168-textbook/applications/4-23-cdn3.png">
+<p>ISP 为什么愿意让应用在自己的网络中部署 CDN？事实证明，这对各方都有利。ISP 的客户可以使用距离更近的新 CDN，从而获得更好性能；用户与 CDN 之间的大量流量也全部留在 ISP 的网络内。这意味着 ISP 与应用之间的对等互联只需较少带宽，因为内容只跨越该连接传输一次。</p>
+<p>实际中，ISP 和 CDN 经常合作部署服务器。例如，应用免费提供服务器，ISP 免费把服务器接入网络。有时双方需要根据服务器在网络中的部署位置以及服务器和连接成本协商付款（由 CDN 向 ISP 付款，或由 ISP 向 CDN 付款）。不过，双方都有部署这些服务器的利益。</p>
+<p>我们还可以尝试更进一步，但最终会遇到成本效益权衡。最极端的做法是在每个人家里部署 CDN，但成本很可能超过收益。尤其是，多名用户共同使用时 CDN 效果最好：共享缓存更大，一次部署也能覆盖许多用户。</p>
+<img width="900px" src="/image/cs168-textbook/applications/4-24-cdn4.png">
+<p>更一般地说，新增 CDN 的成本与少建带宽所节省的资金之间存在权衡。实际中 ISP 网络里确实存在 CDN，因为在这些位置安装仍然有利可图。</p>
+<p>Sandvine（一家数据包检查公司）2023 年的一份报告显示，全部互联网流量中 15% 来自 Netflix，11.4% 来自 YouTube，4.5% 来自 Disney+。如果 ISP 仅为这三个应用在自己的网络中安装服务器，就有可能少建设 25% 的网络容量。</p>
+<p>Google、Netflix、Amazon 和 Facebook 等大型应用提供商会在自己的网络以及 ISP 网络中部署 CDN。</p>
+<p>如果你是应用提供商，或许不像 Google 或 Amazon 那样是科技巨头，但仍希望通过 CDN 提供内容来获得良好性能。较小的应用很可能负担不起自行安装 CDN。不过，Cloudflare、Akamai 和 Edgio 等公司已经部署了 CDN，你可以付费让这些公司在它们现有的 CDN 上部署你的内容。这些 CDN 提供商也会在自有网络和 ISP 网络中部署基础设施。</p>
+<p>ISP 也可以使用 CDN，因为 ISP 自身同样可能拥有提供内容的应用。购买互联网服务时，ISP 还可能提供电视服务（直播电视或视频点播）。这些 ISP 会安装自己的 CDN，以高效地向你提供电视内容。</p>
+<p>从根本上说，CDN 中的服务器与互联网上任何其他提供内容的服务器相同，不过它们通常针对存储和交付海量内容做了高度优化。有些服务器可能更擅长存储和提供大量内容，另一些则可能更擅长向大量客户快速提供较小内容。</p>
+<h2 id="把客户端引向缓存">把客户端引向缓存</h2>
+<p>CDN 中遍布互联网的许多不同服务器都在提供相同内容。客户端怎么知道应该联系哪一台？</p>
+<p>DNS 的一些技巧同样适用于 CDN。可以使用任播，让多台服务器宣告相同的 IP 前缀，使路由算法能找到通往其中任意一台服务器的最佳路径。</p>
+<img width="800px" src="/image/cs168-textbook/applications/4-25-anycast1.png">
+<p>任播的一个问题涉及长时间运行的连接。假设客户端正与其中一台服务器保持 TCP 连接。连接期间，网络中的某条中间链路发生故障。由于所有服务器都使用相同 IP 地址，从中间路由器的角度看，把数据包转发给任意一台服务器都有效。路由器此时可能开始把数据包转发给另一台使用相同 IP 地址的服务器。然而，TCP 连接是与原服务器建立的，新服务器无法继续原连接。</p>
+<p>请注意，在 DNS 中使用任播时不存在这个问题，因为 DNS 连接非常短（通常只有一个 UDP 数据包）。</p>
+<img width="800px" src="/image/cs168-textbook/applications/4-26-anycast2.png">
+<p>还可以使用 DNS 进行负载均衡。与任播不同，此时各服务器使用不同 IP 地址，但仍拥有相同域名。客户端查询域到 IP 的映射时，DNS 名称服务器可以根据客户端位置提供不同 IP 地址。</p>
+<p>这种基于 DNS 的方法没有任播面对的长连接问题，因为服务器现在使用不同地址，路由器不会突然开始把数据包转发给另一台服务器。</p>
+<p>基于 DNS 的方法存在粒度不足的问题。举一个极端例子：假设 Comcast ISP 中所有人都使用同一个递归解析器。这意味着所有人都把 DNS 查询发给该解析器，再由它向应用名称服务器查询。应用名称服务器只能看出 DNS 请求来自 Comcast，必须向 Comcast 返回一个 IP 地址。于是 Comcast 网络中的所有用户都在使用同一台服务器，即使这些用户遍布世界各地。</p>
+<img width="800px" src="/image/cs168-textbook/applications/4-27-dns-loadbalance.png">
+<p>比任播或 DNS 更稳健的做法是应用层映射。源服务器收到 HTTP 请求时，可以根据请求来源，让响应中的链接指向不同服务器（例如位于不同地点的 static1.google.com 或 static2.google.com）。源服务器也可以用 HTTP 300 类状态码回复，把用户重定向到适当服务器。</p>
+<p>这种应用层方法没有 DNS 的粒度问题，因为应用能在 HTTP 请求中看到客户端地址；也没有任播的问题，因为不同服务器可以使用不同 IP 地址。</p>
+<p>不过，和 DNS 负载均衡一样，应用仍需要某种方式猜测距离客户端最近的服务器（“近”可以按地理位置或网络拓扑衡量）。</p>
+<p>应用层映射的一个好处是可以依据内容提供额外粒度。例如，热门视频可以部署到大量服务器，让每个客户端都能从附近服务器获取；相比之下，很少访问的冷门视频可以只部署在较少服务器上，要求用户到更远处获取内容。</p>
+<h2 id="较新的-http-版本">较新的 HTTP 版本</h2>
+<p>随着互联网发展，HTTP 因为具有很强的通用性，开始被越来越多的应用采用。</p>
+<p>最终，HTTP 安全日益受到关注。运行 HTTP 的银行服务器很可能不希望信息以便于人类阅读的明文形式通过网络发送，让中间路由器或恶意攻击者能够读取。</p>
+<p>HTTPS 是引入额外安全性的 HTTP 扩展。一种名为传输层安全（Transport Layer Security，TLS）的协议构建在 TCP 之上，用户交换密钥并加密消息，再通过字节流发送。HTTPS 的基本协议不变，但现在运行在 TLS（其自身又运行在 TCP 之上）上，而不是直接运行在未经保护、不安全的原始 TCP 上。近年来一直在推动网站升级到 HTTPS；截至 2024 年，超过 85% 的网站已默认使用 HTTPS。</p>
+<p>HTTP/2.0 于 2015 年推出，是自 1997 年以来该协议的第一次重大修订。修订的主要目标是通过降低延迟、提高页面加载速度来改善性能。</p>
+<p>HTTP/2.0 引入服务器端推送：即使客户端没有发出请求，服务器也能发送响应。这样，服务器可以预测用户可能需要的内容并提前提供，不必等待用户发出请求。例如，执行 Google 搜索后，结果的 HTML 会先返回；随后用户浏览器解析 HTML，发现需要 Google 徽标，再发出另一个 HTTP 请求。使用 HTTP/2.0，服务器无需等待用户请求，就能预先把 Google 徽标交给用户。</p>
+<p>HTTP/2.0 还有其他性能改进。头部可以压缩以节省空间；请求和响应可以设置优先级，让高优先级内容（例如搜索结果文本）先于低优先级内容（例如 Google 徽标）交付；并发请求也可以更高效地复用。假设第一个请求的响应为 4 GB，第二个请求的响应为 1 KB，朴素实现可能让第二个响应一直等待第一个完成。HTTP/2.0 可以更智能地管理这些响应。</p>
+<p>HTTP/2.0 已被客户端（例如现代浏览器）和服务器（例如 CDN）广泛采用。</p>
+<p>HTTP/3.0 于 2022 年推出（与 1.1 到 2.0 的间隔相比，它在 HTTP/2.0 后不久便出现）。其语义与 HTTP/2.0 相同，但替换了底层传输层协议。HTTP/3.0 不再运行在 TCP 字节流上，而是运行在名为 QUIC 的新传输协议上；QUIC 专门设计为与 HTTP/3.0 良好协作。QUIC 即快速 UDP 连接（Quick UDP Connections），由 Google 设计，并在互联网工程任务组（IETF）中完成标准化。</p>
+<p>HTTP/3.0 是一个例子：为了提高效率，我们有意放弃了网络的核心范式之一——分层。设计者可以同时定制传输层（QUIC）和应用层（HTTP/3.0）协议，从而让二者协同良好。</p> </article> <hr class="my-8 border-dashed"> <a href="https://github.com/howIdobetter/My-Blog/edit/main/src/content/posts/cs168-applications-02-http.md" target="_blank" rel="noopener noreferrer" class="hover:text-accent text-muted-foreground flex justify-baseline gap-1.5 sm:hidden"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M7 7H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-1" /><path d="M20.385 6.585a2.1 2.1 0 0 0-2.97-2.97L9 12v3h3zM16 5l3 3" /></svg><span>编辑文章</span></a> <div id="btt-btn-container" class="fixed inset-e-4 bottom-8 z-50 md:sticky md:inset-e-auto md:float-end md:me-1 translate-y-14 opacity-0 transition duration-500"> <button data-button="back-to-top" aria-label="回到顶部" class="group bg-background relative px-2 py-1 size-14 rounded-full shadow-xl md:h-8 md:w-fit md:rounded-md md:shadow-none md:focus-visible:rounded-none md:bg-background/35 md:bg-clip-padding md:backdrop-blur-lg"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block rotate-90 md:hidden" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 12h14M5 12l6 6M5 12l6-6" /></svg> <span class="group-hover:text-accent sr-only text-sm md:not-sr-only"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block size-4" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" /><path d="M12 5v14M16 9l-4-4M8 9l4-4" /></svg> 回到顶部 </span> </button> </div> <script data-astro-rerun>
+  function backToTop() {
+    const btnContainer = document.querySelector("#btt-btn-container");
+    const backToTopBtn = document.querySelector("[data-button='back-to-top']");
+    const pageHeader = document.querySelector("body > header");
+
+    if (!btnContainer || !backToTopBtn || !pageHeader) return;
+
+    backToTopBtn.addEventListener("click", () => {
+      document.body.scrollTop = 0;
+      document.documentElement.scrollTop = 0;
+    });
+
+    const observer = new IntersectionObserver(([entry]) => {
+      const isVisible = !entry.isIntersecting;
+      if (entry) {
+        btnContainer.classList.toggle("opacity-100", isVisible);
+        btnContainer.classList.toggle("translate-y-0", isVisible);
+        btnContainer.classList.toggle("opacity-0", !isVisible);
+        btnContainer.classList.toggle("translate-y-14", !isVisible);
+      }
+    });
+    observer.observe(pageHeader);
+  }
+  backToTop();
+</script> <ul class="mt-4 mb-8 flex flex-wrap gap-4 sm:my-8"> <li> <a href="/tags/networking/" class="border-border flex items-center gap-1 rounded-full border transition-colors hover:border-accent hover:text-accent focus-visible:text-accent focus-visible:no-underline px-3 py-1.5 text-sm" data-astro-transition-scope="astro-36ssibgs-1"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="text-accent opacity-80 size-3.5" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 9h14M5 15h14M11 4 7 20M17 4l-4 16" /></svg> networking </a> </li><li> <a href="/tags/cs168/" class="border-border flex items-center gap-1 rounded-full border transition-colors hover:border-accent hover:text-accent focus-visible:text-accent focus-visible:no-underline px-3 py-1.5 text-sm" data-astro-transition-scope="astro-36ssibgs-2"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="text-accent opacity-80 size-3.5" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 9h14M5 15h14M11 4 7 20M17 4l-4 16" /></svg> cs168 </a> </li><li> <a href="/tags/course-notes/" class="border-border flex items-center gap-1 rounded-full border transition-colors hover:border-accent hover:text-accent focus-visible:text-accent focus-visible:no-underline px-3 py-1.5 text-sm" data-astro-transition-scope="astro-36ssibgs-3"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="text-accent opacity-80 size-3.5" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 9h14M5 15h14M11 4 7 20M17 4l-4 16" /></svg> course-notes </a> </li><li> <a href="/tags/applications/" class="border-border flex items-center gap-1 rounded-full border transition-colors hover:border-accent hover:text-accent focus-visible:text-accent focus-visible:no-underline px-3 py-1.5 text-sm" data-astro-transition-scope="astro-36ssibgs-4"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="text-accent opacity-80 size-3.5" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 9h14M5 15h14M11 4 7 20M17 4l-4 16" /></svg> applications </a> </li> </ul>  <hr class="my-8 border-dashed"> <div data-pagefind-ignore class="my-8 grid grid-cols-1 gap-4 sm:grid-cols-2"> <a href="/posts/cs168-applications-01-dns/" class="soft-panel hover:border-accent/70 hover:text-accent flex w-full gap-3 p-4 transition"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block flex-none rtl:rotate-180" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 12h14M5 12l6 6M5 12l6-6" /></svg> <div> <span class="mono-label">上一篇</span> <div class="mt-1 text-sm leading-6">DNS</div> </div> </a> <a href="/posts/cs168-beyond-01-multicast/" class="soft-panel hover:border-accent/70 hover:text-accent flex w-full justify-end gap-3 p-4 text-end transition sm:col-start-2"> <div> <span class="mono-label">下一篇</span> <div class="mt-1 text-sm leading-6">多播</div> </div> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block flex-none rtl:rotate-180" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 12h14M13 18l6-6M13 6l6 6" /></svg> </a> </div> </main> <footer class="app-layout mt-auto"> <div class="border-border text-muted-foreground flex flex-col items-start justify-between gap-6 border-t py-9 text-sm sm:flex-row sm:items-end"> <div> <p class="text-foreground font-semibold">随便做做</p> <p class="mt-1">先记下来，再慢慢改对。</p> </div> <div class="flex items-center gap-5"> <div class="flex flex-wrap items-center gap-1"> <a href="https://github.com/howIdobetter" title="GitHub" class="group inline-flex items-center gap-1 hover:text-accent p-2 hover:rotate-6 sm:p-1">  <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block size-6 scale-125 fill-transparent stroke-current stroke-2 opacity-90 group-hover:fill-transparent sm:scale-110" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" /><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21" /></svg> <span class="sr-only">GitHub</span>  </a> </div> <span class="whitespace-nowrap">© 2026 一剑留名ing</span> </div> </div> </footer>   <script type="module">const a="theme",n="light",r="dark";function i(){const e=localStorage.getItem(a);return e||(window.matchMedia("(prefers-color-scheme: dark)").matches?r:n)}let o=window.__theme?.value??i();function s(){localStorage.setItem(a,o),m()}function m(){const e=document.firstElementChild;e?.setAttribute("data-theme",o),e?.classList.toggle("dark",o===r);const t=document.querySelector("#theme-btn"),c=o===n?t?.dataset.labelDark:t?.dataset.labelLight;c&&(t?.setAttribute("aria-label",c),t?.setAttribute("title",c));const l=window.getComputedStyle(document.body).backgroundColor;document.querySelector("meta[name='theme-color']")?.setAttribute("content",l)}function d(){m(),document.querySelector("#theme-btn")?.addEventListener("click",()=>{o=o===n?r:n,s()})}d();document.addEventListener("astro:after-swap",d);document.addEventListener("astro:before-swap",e=>{const t=document.querySelector("meta[name='theme-color']")?.getAttribute("content");t&&e.newDocument.querySelector("meta[name='theme-color']")?.setAttribute("content",t)});window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change",({matches:e})=>{o=e?r:n,s()});</script> </body> </html> <script data-astro-rerun>
+  function addHeadingLinks() {
+    const isZh = document.documentElement.lang === "zh-CN";
+    const headings = Array.from(
+      document.querySelectorAll("h2, h3, h4, h5, h6")
+    );
+    for (const heading of headings) {
+      heading.classList.add("group");
+      const link = document.createElement("a");
+      link.className =
+        "heading-link ms-2 no-underline opacity-75 md:opacity-0 md:group-hover:opacity-100 md:focus:opacity-100";
+      link.href = "#" + heading.id;
+      link.setAttribute(
+        "aria-label",
+        isZh
+          ? `链接到本节：${heading.textContent}`
+          : `Link to section: ${heading.textContent}`
+      );
+
+      const span = document.createElement("span");
+      span.ariaHidden = "true";
+      span.innerText = "#";
+      link.appendChild(span);
+      heading.appendChild(link);
+    }
+  }
+  addHeadingLinks();
+
+  function attachCopyButtons() {
+    const isZh = document.documentElement.lang === "zh-CN";
+    const copyButtonLabel = isZh ? "复制" : "Copy";
+    const copiedButtonLabel = isZh ? "已复制" : "Copied";
+    const codeBlocks = Array.from(document.querySelectorAll("pre"));
+
+    for (const codeBlock of codeBlocks) {
+      const wrapper = document.createElement("div");
+      wrapper.style.position = "relative";
+
+      const computedStyle = getComputedStyle(codeBlock);
+      const hasFileNameOffset =
+        computedStyle.getPropertyValue("--file-name-offset").trim() !== "";
+
+      const topClass = hasFileNameOffset
+        ? "top-(--file-name-offset)"
+        : "-top-3";
+
+      const copyButton = document.createElement("button");
+      copyButton.className = `copy-code absolute end-3 ${topClass} rounded bg-muted border border-muted px-2 py-1 text-xs leading-4 text-foreground font-medium`;
+      copyButton.innerHTML = copyButtonLabel;
+      copyButton.setAttribute("aria-label", copyButtonLabel);
+      copyButton.setAttribute("aria-live", "polite");
+      codeBlock.setAttribute("tabindex", "0");
+      codeBlock.appendChild(copyButton);
+
+      codeBlock?.parentNode?.insertBefore(wrapper, codeBlock);
+      wrapper.appendChild(codeBlock);
+
+      copyButton.addEventListener("click", async () => {
+        await copyCode(codeBlock, copyButton);
+      });
+    }
+
+    async function copyCode(block, button) {
+      const code = block.querySelector("code");
+      const text = code?.innerText;
+
+      await navigator.clipboard.writeText(text ?? "");
+
+      button.innerText = copiedButtonLabel;
+      button.setAttribute("aria-label", copiedButtonLabel);
+
+      setTimeout(() => {
+        button.innerText = copyButtonLabel;
+        button.setAttribute("aria-label", copyButtonLabel);
+      }, 700);
+    }
+  }
+  attachCopyButtons();
+
+  /** Accessible image lightbox for article images. */
+  function initLightbox() {
+    const article = document.getElementById("article");
+    if (!article) return;
+
+    const prefersReducedMotion = () =>
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    let overlay = null;
+    let lastFocused = null;
+
+    // Defer attribute mutations so they don't push the LCP timestamp.
+    // Event listeners below use delegation and don't need the attributes to exist yet.
+    requestAnimationFrame(() => {
+      const images = Array.from(article.querySelectorAll("img"));
+      for (const image of images) {
+        if (image.closest("a")) continue;
+        image.setAttribute("role", "button");
+        image.setAttribute("tabindex", "0");
+        image.setAttribute("aria-haspopup", "dialog");
+        image.setAttribute(
+          "aria-label",
+          image.alt ? `Zoom image: ${image.alt}` : "Zoom image"
+        );
+      }
+    });
+
+    function open(src, alt, trigger) {
+      if (overlay) return;
+      lastFocused = trigger ?? document.activeElement;
+
+      overlay = document.createElement("div");
+      overlay.setAttribute("role", "dialog");
+      overlay.setAttribute("aria-modal", "true");
+      overlay.setAttribute(
+        "aria-label",
+        alt ? `Image preview: ${alt}` : "Image preview"
+      );
+      overlay.className =
+        "fixed inset-0 z-50 flex cursor-zoom-out items-center justify-center bg-black/70 backdrop-blur-sm opacity-0 transition-opacity duration-200 motion-reduce:transition-none";
+
+      const closeButton = document.createElement("button");
+      closeButton.type = "button";
+      closeButton.setAttribute("aria-label", "Close image preview");
+      closeButton.className =
+        "absolute end-4 top-4 rounded p-2 text-3xl leading-none text-white";
+      closeButton.innerHTML = "&#10005;";
+      closeButton.addEventListener("click", close);
+
+      const image = document.createElement("img");
+      image.src = src;
+      image.alt = "";
+      image.className =
+        "max-h-[90dvh] max-w-[90dvw] cursor-default object-contain";
+
+      overlay.append(closeButton, image);
+      overlay.addEventListener("click", e => {
+        if (e.target === overlay && currentScale <= 1) close();
+      });
+
+      let currentScale = 1;
+      let translateX = 0;
+      let translateY = 0;
+      let initialDist = 0;
+      let initialScale = 1;
+      let panStartX = 0;
+      let panStartY = 0;
+      let panStartTranslateX = 0;
+      let panStartTranslateY = 0;
+      let lastTapTime = 0;
+
+      function applyTransform() {
+        image.style.transform = `scale(${currentScale}) translate(${translateX}px, ${translateY}px)`;
+      }
+
+      function resetTransform() {
+        currentScale = 1;
+        translateX = 0;
+        translateY = 0;
+        image.style.transform = "";
+      }
+
+      overlay.addEventListener(
+        "touchstart",
+        e => {
+          const t = e.touches;
+          if (t.length === 2) {
+            initialDist = Math.hypot(
+              t[1].clientX - t[0].clientX,
+              t[1].clientY - t[0].clientY
+            );
+            initialScale = currentScale;
+          } else if (t.length === 1) {
+            const now = Date.now();
+            if (now - lastTapTime < 300) {
+              e.preventDefault();
+              if (currentScale > 1) {
+                resetTransform();
+              } else {
+                currentScale = 2;
+                translateX = 0;
+                translateY = 0;
+                applyTransform();
+              }
+              lastTapTime = 0;
+              panStartX = t[0].clientX;
+              panStartY = t[0].clientY;
+              panStartTranslateX = translateX;
+              panStartTranslateY = translateY;
+            } else {
+              lastTapTime = now;
+              if (currentScale > 1) {
+                panStartX = t[0].clientX;
+                panStartY = t[0].clientY;
+                panStartTranslateX = translateX;
+                panStartTranslateY = translateY;
+              }
+            }
+          }
+        },
+        { passive: false }
+      );
+
+      overlay.addEventListener(
+        "touchmove",
+        e => {
+          const t = e.touches;
+          if (t.length === 2) {
+            e.preventDefault();
+            const dist = Math.hypot(
+              t[1].clientX - t[0].clientX,
+              t[1].clientY - t[0].clientY
+            );
+            currentScale = Math.min(
+              4,
+              Math.max(1, initialScale * (dist / initialDist))
+            );
+            applyTransform();
+          } else if (t.length === 1) {
+            if (currentScale > 1) {
+              e.preventDefault();
+              translateX =
+                panStartTranslateX + (t[0].clientX - panStartX) / currentScale;
+              translateY =
+                panStartTranslateY + (t[0].clientY - panStartY) / currentScale;
+              const maxX = Math.max(
+                0,
+                (image.clientWidth - overlay.clientWidth / currentScale) / 2
+              );
+              const maxY = Math.max(
+                0,
+                (image.clientHeight - overlay.clientHeight / currentScale) / 2
+              );
+              translateX = Math.min(maxX, Math.max(-maxX, translateX));
+              translateY = Math.min(maxY, Math.max(-maxY, translateY));
+              applyTransform();
+            } else {
+              e.preventDefault();
+            }
+          }
+        },
+        { passive: false }
+      );
+
+      overlay.addEventListener("touchend", e => {
+        if (e.touches.length === 0 && currentScale <= 1.05) {
+          resetTransform();
+        }
+      });
+
+      overlay.addEventListener("touchcancel", e => {
+        if (e.touches.length === 0 && currentScale <= 1.05) {
+          resetTransform();
+        }
+      });
+
+      document.body.appendChild(overlay);
+      document.body.style.overflow = "hidden";
+      document.addEventListener("keydown", onKeyDown);
+      window.__closeLightbox = close;
+
+      requestAnimationFrame(() => overlay?.classList.add("opacity-100"));
+      closeButton.focus();
+    }
+
+    function close() {
+      if (!overlay) return;
+      const el = overlay;
+      overlay = null;
+      window.__closeLightbox = null;
+
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = "";
+      lastFocused?.focus();
+      lastFocused = null;
+
+      if (prefersReducedMotion()) {
+        el.remove();
+        return;
+      }
+      const remove = () => el.remove();
+      el.addEventListener("transitionend", remove, { once: true });
+      setTimeout(remove, 250); // fallback in case transitionend never fires
+      el.classList.remove("opacity-100");
+    }
+
+    function onKeyDown(e) {
+      if (e.key === "Escape") {
+        close();
+      } else if (e.key === "Tab") {
+        trapFocus(e);
+      }
+    }
+
+    // Keep keyboard focus inside the open dialog.
+    function trapFocus(e) {
+      if (!overlay) return;
+      const focusables = overlay.querySelectorAll(
+        'a[href], button, [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+
+    function triggerFromEvent(e) {
+      const image = e.target.closest("img");
+      if (!image || !article.contains(image) || image.closest("a")) return null;
+      return image;
+    }
+
+    function activate(image) {
+      open(image.currentSrc || image.src, image.alt, image);
+    }
+
+    article.addEventListener("click", e => {
+      const image = triggerFromEvent(e);
+      if (!image) return;
+      e.preventDefault();
+      activate(image);
+    });
+
+    article.addEventListener("keydown", e => {
+      if (e.key !== "Enter" && e.key !== " " && e.key !== "Spacebar") return;
+      const image = triggerFromEvent(e);
+      if (!image) return;
+      e.preventDefault();
+      activate(image);
+    });
+  }
+  initLightbox();
+
+  if (!window.__lightboxSwapBound) {
+    window.__lightboxSwapBound = true;
+    document.addEventListener("astro:before-swap", () =>
+      window.__closeLightbox?.()
+    );
+  }
+
+  document.addEventListener("astro:after-swap", () =>
+    window.scrollTo({ left: 0, top: 0, behavior: "instant" })
+  );
+</script>

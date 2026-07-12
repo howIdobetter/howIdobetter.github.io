@@ -1,0 +1,673 @@
+<!DOCTYPE html><html dir="ltr" lang="zh-CN" class="overflow-y-scroll scroll-smooth"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="canonical" href="https://howidobetter.github.io/posts/cs168-datacenter-06-sdn/"><meta name="generator" content="Astro v6.4.2"><!-- Primary meta --><title>CS168：软件定义网络 | 随便做做</title><meta name="title" content="CS168：软件定义网络 | 随便做做"><meta name="description" content="CS168 中文译文：软件定义网络，完整保留原教材的技术推导、示例与图表。"><meta name="author" content="一剑留名ing"><link rel="sitemap" href="/sitemap-index.xml"><!-- Open Graph --><meta property="og:type" content="article"><meta property="og:site_name" content="随便做做"><meta property="og:title" content="CS168：软件定义网络 | 随便做做"><meta property="og:description" content="CS168 中文译文：软件定义网络，完整保留原教材的技术推导、示例与图表。"><meta property="og:url" content="https://howidobetter.github.io/posts/cs168-datacenter-06-sdn/"><meta property="og:image" content="https://howidobetter.github.io/default-og.png"><!-- Twitter / X --><meta property="twitter:card" content="summary_large_image"><meta property="twitter:url" content="https://howidobetter.github.io/posts/cs168-datacenter-06-sdn/"><meta property="twitter:title" content="CS168：软件定义网络 | 随便做做"><meta property="twitter:description" content="CS168 中文译文：软件定义网络，完整保留原教材的技术推导、示例与图表。"><meta property="twitter:image" content="https://howidobetter.github.io/default-og.png"><!-- RSS autodiscovery --><link rel="alternate" type="application/rss+xml" title="随便做做" href="https://howidobetter.github.io/rss.xml"><!-- Filled at runtime by theme.ts to match the current background colour --><meta name="theme-color" content=""><!-- Extra head content injected by child layouts (e.g. JSON-LD, article meta) --><meta property="article:published_time" content="2026-07-12T00:00:00.000Z"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"CS168：软件定义网络 | 随便做做","description":"CS168 中文译文：软件定义网络，完整保留原教材的技术推导、示例与图表。","url":"https://howidobetter.github.io/posts/cs168-datacenter-06-sdn/","image":"https://howidobetter.github.io/default-og.png","datePublished":"2026-07-12T00:00:00.000Z","author":[{"@type":"Person","name":"一剑留名ing","url":"https://github.com/howIdobetter"}]}</script> <!--
+      Inline FOUC-prevention script: sets data-theme on <html> before
+      the browser paints. Runs synchronously, no defer/async.
+    --><script>
+      (function () {
+        const stored = localStorage.getItem("theme");
+        const prefersDark = window.matchMedia(
+          "(prefers-color-scheme: dark)"
+        ).matches;
+        const theme = stored ?? (prefersDark ? "dark" : "light");
+        const root = document.firstElementChild;
+        root?.setAttribute("data-theme", theme);
+        root?.classList.toggle("dark", theme === "dark");
+        // Expose value so theme.ts can skip re-detection.
+        window.__theme = { value: theme };
+      })();
+    </script><meta name="astro-view-transitions-enabled" content="true"><meta name="astro-view-transitions-fallback" content="animate"><script type="module" src="/_astro/ClientRouter.astro_astro_type_script_index_0_lang.CAqDO0tx.js"></script><link rel="stylesheet" href="/_astro/Footer.W6Wz50NF.css">
+<style>@keyframes astroFadeInOut{0%{opacity:1}to{opacity:0}}@keyframes astroFadeIn{0%{opacity:0;mix-blend-mode:plus-lighter}to{opacity:1;mix-blend-mode:plus-lighter}}@keyframes astroFadeOut{0%{opacity:1;mix-blend-mode:plus-lighter}to{opacity:0;mix-blend-mode:plus-lighter}}@keyframes astroSlideFromRight{0%{transform:translate(100%)}}@keyframes astroSlideFromLeft{0%{transform:translate(-100%)}}@keyframes astroSlideToRight{to{transform:translate(100%)}}@keyframes astroSlideToLeft{to{transform:translate(-100%)}}@media(prefers-reduced-motion){::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}[data-astro-transition-scope]{animation:none!important}}
+</style><style>[data-astro-transition-scope="astro-36ssibgs-1"] { view-transition-name: networking; }@layer astro { ::view-transition-old(networking) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(networking) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(networking) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(networking) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-1"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-1"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-1"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-1"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style><style>[data-astro-transition-scope="astro-36ssibgs-2"] { view-transition-name: cs168; }@layer astro { ::view-transition-old(cs168) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(cs168) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(cs168) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(cs168) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style><style>[data-astro-transition-scope="astro-36ssibgs-3"] { view-transition-name: course-notes; }@layer astro { ::view-transition-old(course-notes) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(course-notes) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(course-notes) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(course-notes) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style><style>[data-astro-transition-scope="astro-36ssibgs-4"] { view-transition-name: datacenter; }@layer astro { ::view-transition-old(datacenter) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(datacenter) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(datacenter) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(datacenter) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style></head> <body class="bg-background font-app text-foreground selection:bg-accent/75 selection:text-accent-foreground flex min-h-svh flex-col">    <a id="skip-to-content" href="#main-content" class="bg-background text-accent absolute inset-s-4 -top-full z-50 border px-3 py-2 transition-[top] focus:top-3"> 跳到正文 </a> <header class="border-border bg-background/90 relative z-30 border-b backdrop-blur"> <div class="app-layout relative flex min-h-18 w-full items-baseline justify-between sm:items-center"> <a href="/" class="absolute inline-flex items-baseline gap-3 py-1 text-lg leading-8 font-semibold whitespace-nowrap sm:static sm:my-auto sm:text-xl sm:leading-none"> <span>随便做做</span> <span class="text-muted-foreground hidden font-mono text-[0.68rem] font-normal sm:inline">
+howIdobetter
+</span> </a> <nav id="nav-menu" class="flex w-full flex-col items-center sm:ms-2 sm:flex-row sm:justify-end sm:py-0"> <button id="menu-btn" class="focus-outline self-end p-3 sm:hidden" aria-label="打开菜单" aria-expanded="false" aria-controls="menu-items" data-label-open="打开菜单" data-label-close="关闭菜单"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="hidden" viewBox="0 0 24 24" id="close-icon"><path stroke="none" d="M0 0h24v24H0z" /><path d="M18 6 6 18M6 6l12 12" /></svg> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="icon icon-tabler icons-tabler-outline icon-tabler-menu-deep" viewBox="0 0 24 24" id="menu-icon"><path stroke="none" d="M0 0h24v24H0z" /><path d="M4 6h16M7 12h13M10 18h10" /></svg> </button> <ul id="menu-items" class="border-border [&>li>a]:hover:text-accent mt-3 hidden w-full grid-cols-2 place-content-center gap-1 border-t py-3 sm:mt-0 sm:flex sm:w-auto sm:items-center sm:gap-x-1 sm:border-0 sm:py-0 [&>li>a]:block [&>li>a]:px-4 [&>li>a]:py-3 [&>li>a]:text-center [&>li>a]:font-medium [&>li>a]:transition-colors sm:[&>li>a]:px-3 sm:[&>li>a]:py-2"> <li class="col-span-2"> <a href="/posts/" class="active-nav"> 文章 </a> </li> <li class="col-span-2"> <a href="/tags/"> 标签 </a> </li> <li class="col-span-2"> <a href="/about/"> 关于 </a> </li> <li class="col-span-2"> <a href="/archives/" title="归档" aria-label="归档" class="group inline-flex items-center gap-1 hover:text-accent focus-outline flex size-full justify-center p-3 sm:relative sm:size-10 sm:p-0">  <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="hidden sm:absolute sm:top-1/2 sm:left-1/2 sm:block sm:size-6 sm:-translate-x-1/2 sm:-translate-y-1/2" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v0a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8M10 12h4" /></svg> <span class="sm:sr-only">归档</span>  </a> </li> <li class="col-span-1 flex items-center justify-center"> <a href="/search/" title="搜索" aria-label="搜索" class="group inline-flex items-center gap-1 hover:text-accent focus-outline relative size-11 sm:size-10">  <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="absolute top-1/2 left-1/2 size-6 -translate-x-1/2 -translate-y-1/2" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M3 10a7 7 0 1 0 14 0 7 7 0 1 0-14 0M21 21l-6-6" /></svg> <span class="sr-only">搜索</span>  </a> </li> <li class="col-span-1 flex items-center justify-center"> <div class="border-border flex overflow-hidden rounded-full border text-xs font-semibold" aria-label="Language"> <a href="/posts/cs168-datacenter-06-sdn/" title="中文" aria-current="true" class="px-2 py-1 transition-colors bg-accent text-accent-foreground"> 中 </a><a href="/en/posts/cs168-datacenter-06-sdn/" title="English" class="px-2 py-1 transition-colors hover:text-accent"> EN </a> </div> </li> <li class="col-span-1 flex items-center justify-center"> <button id="theme-btn" class="focus-outline hover:[&>svg]:stroke-accent relative size-12 rounded-full p-4 transition-colors sm:size-10" title="切换主题" aria-label="auto" aria-live="polite" data-label-light="切换为浅色主题" data-label-dark="切换为深色主题"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="absolute top-[50%] left-[50%] translate-[-50%] scale-100 rotate-0 transition-[transform,opacity] dark:scale-0 dark:-rotate-90" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M12 3h.393a7.5 7.5 0 0 0 7.92 12.446A9 9 0 1 1 12 2.992z" /></svg> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="absolute top-[50%] left-[50%] translate-[-50%] scale-0 rotate-90 transition-[transform,opacity] dark:scale-100 dark:rotate-0" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M14.828 14.828a4 4 0 1 0-5.656-5.656 4 4 0 0 0 5.656 5.656M6.343 17.657l-1.414 1.414M6.343 6.343 4.929 4.929M17.657 6.343l1.414-1.414M17.657 17.657l1.414 1.414M4 12H2M12 4V2M20 12h2M12 20v2" /></svg> </button> </li> </ul> </nav> </div> </header> <script type="module">function c(){const e=document.querySelector("#menu-btn"),t=document.querySelector("#menu-items"),n=document.querySelector("#menu-icon"),s=document.querySelector("#close-icon");if(!e||!t||!n||!s)return;const a=e.dataset.labelOpen??"Open menu",l=e.dataset.labelClose??"Close menu";e.addEventListener("click",()=>{const o=e.getAttribute("aria-expanded")==="true";e.setAttribute("aria-expanded",o?"false":"true"),e.setAttribute("aria-label",o?a:l),t.classList.toggle("hidden"),t.classList.toggle("grid"),n.classList.toggle("hidden"),s.classList.toggle("hidden")})}c();document.addEventListener("astro:after-swap",c);</script> <div class="reading-progress" aria-hidden="true"> <div class="reading-progress-bar"></div> </div> <div class="app-layout flex items-center justify-start"><a id="back-button" href="/" class="group inline-flex items-center gap-1 hover:text-accent focus-outline hover:text-foreground/75 -ms-2 mt-8 mb-2"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block size-6 rtl:rotate-180" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="m15 6-6 6 6 6" /></svg><span>返回</span> </a></div><script type="module">function o(){const t=document.querySelector("#back-button"),e=sessionStorage.getItem("backUrl");e&&t&&(t.href=e)}document.addEventListener("astro:page-load",o);o();</script> <main id="main-content" class="app-layout pb-8" data-pagefind-body> <header class="border-border max-w-readable border-b pt-8 pb-8 sm:pt-12"> <h1 style="view-transition-name:cs-168-u00ff1au008f6fu004ef6u005b9au004e49u007f51u007edc" class="text-foreground text-3xl leading-tight font-semibold text-balance sm:text-5xl"> CS168：软件定义网络 </h1> <p class="text-muted-foreground mt-4 text-lg leading-8 text-pretty"> CS168 中文译文：软件定义网络，完整保留原教材的技术推导、示例与图表。 </p> <div class="mt-5 flex flex-wrap items-center gap-3"> <div class="text-muted-foreground flex items-center gap-x-2 font-mono"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block size-5 min-w-5" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" /><path d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM16 3v4M8 3v4M4 11h16M7 14h.013M10.01 14h.005M13.01 14h.005M16.015 14h.005M13.015 17h.005M7.01 17h.005M10.01 17h.005" /></svg>  <time class="text-sm sm:text-base" datetime="2026-07-12T00:00:00.000Z"> 2026年7月12日 </time> </div> <a href="https://github.com/howIdobetter/My-Blog/edit/main/src/content/posts/cs168-datacenter-06-sdn.md" target="_blank" rel="noopener noreferrer" class="hover:text-accent text-muted-foreground flex justify-baseline gap-1.5 max-sm:hidden"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M7 7H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-1" /><path d="M20.385 6.585a2.1 2.1 0 0 0-2.97-2.97L9 12v3h3zM16 5l3 3" /></svg><span>编辑文章</span></a> </div> </header> <aside class="border-border mt-8 border-y"> <details class="group py-4 sm:hidden"> <summary class="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4"> <span> <span class="mono-label block"> CS168 · 数据中心 </span> <span class="text-accent mt-1 block text-sm font-semibold"> 6 / 7 </span> </span> <span aria-hidden="true" class="text-muted-foreground text-xl transition-transform group-open:rotate-45">
++
+</span> </summary> <ol class="border-border mt-3 border-t pt-2"> <li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-datacenter-01-topology/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 01 </span> <span>CS168：数据中心拓扑</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-datacenter-02-datacenter-cc/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 02 </span> <span>CS168：数据中心拥塞控制</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-datacenter-03-datacenter-routing/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 03 </span> <span>CS168：数据中心路由</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-datacenter-04-datacenter-addressing/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 04 </span> <span>CS168：数据中心寻址</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-datacenter-05-virtualization/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 05 </span> <span>CS168：虚拟化</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-datacenter-06-sdn/" aria-current="page" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm text-accent font-semibold"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 06 </span> <span>CS168：软件定义网络</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-datacenter-07-host-networking/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 07 </span> <span>CS168：主机网络</span> </a> </li> </ol> </details> <div class="hidden py-5 sm:block"> <div class="flex items-baseline justify-between gap-4"> <p class="mono-label">CS168 · 数据中心</p> <p class="text-accent text-sm font-semibold"> 6 / 7 </p> </div> <ol class="border-border mt-4 grid border-t sm:grid-cols-3 lg:grid-cols-6"> <li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-datacenter-01-topology/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 01 </span> <span class="mt-1 block"> CS168：数据中心拓扑 </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-datacenter-02-datacenter-cc/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 02 </span> <span class="mt-1 block"> CS168：数据中心拥塞控制 </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-datacenter-03-datacenter-routing/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 03 </span> <span class="mt-1 block"> CS168：数据中心路由 </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-datacenter-04-datacenter-addressing/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 04 </span> <span class="mt-1 block"> CS168：数据中心寻址 </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-datacenter-05-virtualization/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 05 </span> <span class="mt-1 block"> CS168：虚拟化 </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-datacenter-06-sdn/" aria-current="page" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors bg-muted/60 text-accent font-semibold"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 06 </span> <span class="mt-1 block"> CS168：软件定义网络 </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-datacenter-07-host-networking/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 07 </span> <span class="mt-1 block"> CS168：主机网络 </span> </a> </li> </ol> </div> </aside> <article id="article" class="mt-8 w-full app-prose max-w-readable prose-pre:bg-(--shiki-light-bg) dark:prose-pre:bg-(--shiki-dark-bg)"> <aside class="border-border bg-muted/35 mb-8 border-s-2 px-5 py-4 text-sm leading-6"> <p class="m-0">
+本文译自  <a href="https://textbook.cs168.io/datacenter/sdn.html">CS 168 Textbook</a> 
+，依照 <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh-hans"> CC BY-SA 4.0 </a> 
+许可发布
+
+。<span> 由英文原文完整翻译为简体中文；技术术语在首次出现时保留英文。</span> </p> </aside> <h2 id="软件定义网络">软件定义网络</h2>
+<h2 id="为什么需要软件定义网络">为什么需要软件定义网络？</h2>
+<p>之前，我们了解了如何调整路由协议以适应数据中心环境（例如等价多路径）。如果我们想针对特定网络的限制和用例进一步优化路由协议怎么办？标准路由协议可能不再起作用。</p>
+<p>在本节中，我们将探讨<strong>软件定义网络</strong>，这是一种思考路由和网络管理的全新范例。在路由方面，SDN 架构涉及一个集中控制中心计算路由并将其分发到各个路由器。我们将了解 SDN 如何在数据中心和广域网环境中工作，并讨论这种新方法的优点和缺点。</p>
+<h2 id="软件定义网络简史">软件定义网络简史</h2>
+<p>尽管我们将 SDN 视为专用路由协议的新方法，但 SDN 范式最初是为了解决管理层面的难题而设计的。</p>
+<p>回想一下，管理平面对于网络运行至关重要。路由器不能做任何事情，除非有人配置它们（例如为链路分配成本）并告诉它们要做什么（例如要运行什么路由协议）。此外，我们需要路由器报告错误以保持网络正常运行。历史上，许多管理工作都是手动完成的。</p>
+<p>尽管管理平面如此重要，但对其创新的关注却相对较少。在控制平面，我们看到了许多不同的路由协议，但我们配置和控制路由器的方式发展得更慢。</p>
+<p>在互联网的历史上，使用脚本以编程方式与网络交互的过程一直在缓慢发展。这些脚本接受操作员手动执行的工作，并用代码实现它们（不需要太多智能）。例如，脚本允许自动添加路由器和网络链路的过程。用于修复网络的脚本可能会说：如果路由器出现故障，请检查它是否确实出现故障，重新启动它，如果仍然没有修复，请向操作员报告。</p>
+<p>尽管取得了进展，但这些管理系统长期以来一直是网络运营的瓶颈。每次添加新路由器时，我们可能仍然需要等待人为干预。</p>
+<p>2005 年，Albert Greenberg 等人发表了一篇论文。等人。描述这个问题时说：“今天的数据网络出奇的脆弱且难以管理。我们认为这些问题的根源在于控制和管理平面的复杂性。”</p>
+<p>针对这些问题，研究人员开始思考运行网络系统的不同方式。这导致了更激进的提议，重新构想了路由器的基本设计。</p>
+<p>我们将看到的概念最初是在 2003 年考虑的，尽管当时它们并没有获得太大的推动力。网络管理的挫折加速了新管理模式的发展。到 2008 年，出现了更大的势头，导致了 OpenFlow 交换机接口（我们很快就会看到）。</p>
+<p>到 2011 年，行业明显正在朝着这个新方向发展，主要网络运营商（Google、雅虎、Verizon、微软、Facebook）和供应商（思科、瞻博网络、惠普、戴尔）成立了开放网络基金会 (ONF)。 Nicira 是一家专注于 SDN 的初创公司，开发了 OpenFlow 接口，2012 年的初创公司估值为 4000 万美元。</p>
+<h2 id="路由器的垂直集成与标准化">路由器的垂直集成与标准化</h2>
+<p>如果我们想重新构想路由器的设计，在实践中将如何实施？路由器上的技术如何随着时间的推移而变化？</p>
+<p>如果您的网络需要路由器，您可能会从 Cisco 或 Juniper 等主要设备供应商处购买路由器。为了确保路由器相互兼容，所有主要设备供应商都根据一些预先定义的标准来构建他们的路由器。</p>
+<p>这种商业模式可能会使新方法的创新和实验变得困难。假设您对路由协议有一个新想法。您需要让标准机​​构批准该协议，这可能需要数年时间。然后，您必须等待供应商升级其制造以符合新标准。</p>
+<p>标准化还使得路由器对于实施定制解决方案的用户来说不太灵活。如果您遇到特定于您的网络的问题，但其他人没有遇到此问题，那么您的解决方案可能不会被标准机构采用。供应商希望制造出满足每个人需求的路由器，如果没有其他人想要，他们不一定会实施最适合您的解决方案。</p>
+<p>另一方面，标准化还意味着，如果其他人遇到您没有的问题，路由器可能会提供解决他们问题的解决方案，即使您不需要它。对于您的特定网络而言，这可能会使路由器变得不必要的复杂。</p>
+<p>标准化也使实验和研究变得困难。如果您想尝试一个新想法看看它是否有效，您可能无法购买可以实现您的新想法的路由器。供应商不想构建针对某一特定客户的实验性产品，这甚至可能不起作用。</p>
+<p>创新和实验的另一个主要障碍是路由器的<strong>垂直集成</strong>。您购买的路由器已经具有芯片上连接的所有三个平面的功能。没有任何模块化功能可以让您仅更换控制平面本身。</p>
+<img width="300px" src="/image/cs168-textbook/datacenter/6-063-vertical-integration.png">
+<h2 id="路由器创新">路由器创新</h2>
+<p>如果我们确实想创新路由器，我们可以在每个层面进行哪些创新，以及我们将使用哪些类型的现有标准？</p>
+<p>数据平面由IEEE（电气工程组）标准化，要求大家严格遵循标准。如果连接来自不同供应商的两个路由器，我们必须确保双方以相同一致的格式沿着物理线路发送位。</p>
+<p>数据平面创新通常是由对更高带宽路由器的需求驱动的，并且通常不会引入新功能。这种发展非常缓慢，以 2-3 年为增量，因为我们必须解决物理硬件问题并设计芯片以增加带宽。由于核心数据平面功能相对稳定，路由器创新并不是真正集中在数据平面上，开发周期慢也没关系。</p>
+<p>控制平面由 IETF（RFC 背后的网络组织）标准化。尽管核心功能大多是标准化的，但供应商有时会添加自己的扩展。例如，我们假设每个路由器（即使它们来自不同的路由器）都遵循相同的路由协议。</p>
+<p>控制平面创新（例如新的路由协议）可能需要几年时间才能被采用。您可能必须提交 RFC 提案草案，社区可能会花一些时间讨论该提案，然后才能同意其条款。</p>
+<p>管理平面也由 IETF 标准化，尽管标准化程度要低得多。不同的运营商可以使用不同的软件来配置他们的路由器，我们并不需要不同的供应商就某些标准化软件达成一致。由于该平面只是松散标准化，因此存在许多具有不同特征的不同方法。</p>
+<p>总结：数据平面是标准化的（但我们并没有真正考虑新功能），控制平面是标准化的（但我们想尝试新的解决方案），而管理平面并不是真正标准化。</p>
+<h2 id="激进构想解耦路由器">激进构想：解耦路由器</h2>
+<p>标准化和垂直整合使得创新和实验变得困难。这导致了通过将平面分成不同的抽象层来分解路由器的激进想法。我们现在可以单独购买数据和控制平面功能，而不是购买具有所有三个平面的单个路由器。这使我们能够彼此独立地更改图层。</p>
+<p>为了连接这三层，我们需要在抽象层之间有一个 API。在垂直耦合路由器中，我们不关心数据平面和控制平面如何相互通信。但是，如果我们单独购买数据平面，并且想要在上面设计自己的自定义控制平面，则需要一个与数据平面交互的接口。</p>
+<img width="300px" src="/image/cs168-textbook/datacenter/6-064-sdn1.png">
+<p>更激进的想法是不再只考虑路由器的三个平面，而是设计一种新的系统架构，将数据平面和控制平面自然地分开。</p>
+<img width="900px" src="/image/cs168-textbook/datacenter/6-065-sdn2.png">
+<p>在底部，我们有商用网络设备。您可以将这些视为仅购买数据平面本身。这些路由器通过网络操作系统接收来自控制程序的指令，并根据这些指令简单地转发数据包。这些路由器根本不需要考虑路由协议，因此它们可以更便宜。</p>
+<p>中间是网络操作系统。您可以将其视为连接数据平面路由器和控制平面程序的 API。网络操作系统提供了可以传递给控制程序的路由器的抽象（例如作为图表）。然后，控制程序可以向网络操作系统发送路由指令，而不必担心如何对特定路由器进行编程。网络操作系统可以接受这些指令并将其编程到各个路由器上。</p>
+<p>在顶部，我们有控制程序。您可以将其视为购买或自行实现控制平面。在这里，操作员从网络操作系统接收网络的抽象（例如图），并可以使用它来编写自己的自定义路由协议。然后，生成的路由可以传递到网络操作系统，网络操作系统会将它们编程到路由器上。</p>
+<h2 id="openflow-api-格式">OpenFlow API 格式</h2>
+<p><strong>OpenFlow</strong> 是一个用于与路由器数据平面交互的 API。运营商编写自己的奇特代码，与路由器分开，计算通过网络的路由。然后，这些路由可以被编程到转发芯片上。</p>
+<img width="300px" src="/image/cs168-textbook/datacenter/6-066-openflow1.png">
+<p>OpenFlow范例与传统路由器不同，传统路由器的控制平面是在路由器中实现的，并且没有明确的API用于将自定义路由编程到转发芯片上。</p>
+<p>OpenFlow API 定义了一个<strong>流表</strong>抽象来描述路由和转发规则。操作员代码可以输出它想要的任何规则和路由，并将它们安装在路由器上，只要它们是流表格式的。</p>
+<p>API 的基本构建块是流表，您可以将其视为转发表的通用版本。每个流表都由键值对组成，就像转发表一样。键指定数据包的<strong>匹配</strong>内容。这可以是目的地前缀、精确目的地、五元组或其他相对简单的匹配。相应的值指定当数据包匹配时要设置什么<strong>操作</strong>。该操作可以将数据包发送到下一跳（如转发表），但也可以指定更奇特的操作，例如添加额外的标头。</p>
+<p>输出格式是一系列一个或多个编号的流表，其中每个表都有自己不同的匹配操作条目。然后可以将这些流表编程到转发芯片上。</p>
+<img width="700px" src="/image/cs168-textbook/datacenter/6-068-openflow3.png">
+<p>当数据包到达路由器时，会按顺序检查每个表（例如表 0、表 1、表 2 等），当存在匹配项时，我们记下相应的操作（尚未执行）。最终，一旦根据最终表检查了数据包，我们写下的任何操作都会应用于该数据包。</p>
+<p>还有一些用于跳到后面的表的特殊操作，我们可以在以下规则中使用它们：如果源端口与此数字匹配，则跳到表 5 以设置其他操作。</p>
+<img width="800px" src="/image/cs168-textbook/datacenter/6-067-openflow2.png">
+<p>操作员可以运行他们想要生成流表的任何代码，并且流表可以比目的地/下一跳转发表更通用。然而，我们生成的规则（匹配/动作对）仍然受到专用转发芯片硬件的限制。转发芯片针对速度进行了优化，并且可能无法处理复杂的匹配规则，例如“如果 TCP 有效负载是英文，则设置此操作”。</p>
+<p>因此，我们在实践中看到的流表最终看起来与我们已经看到的表非常相似。常见的匹配规则包括 IP 目的地上的最长前缀匹配、用于识别流的 5 元组以及封装标头（例如 MPLS）上的精确匹配。</p>
+<p>如果转发规则没有那么不同，为什么还要使用 OpenFlow？请记住，主要优点是它为操作员提供了控制平面的完全自由。我们不再局限于距离向量或链路状态协议。</p>
+<img width="400px" src="/image/cs168-textbook/datacenter/6-069-openflow4.png">
+<h2 id="灵活控制平面的优势">灵活控制平面的优势</h2>
+<p>我们的新架构使运营商能够灵活地在控制平面实施新的路由协议。这种方法有哪些好处？</p>
+<p>运营商可以实施最适合其特定需求的自定义路由协议。运营商不再受到标准机构和供应商的限制。</p>
+<p>灵活性还为我们提供了简化的机会。例如，如果标准化协议包含我们不需要的功能，则我们不必在自定义解决方案中实现它们。更简单的协议可以具有更少的代码和更简单的代码，这可能允许更容易地开发和维护该协议。</p>
+<p>最后，灵活的控制平面可以在控制程序中集中计算路由，而不是分布在多个路由器上。集中化也有几个好处。</p>
+<p>集中化可以带来更智能的路由决策，并由此获得出色的性能。Google 工程师在 2013 年的一份报告中介绍了他们部署的 SDN 架构：集中式流量工程服务在多条路径间拆分应用流量，依据应用的优先级和需求平衡容量，使链路利用率接近 100%。Microsoft 同年发表的一篇论文也介绍了如何利用 OpenFlow 控制器，在软件驱动的广域网（WAN）中实现高利用率。</p>
+<p>更智能的路由决策可以帮助优化除性能之外的标准路由协议无法轻松优化的其他标准。例如，美国政府网络可能会实施地理围栏规则，规定不要通过加拿大境内的链接发送流量。或者，广播电视网络可能希望优化路径多样性以提高可靠性。我们可以强制两个流通过不共享任何链接的路径传输，这样，如果某个链接出现故障，只有其中一个流受到影响。两条路径可以互为备份。</p>
+<p>集中化还可以使路由协议更容易收敛。在分布式协议中，如果网络发生变化，路由器必须协调以收敛到新的路由状态。在这种集中式模型中，如果链路发生故障，该路由器可以告诉老板，老板可以重新计算路由并将新路由安装在路由器上。</p>
+<h2 id="流量工程">流量工程</h2>
+<p>灵活的控制平面使我们能够执行<strong>流量工程</strong>，这意味着我们可以比标准分布式路由协议更智能、更高效的方式路由流量。</p>
+<img width="700px" src="/image/cs168-textbook/datacenter/6-070-engineering1.png">
+<p>假设有两个连接：10 Gbps 的 S1-D 和 10 Gbps 的 S2-D。如果我们只运行标准的最低成本路由，两个流都会沿着底部路径发送流量。底部路径将会拥塞（10 Gbps 链路上的 20 Gbps），而顶部路径的带宽则处于未使用状态。</p>
+<p>通过更智能的路由方案，我们可以沿着顶部路径发送 S1-D 流量，沿着底部路径发送 S2-D 流量。使用流量工程，我们迫使一些数据包采取更长的路线，以便更好地利用网络中的带宽。</p>
+<img width="700px" src="/image/cs168-textbook/datacenter/6-071-engineering2.png">
+<p>为了计算这些路由，我们可以修改最低成本路由，并强制流量应位于具有足够容量的最短路径上。我们还可以强制执行其他约束而不是容量，例如延迟。由此产生的算法称为<strong>约束最短路径优先 (cSPF)</strong>。</p>
+<p>现在，假设 S1-D 需要 12 Gbps，S2-D 需要 8 Gbps。 cSPF 将沿不同路径发送流以最大化带宽，但 S1-D 通过 10 Gbps 链路发送 12 Gbps。</p>
+<p>为了解决这个问题，我们的流量工程可以更加智能，并将流量拆分到不同的路径上。 S1-D 可以沿顶部路径发送 10 Gbps 的流量，并沿底部路径发送剩余的 2 Gbps。</p>
+<p>同样，我们的流量工程使我们能够实现自定义逻辑，从而更好地利用网络容量。</p>
+<img width="700px" src="/image/cs168-textbook/datacenter/6-074-engineering5.png">
+<p>我们如何使用之前的 OpenFlow API 实际上实现通过网络的分割路径？请记住，我们的路由决策仍应遵循转发表可以理解的简单规则。</p>
+<p>一种方法是使用封装。在发送方，我们可以添加规则来添加额外的标头，其中一些数据包获得标签 0，其余的数据包获得标签 1。该标签告诉我们沿哪条路径发送流量。</p>
+<img width="700px" src="/image/cs168-textbook/datacenter/6-075-engineering6.png">
+<p>现在，在 R1 处，我们可以添加简单的规则，将标签 0 数据包向上路由到 R2，将标签 1 数据包向下路由到 R3。除了我们用于约束最低成本路由的其他规则之外，还可以应用此想法（例如，流表可能具有其他目的地或其他流的其他条目）。</p>
+<h2 id="集中式流量工程与全局最优决策">集中式流量工程与全局最优决策</h2>
+<p>自定义路由协议的 SDN 模型的一大区别是集中化。在原始模型中，每个路由器都运行自己的路由协议。现在，我们可以让路由器外部的一台计算机计算所有路由，然后使用流表 API 将这些路由安装在路由器上。</p>
+<p>集中化使我们能够做出<strong>全局最优决策</strong>。在分布式协议中，每个路由器都为自己做出最佳决策，但这可能不是其他路由器的最佳决策。在集中式模型中，老板可以利用其网络的全局视图来决定什么对每个人都是最好的，并告诉路由器遵循该决定。</p>
+<img width="700px" src="/image/cs168-textbook/datacenter/6-072-engineering3.png">
+<p>考虑具有两个流的网络：20 Gbps 的 S1-D 和 100 Gbps 的 S2-D。假设我们尚未实现将流拆分到多个路径的支持。</p>
+<p>假设 20 Gbps S1-D 流首先启动。首先使用约束最短路径，S1 可以选择使用底部路径。从 S1 的角度来看，这是一个局部最优的决策（顶部和底部路径都同样好）。</p>
+<p>随后，100 Gbps S2-D 流开始。现在，使用约束最短路径优先，S2-D 没有任何单一路径可以满足其要求。顶部路径（20Gbps）和底部路径（80Gbps）容量均不足。</p>
+<p>这里的关键问题是，每个路由器独立做出自己的决定，没有协调。</p>
+<p>通过引入集中控制器，控制器可以了解整个网络结构和每个流的需求，更智能地为每个流分配路径。由此产生的决策是全局最优的，并提高了网络效率。</p>
+<img width="700px" src="/image/cs168-textbook/datacenter/6-073-engineering4.png">
+<p>集中式流量工程可以根据运营商想要优化的内容做出更智能的路由决策。例如，我们可以将流量分类为高优先级或低优先级，并做出优化网络利用率和不同应用程序需求的决策。</p>
+<h2 id="数据中心覆盖网络中的-sdn">数据中心覆盖网络中的 SDN</h2>
+<p>在上一节中，我们看到虚拟交换机可以应用封装来连接覆盖网络和底层网络。给定虚拟地址，我们可以添加具有相应物理地址的标头，这允许数据包沿着底层网络发送。但是，我们如何知道虚拟地址和物理地址之间的映射呢？</p>
+<p>我们还看到封装可用于支持单个数据中心中的多个租户，每个租户都运行自己的专用网络。交换机可以添加带有虚拟网络 ID 的标头。但是，我们如何知道要使用哪个虚拟网络 ID？</p>
+<p>数据中心可以使用集中式SDN控制器来解决这些问题。每个租户都可以操作自己的控制器。创建新 VM 时，SDN 会了解其虚拟地址和物理地址。然后，SDN 可以更新其他虚拟交换机中的转发表，使用新的虚拟/物理地址映射添加封装规则。</p>
+<img width="900px" src="/image/cs168-textbook/datacenter/6-076-sdn-overlay.png">
+<p>例如，假设使用虚拟 IP 192.0.2.1 和物理 IP 2.2.2.2 创建 Coke VM 2。 SDN 知道 Coke VM 1 位于物理服务器 1.1.1.1 上，因此它可以转到 1.1.1.1 上的虚拟交换机并为新的 Coke VM 2 添加封装规则。</p>
+<p>1.1.1.1 处的流表可能会显示：如果收到目的地为 192.0.2.1 的数据包，请添加可乐虚拟网络 ID 为 42 的标头。此外，添加对应物理地址 2.2.2.2 的标头。然后，沿着底层网络发送数据包。</p>
+<h2 id="数据中心覆盖网络采用-sdn-的优势">数据中心覆盖网络采用 SDN 的优势</h2>
+<p>为什么我们要使用集中式 SDN 架构来支持数据中心的虚拟化和多租户，而不是更标准的路由协议？</p>
+<p>集中式 SDN 架构使我们能够将覆盖网络和底层网络干净地分成两个可扩展的层。在传统架构中，底层网络中的路由器必须处理自定义封装标头（例如虚拟网络 ID）。 SDN 允许底层网络保持简单，无需考虑虚拟化或多租户。</p>
+<p>集中化为我们提供了一种在终端主机上实现控制平面的简单方法，无需任何复杂的路由协议。控制器了解新主机并相应地更新其他主机。如果没有集中控制器，我们可能需要一些复杂的分布式方案来确定要添加哪些封装标头。</p>
+<p>这个SDN架构也向我们展示了为什么覆盖网络可以很好地扩展。租户的SDN控制器只需要知道属于该特定租户的VM。相比之下，如果我们使用传统架构，则可能必须将新的可口可乐虚拟机通告给所有其他虚拟机，甚至是百事可乐虚拟机。</p>
+<h2 id="数据中心底层网络中的-sdn">数据中心底层网络中的 SDN</h2>
+<p>数据中心底层是一个物理网络，就像任何其他网络一样，尽管具有特殊的拓扑。许多通用网络挑战（例如实现链路的高利用率）也适用于数据中心底层网络。这意味着我们也可以将SDN应用到底层网络。</p>
+<p>底层网络的SDN可以帮助我们通过数据中心有效地路由数据包。例如，运营商可能希望沿着具有小延迟的链路发送老鼠流，并且沿着具有高带宽的链路发送大象流。</p>
+<img width="900px" src="/image/cs168-textbook/datacenter/6-077-sdn-underlay.png">
+<p>在我们的底层 Clos 网络中，每流负载均衡（用于选择路径的哈希 5 元组）仍然可以沿同一路径发送多个大象流。即使两个大象流使用不同的路径，这些路径也可能共享链路，并且这些链路可能会变得拥塞。 SDN 控制器可以通过协调流并将它们放置到不重叠的路径上来解决这个问题。</p>
+<img width="800px" src="/image/cs168-textbook/datacenter/6-078-sdn-paper.png">
+<p>这篇 2022 年 Google 论文描述了通过使用 SDN 更智能地路由流量来消除 Clos 网络中的层（更少的链路、更便宜的数据中心）。</p>
+<p>超大规模数据中心通常在覆盖网络和底层网络中使用 SDN。这些通常作为解耦系统来实现。有一个 SDN 考虑底层，还有一个单独的 SDN 考虑覆盖层。</p>
+<h2 id="广域网中的-sdn">广域网中的 SDN</h2>
+<p>除了数据中心之外，SDN 在一般广域网中也很有用，特别是当带宽的有效利用至关重要时。例如，在前面的流量工程示例中，想象一下如果我们的 10 Gbps 链路是海底电缆。没有廉价的方法来添加额外的带宽，因此优化必须集中于有效利用我们现有的带宽。</p>
+<h2 id="集中控制的缺点">集中控制的缺点</h2>
+<p>集中化并不是免费的，并且有一些缺点。</p>
+<p>缺点之一是可靠性。在传统网络中，如果路由器发生故障，路由协议将围绕故障进行收敛。其他路由器可以沿着其他路径重新路由流量。相比之下，如果中央控制器发生故障，我们就没有办法再更新网络，路由器也不知道如何适应变化。</p>
+<p>注意：我们将集中控制器绘制为单个实体，但它不需要在单个服务器上运行。控制平面计算可以跨多个服务器进行，​​这些服务器协调以逻辑集中的方式运行。这与原始模型不同，在原始模型中，路由器进行协调，但仍然做出自己的分布式决策。这有助于避免硬件中出现单点故障，尽管控制器作为逻辑单元仍然可能发生故障（例如代码中的错误）。</p>
+<p>集中化还带来了可扩展性问题。控制器必须为每个人做出决策，这对于大型网络来说可能会变得昂贵。相比之下，在传统网络中，每个路由器只需为自己执行计算。</p>
+<p>集中化还可能带来不同类型的复杂性。在传统网络中，我们可以购买路由器并连接它，它或多或少会立即开始工作。有了中央控制器，我们就面临着额外的基础设施挑战。我们把这个控制器放在哪里？我们如何以可靠的方式将其连接到各个路由器？</p>
+<p>这是一个活跃的研究领域，包括 Sylvia Ratnasamy 和 Rob Shakir（伯克利 CS 168 讲师）的项目。</p>
+<h2 id="管理平面与数据平面中的-sdn">管理平面与数据平面中的 SDN</h2>
+<p>我们将 SDN 视为实现控制平面的新方法。但是，导致 SDN 发展的最初挫折在于管理层面。</p>
+<p>事实证明，SDN在控制平面使用的许多设计范式也可以适用于管理平面。例如，我们看到 SDN 依赖于定义良好的编程 API（例如 OpenFlow）。</p>
+<p>SP24 中 TODO 时间耗尽。</p> </article> <hr class="my-8 border-dashed"> <a href="https://github.com/howIdobetter/My-Blog/edit/main/src/content/posts/cs168-datacenter-06-sdn.md" target="_blank" rel="noopener noreferrer" class="hover:text-accent text-muted-foreground flex justify-baseline gap-1.5 sm:hidden"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M7 7H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-1" /><path d="M20.385 6.585a2.1 2.1 0 0 0-2.97-2.97L9 12v3h3zM16 5l3 3" /></svg><span>编辑文章</span></a> <div id="btt-btn-container" class="fixed inset-e-4 bottom-8 z-50 md:sticky md:inset-e-auto md:float-end md:me-1 translate-y-14 opacity-0 transition duration-500"> <button data-button="back-to-top" aria-label="回到顶部" class="group bg-background relative px-2 py-1 size-14 rounded-full shadow-xl md:h-8 md:w-fit md:rounded-md md:shadow-none md:focus-visible:rounded-none md:bg-background/35 md:bg-clip-padding md:backdrop-blur-lg"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block rotate-90 md:hidden" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 12h14M5 12l6 6M5 12l6-6" /></svg> <span class="group-hover:text-accent sr-only text-sm md:not-sr-only"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block size-4" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" /><path d="M12 5v14M16 9l-4-4M8 9l4-4" /></svg> 回到顶部 </span> </button> </div> <script data-astro-rerun>
+  function backToTop() {
+    const btnContainer = document.querySelector("#btt-btn-container");
+    const backToTopBtn = document.querySelector("[data-button='back-to-top']");
+    const pageHeader = document.querySelector("body > header");
+
+    if (!btnContainer || !backToTopBtn || !pageHeader) return;
+
+    backToTopBtn.addEventListener("click", () => {
+      document.body.scrollTop = 0;
+      document.documentElement.scrollTop = 0;
+    });
+
+    const observer = new IntersectionObserver(([entry]) => {
+      const isVisible = !entry.isIntersecting;
+      if (entry) {
+        btnContainer.classList.toggle("opacity-100", isVisible);
+        btnContainer.classList.toggle("translate-y-0", isVisible);
+        btnContainer.classList.toggle("opacity-0", !isVisible);
+        btnContainer.classList.toggle("translate-y-14", !isVisible);
+      }
+    });
+    observer.observe(pageHeader);
+  }
+  backToTop();
+</script> <ul class="mt-4 mb-8 flex flex-wrap gap-4 sm:my-8"> <li> <a href="/tags/networking/" class="border-border flex items-center gap-1 rounded-full border transition-colors hover:border-accent hover:text-accent focus-visible:text-accent focus-visible:no-underline px-3 py-1.5 text-sm" data-astro-transition-scope="astro-36ssibgs-1"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="text-accent opacity-80 size-3.5" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 9h14M5 15h14M11 4 7 20M17 4l-4 16" /></svg> networking </a> </li><li> <a href="/tags/cs168/" class="border-border flex items-center gap-1 rounded-full border transition-colors hover:border-accent hover:text-accent focus-visible:text-accent focus-visible:no-underline px-3 py-1.5 text-sm" data-astro-transition-scope="astro-36ssibgs-2"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="text-accent opacity-80 size-3.5" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 9h14M5 15h14M11 4 7 20M17 4l-4 16" /></svg> cs168 </a> </li><li> <a href="/tags/course-notes/" class="border-border flex items-center gap-1 rounded-full border transition-colors hover:border-accent hover:text-accent focus-visible:text-accent focus-visible:no-underline px-3 py-1.5 text-sm" data-astro-transition-scope="astro-36ssibgs-3"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="text-accent opacity-80 size-3.5" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 9h14M5 15h14M11 4 7 20M17 4l-4 16" /></svg> course-notes </a> </li><li> <a href="/tags/datacenter/" class="border-border flex items-center gap-1 rounded-full border transition-colors hover:border-accent hover:text-accent focus-visible:text-accent focus-visible:no-underline px-3 py-1.5 text-sm" data-astro-transition-scope="astro-36ssibgs-4"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="text-accent opacity-80 size-3.5" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 9h14M5 15h14M11 4 7 20M17 4l-4 16" /></svg> datacenter </a> </li> </ul>  <hr class="my-8 border-dashed"> <div data-pagefind-ignore class="my-8 grid grid-cols-1 gap-4 sm:grid-cols-2"> <a href="/posts/cs168-datacenter-05-virtualization/" class="soft-panel hover:border-accent/70 hover:text-accent flex w-full gap-3 p-4 transition"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block flex-none rtl:rotate-180" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 12h14M5 12l6 6M5 12l6-6" /></svg> <div> <span class="mono-label">上一篇</span> <div class="mt-1 text-sm leading-6">CS168：虚拟化</div> </div> </a> <a href="/posts/cs168-datacenter-07-host-networking/" class="soft-panel hover:border-accent/70 hover:text-accent flex w-full justify-end gap-3 p-4 text-end transition sm:col-start-2"> <div> <span class="mono-label">下一篇</span> <div class="mt-1 text-sm leading-6">CS168：主机网络</div> </div> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block flex-none rtl:rotate-180" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 12h14M13 18l6-6M13 6l6 6" /></svg> </a> </div> </main> <footer class="app-layout mt-auto"> <div class="border-border text-muted-foreground flex flex-col items-start justify-between gap-6 border-t py-9 text-sm sm:flex-row sm:items-end"> <div> <p class="text-foreground font-semibold">随便做做</p> <p class="mt-1">先记下来，再慢慢改对。</p> </div> <div class="flex items-center gap-5"> <div class="flex flex-wrap items-center gap-1"> <a href="https://github.com/howIdobetter" title="GitHub" class="group inline-flex items-center gap-1 hover:text-accent p-2 hover:rotate-6 sm:p-1">  <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block size-6 scale-125 fill-transparent stroke-current stroke-2 opacity-90 group-hover:fill-transparent sm:scale-110" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" /><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21" /></svg> <span class="sr-only">GitHub</span>  </a> </div> <span class="whitespace-nowrap">© 2026 一剑留名ing</span> </div> </div> </footer>   <script type="module">const a="theme",n="light",r="dark";function i(){const e=localStorage.getItem(a);return e||(window.matchMedia("(prefers-color-scheme: dark)").matches?r:n)}let o=window.__theme?.value??i();function s(){localStorage.setItem(a,o),m()}function m(){const e=document.firstElementChild;e?.setAttribute("data-theme",o),e?.classList.toggle("dark",o===r);const t=document.querySelector("#theme-btn"),c=o===n?t?.dataset.labelDark:t?.dataset.labelLight;c&&(t?.setAttribute("aria-label",c),t?.setAttribute("title",c));const l=window.getComputedStyle(document.body).backgroundColor;document.querySelector("meta[name='theme-color']")?.setAttribute("content",l)}function d(){m(),document.querySelector("#theme-btn")?.addEventListener("click",()=>{o=o===n?r:n,s()})}d();document.addEventListener("astro:after-swap",d);document.addEventListener("astro:before-swap",e=>{const t=document.querySelector("meta[name='theme-color']")?.getAttribute("content");t&&e.newDocument.querySelector("meta[name='theme-color']")?.setAttribute("content",t)});window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change",({matches:e})=>{o=e?r:n,s()});</script> </body> </html> <script data-astro-rerun>
+  function addHeadingLinks() {
+    const isZh = document.documentElement.lang === "zh-CN";
+    const headings = Array.from(
+      document.querySelectorAll("h2, h3, h4, h5, h6")
+    );
+    for (const heading of headings) {
+      heading.classList.add("group");
+      const link = document.createElement("a");
+      link.className =
+        "heading-link ms-2 no-underline opacity-75 md:opacity-0 md:group-hover:opacity-100 md:focus:opacity-100";
+      link.href = "#" + heading.id;
+      link.setAttribute(
+        "aria-label",
+        isZh
+          ? `链接到本节：${heading.textContent}`
+          : `Link to section: ${heading.textContent}`
+      );
+
+      const span = document.createElement("span");
+      span.ariaHidden = "true";
+      span.innerText = "#";
+      link.appendChild(span);
+      heading.appendChild(link);
+    }
+  }
+  addHeadingLinks();
+
+  function attachCopyButtons() {
+    const isZh = document.documentElement.lang === "zh-CN";
+    const copyButtonLabel = isZh ? "复制" : "Copy";
+    const copiedButtonLabel = isZh ? "已复制" : "Copied";
+    const codeBlocks = Array.from(document.querySelectorAll("pre"));
+
+    for (const codeBlock of codeBlocks) {
+      const wrapper = document.createElement("div");
+      wrapper.style.position = "relative";
+
+      const computedStyle = getComputedStyle(codeBlock);
+      const hasFileNameOffset =
+        computedStyle.getPropertyValue("--file-name-offset").trim() !== "";
+
+      const topClass = hasFileNameOffset
+        ? "top-(--file-name-offset)"
+        : "-top-3";
+
+      const copyButton = document.createElement("button");
+      copyButton.className = `copy-code absolute end-3 ${topClass} rounded bg-muted border border-muted px-2 py-1 text-xs leading-4 text-foreground font-medium`;
+      copyButton.innerHTML = copyButtonLabel;
+      copyButton.setAttribute("aria-label", copyButtonLabel);
+      copyButton.setAttribute("aria-live", "polite");
+      codeBlock.setAttribute("tabindex", "0");
+      codeBlock.appendChild(copyButton);
+
+      codeBlock?.parentNode?.insertBefore(wrapper, codeBlock);
+      wrapper.appendChild(codeBlock);
+
+      copyButton.addEventListener("click", async () => {
+        await copyCode(codeBlock, copyButton);
+      });
+    }
+
+    async function copyCode(block, button) {
+      const code = block.querySelector("code");
+      const text = code?.innerText;
+
+      await navigator.clipboard.writeText(text ?? "");
+
+      button.innerText = copiedButtonLabel;
+      button.setAttribute("aria-label", copiedButtonLabel);
+
+      setTimeout(() => {
+        button.innerText = copyButtonLabel;
+        button.setAttribute("aria-label", copyButtonLabel);
+      }, 700);
+    }
+  }
+  attachCopyButtons();
+
+  /** Accessible image lightbox for article images. */
+  function initLightbox() {
+    const article = document.getElementById("article");
+    if (!article) return;
+
+    const prefersReducedMotion = () =>
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    let overlay = null;
+    let lastFocused = null;
+
+    // Defer attribute mutations so they don't push the LCP timestamp.
+    // Event listeners below use delegation and don't need the attributes to exist yet.
+    requestAnimationFrame(() => {
+      const images = Array.from(article.querySelectorAll("img"));
+      for (const image of images) {
+        if (image.closest("a")) continue;
+        image.setAttribute("role", "button");
+        image.setAttribute("tabindex", "0");
+        image.setAttribute("aria-haspopup", "dialog");
+        image.setAttribute(
+          "aria-label",
+          image.alt ? `Zoom image: ${image.alt}` : "Zoom image"
+        );
+      }
+    });
+
+    function open(src, alt, trigger) {
+      if (overlay) return;
+      lastFocused = trigger ?? document.activeElement;
+
+      overlay = document.createElement("div");
+      overlay.setAttribute("role", "dialog");
+      overlay.setAttribute("aria-modal", "true");
+      overlay.setAttribute(
+        "aria-label",
+        alt ? `Image preview: ${alt}` : "Image preview"
+      );
+      overlay.className =
+        "fixed inset-0 z-50 flex cursor-zoom-out items-center justify-center bg-black/70 backdrop-blur-sm opacity-0 transition-opacity duration-200 motion-reduce:transition-none";
+
+      const closeButton = document.createElement("button");
+      closeButton.type = "button";
+      closeButton.setAttribute("aria-label", "Close image preview");
+      closeButton.className =
+        "absolute end-4 top-4 rounded p-2 text-3xl leading-none text-white";
+      closeButton.innerHTML = "&#10005;";
+      closeButton.addEventListener("click", close);
+
+      const image = document.createElement("img");
+      image.src = src;
+      image.alt = "";
+      image.className =
+        "max-h-[90dvh] max-w-[90dvw] cursor-default object-contain";
+
+      overlay.append(closeButton, image);
+      overlay.addEventListener("click", e => {
+        if (e.target === overlay && currentScale <= 1) close();
+      });
+
+      let currentScale = 1;
+      let translateX = 0;
+      let translateY = 0;
+      let initialDist = 0;
+      let initialScale = 1;
+      let panStartX = 0;
+      let panStartY = 0;
+      let panStartTranslateX = 0;
+      let panStartTranslateY = 0;
+      let lastTapTime = 0;
+
+      function applyTransform() {
+        image.style.transform = `scale(${currentScale}) translate(${translateX}px, ${translateY}px)`;
+      }
+
+      function resetTransform() {
+        currentScale = 1;
+        translateX = 0;
+        translateY = 0;
+        image.style.transform = "";
+      }
+
+      overlay.addEventListener(
+        "touchstart",
+        e => {
+          const t = e.touches;
+          if (t.length === 2) {
+            initialDist = Math.hypot(
+              t[1].clientX - t[0].clientX,
+              t[1].clientY - t[0].clientY
+            );
+            initialScale = currentScale;
+          } else if (t.length === 1) {
+            const now = Date.now();
+            if (now - lastTapTime < 300) {
+              e.preventDefault();
+              if (currentScale > 1) {
+                resetTransform();
+              } else {
+                currentScale = 2;
+                translateX = 0;
+                translateY = 0;
+                applyTransform();
+              }
+              lastTapTime = 0;
+              panStartX = t[0].clientX;
+              panStartY = t[0].clientY;
+              panStartTranslateX = translateX;
+              panStartTranslateY = translateY;
+            } else {
+              lastTapTime = now;
+              if (currentScale > 1) {
+                panStartX = t[0].clientX;
+                panStartY = t[0].clientY;
+                panStartTranslateX = translateX;
+                panStartTranslateY = translateY;
+              }
+            }
+          }
+        },
+        { passive: false }
+      );
+
+      overlay.addEventListener(
+        "touchmove",
+        e => {
+          const t = e.touches;
+          if (t.length === 2) {
+            e.preventDefault();
+            const dist = Math.hypot(
+              t[1].clientX - t[0].clientX,
+              t[1].clientY - t[0].clientY
+            );
+            currentScale = Math.min(
+              4,
+              Math.max(1, initialScale * (dist / initialDist))
+            );
+            applyTransform();
+          } else if (t.length === 1) {
+            if (currentScale > 1) {
+              e.preventDefault();
+              translateX =
+                panStartTranslateX + (t[0].clientX - panStartX) / currentScale;
+              translateY =
+                panStartTranslateY + (t[0].clientY - panStartY) / currentScale;
+              const maxX = Math.max(
+                0,
+                (image.clientWidth - overlay.clientWidth / currentScale) / 2
+              );
+              const maxY = Math.max(
+                0,
+                (image.clientHeight - overlay.clientHeight / currentScale) / 2
+              );
+              translateX = Math.min(maxX, Math.max(-maxX, translateX));
+              translateY = Math.min(maxY, Math.max(-maxY, translateY));
+              applyTransform();
+            } else {
+              e.preventDefault();
+            }
+          }
+        },
+        { passive: false }
+      );
+
+      overlay.addEventListener("touchend", e => {
+        if (e.touches.length === 0 && currentScale <= 1.05) {
+          resetTransform();
+        }
+      });
+
+      overlay.addEventListener("touchcancel", e => {
+        if (e.touches.length === 0 && currentScale <= 1.05) {
+          resetTransform();
+        }
+      });
+
+      document.body.appendChild(overlay);
+      document.body.style.overflow = "hidden";
+      document.addEventListener("keydown", onKeyDown);
+      window.__closeLightbox = close;
+
+      requestAnimationFrame(() => overlay?.classList.add("opacity-100"));
+      closeButton.focus();
+    }
+
+    function close() {
+      if (!overlay) return;
+      const el = overlay;
+      overlay = null;
+      window.__closeLightbox = null;
+
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = "";
+      lastFocused?.focus();
+      lastFocused = null;
+
+      if (prefersReducedMotion()) {
+        el.remove();
+        return;
+      }
+      const remove = () => el.remove();
+      el.addEventListener("transitionend", remove, { once: true });
+      setTimeout(remove, 250); // fallback in case transitionend never fires
+      el.classList.remove("opacity-100");
+    }
+
+    function onKeyDown(e) {
+      if (e.key === "Escape") {
+        close();
+      } else if (e.key === "Tab") {
+        trapFocus(e);
+      }
+    }
+
+    // Keep keyboard focus inside the open dialog.
+    function trapFocus(e) {
+      if (!overlay) return;
+      const focusables = overlay.querySelectorAll(
+        'a[href], button, [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+
+    function triggerFromEvent(e) {
+      const image = e.target.closest("img");
+      if (!image || !article.contains(image) || image.closest("a")) return null;
+      return image;
+    }
+
+    function activate(image) {
+      open(image.currentSrc || image.src, image.alt, image);
+    }
+
+    article.addEventListener("click", e => {
+      const image = triggerFromEvent(e);
+      if (!image) return;
+      e.preventDefault();
+      activate(image);
+    });
+
+    article.addEventListener("keydown", e => {
+      if (e.key !== "Enter" && e.key !== " " && e.key !== "Spacebar") return;
+      const image = triggerFromEvent(e);
+      if (!image) return;
+      e.preventDefault();
+      activate(image);
+    });
+  }
+  initLightbox();
+
+  if (!window.__lightboxSwapBound) {
+    window.__lightboxSwapBound = true;
+    document.addEventListener("astro:before-swap", () =>
+      window.__closeLightbox?.()
+    );
+  }
+
+  document.addEventListener("astro:after-swap", () =>
+    window.scrollTo({ left: 0, top: 0, behavior: "instant" })
+  );
+</script>

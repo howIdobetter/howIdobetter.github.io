@@ -1,0 +1,660 @@
+<!DOCTYPE html><html dir="ltr" lang="zh-CN" class="overflow-y-scroll scroll-smooth"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="canonical" href="https://howidobetter.github.io/posts/cs168-routing-03-routing-states/"><meta name="generator" content="Astro v6.4.2"><!-- Primary meta --><title>路由状态 | 随便做做</title><meta name="title" content="路由状态 | 随便做做"><meta name="description" content="从转发表、下一跳与环路出发，判断一个路由状态是否有效且高效。"><meta name="author" content="一剑留名ing"><link rel="sitemap" href="/sitemap-index.xml"><!-- Open Graph --><meta property="og:type" content="article"><meta property="og:site_name" content="随便做做"><meta property="og:title" content="路由状态 | 随便做做"><meta property="og:description" content="从转发表、下一跳与环路出发，判断一个路由状态是否有效且高效。"><meta property="og:url" content="https://howidobetter.github.io/posts/cs168-routing-03-routing-states/"><meta property="og:image" content="https://howidobetter.github.io/default-og.png"><!-- Twitter / X --><meta property="twitter:card" content="summary_large_image"><meta property="twitter:url" content="https://howidobetter.github.io/posts/cs168-routing-03-routing-states/"><meta property="twitter:title" content="路由状态 | 随便做做"><meta property="twitter:description" content="从转发表、下一跳与环路出发，判断一个路由状态是否有效且高效。"><meta property="twitter:image" content="https://howidobetter.github.io/default-og.png"><!-- RSS autodiscovery --><link rel="alternate" type="application/rss+xml" title="随便做做" href="https://howidobetter.github.io/rss.xml"><!-- Filled at runtime by theme.ts to match the current background colour --><meta name="theme-color" content=""><!-- Extra head content injected by child layouts (e.g. JSON-LD, article meta) --><meta property="article:published_time" content="2026-07-12T00:00:00.000Z"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"路由状态 | 随便做做","description":"从转发表、下一跳与环路出发，判断一个路由状态是否有效且高效。","url":"https://howidobetter.github.io/posts/cs168-routing-03-routing-states/","image":"https://howidobetter.github.io/default-og.png","datePublished":"2026-07-12T00:00:00.000Z","author":[{"@type":"Person","name":"一剑留名ing","url":"https://github.com/howIdobetter"}]}</script> <!--
+      Inline FOUC-prevention script: sets data-theme on <html> before
+      the browser paints. Runs synchronously, no defer/async.
+    --><script>
+      (function () {
+        const stored = localStorage.getItem("theme");
+        const prefersDark = window.matchMedia(
+          "(prefers-color-scheme: dark)"
+        ).matches;
+        const theme = stored ?? (prefersDark ? "dark" : "light");
+        const root = document.firstElementChild;
+        root?.setAttribute("data-theme", theme);
+        root?.classList.toggle("dark", theme === "dark");
+        // Expose value so theme.ts can skip re-detection.
+        window.__theme = { value: theme };
+      })();
+    </script><meta name="astro-view-transitions-enabled" content="true"><meta name="astro-view-transitions-fallback" content="animate"><script type="module" src="/_astro/ClientRouter.astro_astro_type_script_index_0_lang.CAqDO0tx.js"></script><link rel="stylesheet" href="/_astro/Footer.W6Wz50NF.css">
+<style>@keyframes astroFadeInOut{0%{opacity:1}to{opacity:0}}@keyframes astroFadeIn{0%{opacity:0;mix-blend-mode:plus-lighter}to{opacity:1;mix-blend-mode:plus-lighter}}@keyframes astroFadeOut{0%{opacity:1;mix-blend-mode:plus-lighter}to{opacity:0;mix-blend-mode:plus-lighter}}@keyframes astroSlideFromRight{0%{transform:translate(100%)}}@keyframes astroSlideFromLeft{0%{transform:translate(-100%)}}@keyframes astroSlideToRight{to{transform:translate(100%)}}@keyframes astroSlideToLeft{to{transform:translate(-100%)}}@media(prefers-reduced-motion){::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}[data-astro-transition-scope]{animation:none!important}}
+</style><style>[data-astro-transition-scope="astro-36ssibgs-1"] { view-transition-name: networking; }@layer astro { ::view-transition-old(networking) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(networking) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(networking) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(networking) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-1"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-1"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-1"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-1"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style><style>[data-astro-transition-scope="astro-36ssibgs-2"] { view-transition-name: cs168; }@layer astro { ::view-transition-old(cs168) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(cs168) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(cs168) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(cs168) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style><style>[data-astro-transition-scope="astro-36ssibgs-3"] { view-transition-name: course-notes; }@layer astro { ::view-transition-old(course-notes) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(course-notes) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(course-notes) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(course-notes) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style><style>[data-astro-transition-scope="astro-36ssibgs-4"] { view-transition-name: routing; }@layer astro { ::view-transition-old(routing) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(routing) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(routing) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(routing) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style></head> <body class="bg-background font-app text-foreground selection:bg-accent/75 selection:text-accent-foreground flex min-h-svh flex-col">    <a id="skip-to-content" href="#main-content" class="bg-background text-accent absolute inset-s-4 -top-full z-50 border px-3 py-2 transition-[top] focus:top-3"> 跳到正文 </a> <header class="border-border bg-background/90 relative z-30 border-b backdrop-blur"> <div class="app-layout relative flex min-h-18 w-full items-baseline justify-between sm:items-center"> <a href="/" class="absolute inline-flex items-baseline gap-3 py-1 text-lg leading-8 font-semibold whitespace-nowrap sm:static sm:my-auto sm:text-xl sm:leading-none"> <span>随便做做</span> <span class="text-muted-foreground hidden font-mono text-[0.68rem] font-normal sm:inline">
+howIdobetter
+</span> </a> <nav id="nav-menu" class="flex w-full flex-col items-center sm:ms-2 sm:flex-row sm:justify-end sm:py-0"> <button id="menu-btn" class="focus-outline self-end p-3 sm:hidden" aria-label="打开菜单" aria-expanded="false" aria-controls="menu-items" data-label-open="打开菜单" data-label-close="关闭菜单"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="hidden" viewBox="0 0 24 24" id="close-icon"><path stroke="none" d="M0 0h24v24H0z" /><path d="M18 6 6 18M6 6l12 12" /></svg> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="icon icon-tabler icons-tabler-outline icon-tabler-menu-deep" viewBox="0 0 24 24" id="menu-icon"><path stroke="none" d="M0 0h24v24H0z" /><path d="M4 6h16M7 12h13M10 18h10" /></svg> </button> <ul id="menu-items" class="border-border [&>li>a]:hover:text-accent mt-3 hidden w-full grid-cols-2 place-content-center gap-1 border-t py-3 sm:mt-0 sm:flex sm:w-auto sm:items-center sm:gap-x-1 sm:border-0 sm:py-0 [&>li>a]:block [&>li>a]:px-4 [&>li>a]:py-3 [&>li>a]:text-center [&>li>a]:font-medium [&>li>a]:transition-colors sm:[&>li>a]:px-3 sm:[&>li>a]:py-2"> <li class="col-span-2"> <a href="/posts/" class="active-nav"> 文章 </a> </li> <li class="col-span-2"> <a href="/tags/"> 标签 </a> </li> <li class="col-span-2"> <a href="/about/"> 关于 </a> </li> <li class="col-span-2"> <a href="/archives/" title="归档" aria-label="归档" class="group inline-flex items-center gap-1 hover:text-accent focus-outline flex size-full justify-center p-3 sm:relative sm:size-10 sm:p-0">  <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="hidden sm:absolute sm:top-1/2 sm:left-1/2 sm:block sm:size-6 sm:-translate-x-1/2 sm:-translate-y-1/2" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v0a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8M10 12h4" /></svg> <span class="sm:sr-only">归档</span>  </a> </li> <li class="col-span-1 flex items-center justify-center"> <a href="/search/" title="搜索" aria-label="搜索" class="group inline-flex items-center gap-1 hover:text-accent focus-outline relative size-11 sm:size-10">  <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="absolute top-1/2 left-1/2 size-6 -translate-x-1/2 -translate-y-1/2" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M3 10a7 7 0 1 0 14 0 7 7 0 1 0-14 0M21 21l-6-6" /></svg> <span class="sr-only">搜索</span>  </a> </li> <li class="col-span-1 flex items-center justify-center"> <div class="border-border flex overflow-hidden rounded-full border text-xs font-semibold" aria-label="Language"> <a href="/posts/cs168-routing-03-routing-states/" title="中文" aria-current="true" class="px-2 py-1 transition-colors bg-accent text-accent-foreground"> 中 </a><a href="/en/posts/cs168-routing-03-routing-states/" title="English" class="px-2 py-1 transition-colors hover:text-accent"> EN </a> </div> </li> <li class="col-span-1 flex items-center justify-center"> <button id="theme-btn" class="focus-outline hover:[&>svg]:stroke-accent relative size-12 rounded-full p-4 transition-colors sm:size-10" title="切换主题" aria-label="auto" aria-live="polite" data-label-light="切换为浅色主题" data-label-dark="切换为深色主题"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="absolute top-[50%] left-[50%] translate-[-50%] scale-100 rotate-0 transition-[transform,opacity] dark:scale-0 dark:-rotate-90" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M12 3h.393a7.5 7.5 0 0 0 7.92 12.446A9 9 0 1 1 12 2.992z" /></svg> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="absolute top-[50%] left-[50%] translate-[-50%] scale-0 rotate-90 transition-[transform,opacity] dark:scale-100 dark:rotate-0" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M14.828 14.828a4 4 0 1 0-5.656-5.656 4 4 0 0 0 5.656 5.656M6.343 17.657l-1.414 1.414M6.343 6.343 4.929 4.929M17.657 6.343l1.414-1.414M17.657 17.657l1.414 1.414M4 12H2M12 4V2M20 12h2M12 20v2" /></svg> </button> </li> </ul> </nav> </div> </header> <script type="module">function c(){const e=document.querySelector("#menu-btn"),t=document.querySelector("#menu-items"),n=document.querySelector("#menu-icon"),s=document.querySelector("#close-icon");if(!e||!t||!n||!s)return;const a=e.dataset.labelOpen??"Open menu",l=e.dataset.labelClose??"Close menu";e.addEventListener("click",()=>{const o=e.getAttribute("aria-expanded")==="true";e.setAttribute("aria-expanded",o?"false":"true"),e.setAttribute("aria-label",o?a:l),t.classList.toggle("hidden"),t.classList.toggle("grid"),n.classList.toggle("hidden"),s.classList.toggle("hidden")})}c();document.addEventListener("astro:after-swap",c);</script> <div class="reading-progress" aria-hidden="true"> <div class="reading-progress-bar"></div> </div> <div class="app-layout flex items-center justify-start"><a id="back-button" href="/" class="group inline-flex items-center gap-1 hover:text-accent focus-outline hover:text-foreground/75 -ms-2 mt-8 mb-2"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block size-6 rtl:rotate-180" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="m15 6-6 6 6 6" /></svg><span>返回</span> </a></div><script type="module">function o(){const t=document.querySelector("#back-button"),e=sessionStorage.getItem("backUrl");e&&t&&(t.href=e)}document.addEventListener("astro:page-load",o);o();</script> <main id="main-content" class="app-layout pb-8" data-pagefind-body> <header class="border-border max-w-readable border-b pt-8 pb-8 sm:pt-12"> <h1 style="view-transition-name:u008defu007531u0072b6u006001" class="text-foreground text-3xl leading-tight font-semibold text-balance sm:text-5xl"> 路由状态 </h1> <p class="text-muted-foreground mt-4 text-lg leading-8 text-pretty"> 从转发表、下一跳与环路出发，判断一个路由状态是否有效且高效。 </p> <div class="mt-5 flex flex-wrap items-center gap-3"> <div class="text-muted-foreground flex items-center gap-x-2 font-mono"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block size-5 min-w-5" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" /><path d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM16 3v4M8 3v4M4 11h16M7 14h.013M10.01 14h.005M13.01 14h.005M16.015 14h.005M13.015 17h.005M7.01 17h.005M10.01 17h.005" /></svg>  <time class="text-sm sm:text-base" datetime="2026-07-12T00:00:00.000Z"> 2026年7月12日 </time> </div> <a href="https://github.com/howIdobetter/My-Blog/edit/main/src/content/posts/cs168-routing-03-routing-states.md" target="_blank" rel="noopener noreferrer" class="hover:text-accent text-muted-foreground flex justify-baseline gap-1.5 max-sm:hidden"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M7 7H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-1" /><path d="M20.385 6.585a2.1 2.1 0 0 0-2.97-2.97L9 12v3h3zM16 5l3 3" /></svg><span>编辑文章</span></a> </div> </header> <aside class="border-border mt-8 border-y"> <details class="group py-4 sm:hidden"> <summary class="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4"> <span> <span class="mono-label block"> CS168 · 路由 </span> <span class="text-accent mt-1 block text-sm font-semibold"> 3 / 11 </span> </span> <span aria-hidden="true" class="text-muted-foreground text-xl transition-transform group-open:rotate-45">
++
+</span> </summary> <ol class="border-border mt-3 border-t pt-2"> <li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-routing-01-introduction/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 01 </span> <span>路由简介</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-routing-02-intradomain-model/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 02 </span> <span>域内路由模型</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-routing-03-routing-states/" aria-current="page" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm text-accent font-semibold"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 03 </span> <span>路由状态</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-routing-04-distance-vector/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 04 </span> <span>距离向量协议</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-routing-05-link-state/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 05 </span> <span>链路状态协议</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-routing-06-addressing/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 06 </span> <span>寻址</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-routing-07-router-hardware/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 07 </span> <span>路由器硬件</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-routing-08-interdomain-model/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 08 </span> <span>域间路由模型</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-routing-09-bgp/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 09 </span> <span>边界网关协议（BGP）</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-routing-10-bgp-implementation/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 10 </span> <span>BGP 的实现与问题</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-routing-11-ip-header/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 11 </span> <span>IP 首部</span> </a> </li> </ol> </details> <div class="hidden py-5 sm:block"> <div class="flex items-baseline justify-between gap-4"> <p class="mono-label">CS168 · 路由</p> <p class="text-accent text-sm font-semibold"> 3 / 11 </p> </div> <ol class="border-border mt-4 grid border-t sm:grid-cols-3 lg:grid-cols-6"> <li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-routing-01-introduction/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 01 </span> <span class="mt-1 block"> 路由简介 </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-routing-02-intradomain-model/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 02 </span> <span class="mt-1 block"> 域内路由模型 </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-routing-03-routing-states/" aria-current="page" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors bg-muted/60 text-accent font-semibold"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 03 </span> <span class="mt-1 block"> 路由状态 </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-routing-04-distance-vector/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 04 </span> <span class="mt-1 block"> 距离向量协议 </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-routing-05-link-state/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 05 </span> <span class="mt-1 block"> 链路状态协议 </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-routing-06-addressing/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 06 </span> <span class="mt-1 block"> 寻址 </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-routing-07-router-hardware/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 07 </span> <span class="mt-1 block"> 路由器硬件 </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-routing-08-interdomain-model/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 08 </span> <span class="mt-1 block"> 域间路由模型 </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-routing-09-bgp/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 09 </span> <span class="mt-1 block"> 边界网关协议（BGP） </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-routing-10-bgp-implementation/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 10 </span> <span class="mt-1 block"> BGP 的实现与问题 </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-routing-11-ip-header/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 11 </span> <span class="mt-1 block"> IP 首部 </span> </a> </li> </ol> </div> </aside> <article id="article" class="mt-8 w-full app-prose max-w-readable prose-pre:bg-(--shiki-light-bg) dark:prose-pre:bg-(--shiki-dark-bg)"> <aside class="border-border bg-muted/35 mb-8 border-s-2 px-5 py-4 text-sm leading-6"> <p class="m-0">
+本文译自  <a href="https://textbook.cs168.io/routing/solutions.html">Routing States</a> 
+，依照 <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh-hans"> CC BY-SA 4.0 </a> 
+许可发布
+
+。<span> 中文翻译，保留原文结构与图表引用。</span> </p> </aside> <h2 id="路由状态">路由状态</h2>
+<h2 id="糟糕的路由策略">糟糕的路由策略</h2>
+<p>到目前为止，我们把路由问题定义为：当路由器收到一个数据包时，路由器如何知道该把数据包转发到哪里，才能使它最终到达最终目的地？</p>
+<img width="600px" src="/image/cs168-textbook/routing/2-013-forwarding.png">
+<p>一旦找到了解决这一问题的算法（即路由协议（routing protocol）），我们就可以应用该算法生成一个答案，称之为<strong>路由状态（routing state）</strong>。你可以把路由状态看作一组规则，每台路由器都使用这些规则来转发它收到的数据包。路由状态是什么样的？我们又该如何检查给定的路由状态是否有效或良好？</p>
+<p>首先，我们可以考虑几种生成路由状态的糟糕策略。一种可能的路由策略是：路由器把数据包转发给一个随机选中的邻居。凭直觉，我们已经可以看出，以这种方式生成的路由状态很可能无效。如果使用这种策略，我们无法保证数据包会到达其最终目的地。</p>
+<p>另一种可能的糟糕策略是：路由器把数据包的一个副本转发给自己的每一个邻居。直观来看，这种策略也许是有效的，因为数据包的副本最终会扩散到整个网络，并很可能到达目的地。然而，这种策略效率低下，因为它浪费了大量带宽，把数据包转发给那些并非将数据包送达最终目的地所必需的路由器。</p>
+<p>我们可以凭直觉看出这两种策略都很糟糕，但为了分析更聪明的路由协议，我们需要正式定义路由状态是什么样的。然后，我们还需要形式化地说明什么使路由状态有效，以及什么使路由状态良好。</p>
+<h2 id="转发表">转发表</h2>
+<p>在我们的网络模型中，每台路由器都有一定数量的出站链路，将它连接到相邻的路由器和主机。换句话说，在底层图中，每个路由器节点都有一定数量的邻居，这些邻居通过边与路由器相连。</p>
+<p>当路由器收到一个元数据中带有最终目的地的数据包时，它需要决定应把数据包转发给哪个相邻路由器或主机。数据包接下来将被转发到的中间路由器称为<strong>下一跳（next hop）</strong>。</p>
+<img width="700px" src="/image/cs168-textbook/routing/2-014-nexthop.png">
+<p>例如，考虑这个网络。如果 R2 收到一个最终目的地为 B 的数据包，自然对应的下一跳将是 R3。下一跳的可能选择是 R1、R3 和 R4（与 R2 相邻的三台路由器），而 R3 是能让数据包更接近 B 的下一跳。</p>
+<p>如果 R2 收到的却是一个最终目的地为 A 的数据包，那么自然对应的下一跳将改为 R1。</p>
+<p>对于每个可能的最终目的地，我们都可以写下相应的下一跳，以便把数据包转发得更接近该目的地。所得结果称为<strong>转发表（forwarding table）</strong>。</p>
+<img width="850px" src="/image/cs168-textbook/routing/2-015-forwarding-table.png">
+<p>请注意，在从目的地到下一跳的映射中，同一个下一跳可以使用多次。例如，在 R2 的转发表中，发往 B 的数据包和发往 C 的数据包都会被转发到 R3。</p>
+<p>通过写下每台中间路由器的转发表，我们现在就得到了网络的完整路由状态。换句话说，给定一个带有某个最终目的地的数据包，我们能准确知道每台路由器将如何转发该数据包。</p>
+<p>在物理世界中，路由器通常并不把目的地映射到下一跳，而是把目的地映射到<strong>物理端口（physical ports）</strong>，其中每个物理端口都对应一条链路。在图模型中，这时我们会把每个目的地映射到一条边，而不是映射到一个相邻节点。在物理世界中，你可以把它想象成一台路由器有若干条出站线缆，每条线缆都连接到另一台路由器。路由器并不在转发表中写下相邻路由器，而是写下数据包应该沿哪条线缆发送。</p>
+<img width="550px" src="/image/cs168-textbook/routing/2-016-ports.png">
+<p>这是一个细微的区别，它反映出路由器其实并不关心相邻路由器的身份。路由器唯一需要做出的决定，就是把数据包沿其中一条线缆发送出去，而不管这条线缆连接的是谁。为简单起见，在这些笔记中，我们会把转发表画成从目的地到下一跳的映射（而不是到物理端口的映射）。</p>
+<h2 id="基于目的地的转发">基于目的地的转发</h2>
+<p>使用转发表带来的一个结果是：给定一个数据包，决定把它转发到哪里时，只取决于数据包的目的地字段。换句话说，如果路由器收到许多不同的数据包，而它们的目的地都相同，那么这些数据包都会被路由到同一个下一跳（假设转发表保持不变）。由于每个目的地只映射到一个下一跳，因此两个目的地相同的数据包不可能被转发到不同的路由器。这种方法称为<strong>基于目的地的转发（destination-based forwarding）<strong>或</strong>基于目的地的路由（destination-based routing）</strong>。</p>
+<p>基于目的地的路由是最常见的路由方法，也是现代互联网所采用的方法。理论上，还可以存在使用额外元数据来做出转发决策的其他方法，但它们通常只用于有限的应用场景（例如某个特定的局域网内部）。</p>
+<p>在后面的单元中，当我们讨论数据中心拓扑时，可能会考虑这样的基于目的地的转发方法：一个特定目的地可以有多个下一跳。在本单元中，我们将假设每个目的地只映射到一个下一跳。</p>
+<h2 id="路由与转发">路由与转发</h2>
+<p>既然已经介绍了转发表的概念，我们就需要区分创建转发表的过程和使用转发表的过程。</p>
+<p>**路由（routing）**是路由器相互通信，以确定如何填充各自转发表的过程。</p>
+<p>**转发（forwarding）**是接收数据包、在表中查找其适当的下一跳，并把数据包发送给适当邻居的过程。</p>
+<p>转发并不等同于路由。转发数据包时，路由器使用已有的转发表，而不需要知道该表是如何生成的。</p>
+<p>转发是一个局部过程。路由器转发数据包时，不需要知道完整的网络拓扑。路由器也不关心数据包被转发到下一跳之后会去哪里。路由器只需要知道到达的数据包以及自己的转发表。</p>
+<p>相比之下，路由是一个全局过程。为了填充转发表，我们需要了解一些有关网络全局拓扑的信息。</p>
+<img width="950px" src="/image/cs168-textbook/routing/2-017-forwarding-routing.png">
+<p>例如，在填充 R2 的转发表时，我们必须以某种方式得知目的地 B 与 R3 相关联，尽管主机 B 并未直接连接到 R2。在路由过程中，每台路由器也需要知道非本地目的地的信息。</p>
+<h2 id="路由状态的有效性是全局性的">路由状态的有效性是全局性的</h2>
+<p>回想一下，路由状态由每台路由器的转发表构成，这些转发表共同告诉我们数据包将如何穿过网络。给定一个路由状态，我们如何判断它是正确还是错误的？</p>
+<p>首先，我们需要正式定义<strong>路由状态有效性（routing state validity）</strong>，以判断路由状态是否有效（不过这一术语在加州大学伯克利分校的 CS 168 课程之外可能并不常用）。有效性的主要要求是：路由状态需要产生能够确保数据包真正到达目的地的转发决策。</p>
+<p>请注意，必须在全局上下文而不是局部上下文中评估有效性。只看局部路由状态，例如单台路由器的转发表，无法告诉我们一个路由状态是否有效。例如，在路由器 R2 的局部转发表中，我们可能看到目的地 A 的下一跳是路由器 R3，但我们无法判断这是否有效。把数据包转发到 R3 是否有助于数据包到达目的地 A？仅凭这张转发表无从得知。</p>
+<img width="800px" src="/image/cs168-textbook/routing/2-018-validity-local.png">
+<p>相反，我们需要考虑全局路由状态，它由所有路由器中的全部转发表共同构成。</p>
+<img width="950px" src="/image/cs168-textbook/routing/2-019-validity-global.png">
+<h2 id="路由状态有效性的定义">路由状态有效性的定义</h2>
+<p>现在，我们可以定义一个形式化条件，用来检查在给定路由状态下数据包是否会到达目的地。</p>
+<p>当且仅当对于任何目的地，数据包都不会困在死路或环路中时，全局路由状态才是有效的。</p>
+<p>如果数据包到达一台路由器，但该路由器不知道如何把数据包转发到其目的地，因而没有转发数据包，就出现了<strong>死路（dead end）</strong>。当路由器的转发表中不包含该数据包目的地对应的条目时，就可能出现这种情况。</p>
+<p>请注意，死路条件只适用于中间路由器，而不适用于终端主机。当数据包到达作为目的地的终端主机时，终端主机无需再继续转发该数据包，因此我们不会在死路条件中考虑终端主机。</p>
+<img width="950px" src="/image/cs168-textbook/routing/2-020-dead-end.png">
+<p>如果数据包沿着同一组节点构成的环被循环发送，就出现了<strong>环路（loop）</strong>。请注意，因为我们使用的是基于目的地的转发，下一跳只取决于目的地，所以数据包一旦进入环路，就会永远困在其中。无论数据包是第一次、第 10 次还是第 500 次到达路由器，它都会以完全相同的方式被转发（因为最终目的地相同）。由于这一点适用于环路上的每台路由器，数据包将永远困在环路中。</p>
+<img width="850px" src="/image/cs168-textbook/routing/2-021-loop.png">
+<p>这个条件（没有死路，也没有环路）既是路由有效的必要条件，也是充分条件。让我们检查这一逻辑蕴含的两个方向。</p>
+<p>没有死路和环路是有效性的必要条件。换句话说，只有在不存在死路和环路的情况下，一个状态才是有效的。</p>
+<p>证明：如果存在死路，数据包就无法到达目的地。数据包会到达死路，然后不再被转发。</p>
+<p>如果存在环路，数据包就无法到达目的地。数据包会永远困在环路中（这是因为前面所述的基于目的地的转发）。另外，请注意，最终目的地不可能是环路的一部分，因为目的地不会转发数据包。因此，困在环路中的数据包无法到达目的地。</p>
+<p>现在，让我们检查另一个方向。如果没有环路和死路，那么该状态就是有效的。</p>
+<p>证明：假设路由状态不存在环路或死路。数据包不会两次到达同一个节点（因为没有环路）。而且，数据包不会在到达目的地之前停下（因为没有死路）。因此，数据包必须继续在网络中游走，不断到达不同的节点。可供访问的不同节点数量是有限的，所以数据包最终必定到达目的地。因此，该路由状态必定有效。</p>
+<h2 id="有向递送树">有向递送树</h2>
+<p>既然已经有了路由状态有效性的正式定义，我们就可以问：给定一个全局路由状态，如何检查它是否有效？</p>
+<p>为了简化问题，让我们先只考虑单个作为目的地的终端主机，忽略所有其他终端主机。在每台路由器中，我们都可以查找这个目的地，得到相应的下一跳，它告诉我们每台路由器会如何转发发往该目的地的数据包。</p>
+<p>我们可以把每台路由器上针对这个单一目的地的下一跳表示成一个箭头，从而展示该数据包为到达这个单一目的地可能经过的所有路径。</p>
+<img width="800px" src="/image/cs168-textbook/routing/2-022-delivery-tree.png">
+<p>在所得的图中，每个节点都只有一个出站箭头。这反映了我们的假设：在每台路由器的转发表中，一个目的地只对应一个下一跳。</p>
+<p>请注意，在所得图中，两条路径一旦相遇，就再也不会分开。换句话说，即使一个节点有多个入站箭头（路径），由于只有一个出站箭头，这些路径此后也会汇聚成一条路径。这反映了我们基于目的地的转发方法，因为每台路由器只使用最终目的地来决定如何转发数据包。路由器并不关心数据包一开始是如何到达该路由器的。</p>
+<img width="900px" src="/image/cs168-textbook/routing/2-023-no-diverging.png">
+<p>我们画出的箭头形成了一组数据包为了到达这个单一目的地而可能经过的路径。这组路径称为<strong>有向递送树（directed delivery tree）</strong>。</p>
+<p>用图论术语来说，有效递送树中的箭头必须构成一棵以目的地为根的<strong>定向生成树（oriented spanning tree）</strong>。回想一下，生成树是图中一组触及每个节点并构成一棵树的边。我们希望递送树是一棵树，因为其中不应存在环（数据包不能在环路中行进）。我们希望递送树是生成的（触及每个节点），因为我们希望能从任何地方到达目的地。递送树是定向的，因为边带有箭头，告诉我们应朝哪个方向转发数据包。</p>
+<p>有效递送树中的所有边都应指向目的地。换句话说，从任何节点开始，沿着箭头前进都应该最终到达目的地。</p>
+<h2 id="验证路由状态的有效性">验证路由状态的有效性</h2>
+<p>和之前一样，让我们只考虑单个作为目的地的终端主机，忽略所有其他终端主机。</p>
+<p>示例：尽管这里有多个终端主机，我们只考虑终端主机 A。</p>
+<img width="800px" src="/image/cs168-textbook/routing/2-024-validity1.png">
+<p>利用每台路由器上的转发表，我们会在网络中画出箭头，为这个单一目的地构成有向递送树。形式化地说，对于每台路由器（图中的节点），我们都从该节点画出一个出站箭头。</p>
+<p>示例：利用转发表（图中未显示），我们可以为每台路由器画出一个出站箭头。</p>
+<img width="800px" src="/image/cs168-textbook/routing/2-025-validity2.png">
+<p>为简单起见，此时我们可以删除所有没有箭头的链路。这些没有箭头的链路绝不会用于把数据包发送到这个单一目的地，因为它们不在递送树上。</p>
+<p>示例：我们可以删除所有没有箭头的链路。</p>
+<img width="800px" src="/image/cs168-textbook/routing/2-026-validity3.png">
+<p>如果剩余的图是一棵有效的有向递送树（生成树，所有箭头均指向目的地），那么我们就可以说，对于这个单一目的地而言，该路由状态是有效的。</p>
+<p>在上面的示例中，剩余的图确实是一棵汇聚于 A 的有效生成树，因此我们可以说这个路由状态对于 A 是有效的。</p>
+<p>下面是一些无效路由状态的示例：</p>
+<img width="800px" src="/image/cs168-textbook/routing/2-027-dead-end.png">
+<p>这个状态无效。直观地说，存在一台成为死路的路由器。发往 A 的数据包可能被发送到这台路由器，而这台路由器会丢弃数据包，不再转发。形式化地说，剩余的图不是生成树，因为这些边没有全部连通（存在两个不相连的连通分量，而树中不允许出现这种情况）。</p>
+<img width="800px" src="/image/cs168-textbook/routing/2-028-loop.png">
+<p>这个状态也是无效的。直观地说，存在一个数据包可能会困在其中的环路。形式化地说，剩余的图不是生成树，因为这些边不连通，而且存在一个环。</p>
+<p>我们可以为每一个不同的终端主机重复这一过程（每次单独考察一个不同的终端主机）。如果路由状态对于所有目的地都有效，那么我们就可以说该路由状态是有效的，并且始终会把数据包递送到正确的目的地。</p>
+<h2 id="最小成本路由">最小成本路由</h2>
+<p>既然已经定义了什么使路由状态有效（路由没有环路和死路），我们还可以进一步定义什么使路由状态良好。一个网络可能有多个有效的路由状态，而我们希望有某种度量标准，可以帮助判断一条路由是否优于另一条。</p>
+<p>**最小成本路由（least-cost routing）**是衡量路由是否良好的一种常见方法。在最小成本路由中，我们为每条链路分配一个数值成本，并寻找使成本最小的路由。换句话说，我们希望采用能让数据包沿最低成本路径到达目的地的路由。</p>
+<img width="600px" src="/image/cs168-textbook/routing/2-029-costs.png">
+<p>我们可以考虑为链路分配许多不同类型的成本。成本可以取决于建设链路的价格、传播时延、链路的物理距离、不可靠程度、带宽以及其他因素。例如，我们可以根据链路质量（带宽和传播时延）分配成本，使最低成本路径更偏好质量更高的链路。</p>
+<p>通过允许运营者任意设置链路成本，我们就使运营者能够根据自身的具体需求优化网络。我们分配的成本取决于运营者对网络的目标。如果有一条传播时延为 20 ms 的 400 Gbps 链路，以及一条传播时延为 5 ms 的 10 Gbps 链路，哪一条成本更低？这取决于我们是在优化带宽、传播时延、二者的某种组合，还是完全不同的其他因素。</p>
+<p>如果我们把每条链路的成本都设为 1，那么最低成本路径就是经过链路最少的路径。我们有时把这称为最小化<strong>跳数（hop count）</strong>。在这些笔记中，如果图的边上没有标注成本，你可以假设所有边的成本都是 1，</p>
+<p>网络运营者可以决定如何为每条链路分配成本。运营者可以手动分配成本。或者，运营者也可以让网络自动配置成本，不过，对于某些无法自动测量的度量指标，这种方式可能行不通（例如网络并不知道建设链路的财务成本）。</p>
+<p>设计路由协议时，我们可以把成本如何分配这一问题抽象掉。从路由协议的角度看，其他人（例如网络运营者）已经根据自己认为重要的某种因素分配好了成本。算法把这些成本作为输入，并计算最低成本路径，而不管这些成本实际代表什么。</p>
+<img width="950px" src="/image/cs168-textbook/routing/2-030-least-cost.png">
+<p>请注意，成本对于每台路由器来说是局部的。路由器知道自己出站链路的成本，但无法自动得知所有链路的成本。这与我们之前提到的约束一致：路由器并不拥有整个网络拓扑的全局视图。</p>
+<p>为简单起见，路由协议对成本的定义方式做出了一些假设。</p>
+<p>我们假设成本始终是正整数。这与许多常见的现实度量指标一致，例如链路长度或链路的金钱成本。如果我们试图最小化数据包行进的总物理距离，那么负的链路成本没有意义。你不可能沿一条链路行进，却使总行进距离减少。这一假设有助于简化我们后面介绍的协议，因为我们不必担心负权环路之类的边界情况（在这种情况下，最低成本的解决方案会是永远绕着环路行进）。</p>
+<p>我们假设成本是对称的。从 A 到 B 的成本与从 B 到 A 的成本相同。这反映了我们将绘制的图，其中一条边只标有一个对称成本。理论上，链路成本可以不对称，但实践中并不会这样做，而且这会导致路由协议更加复杂。</p>
+<p>在这些假设下，我们对良好路由（最低成本）的定义与对有效路由的定义一致。具体来说，最低成本路由不会包含任何环路，因为成本为正（穿过环路只会增加成本）。</p>
+<h2 id="静态路由">静态路由</h2>
+<p>生成路由的一种可行方法是让网络运营者手动填充转发表。这称为<strong>静态路由（static routing）</strong>。</p>
+<p>单独使用静态路由并不实用（例如，它不可扩展且容易出现人为错误），但即使实现了路由协议，仍有一些路由需要由运营者手动创建。你可以把这些手动路由看作“平凡”路由或“基例”路由，路由协议以它们为基础生成更复杂的路由。</p>
+<p>如果我们与另一台希望向其路由数据包的机器直接相连，就可以手动配置一条路由，把数据包转发给那台机器。这些路由称为<strong>直连路由（direct routes）<strong>或</strong>连接路由（connected routes）</strong>。例如，你的家用路由器通过一条链路连接到你的个人计算机，因此家用路由器可以在转发表中添加一个与你的计算机对应的条目。这个条目是通过告知路由器该连接而添加的，并不是通过运行任何路由协议添加的。</p>
+<img width="800px" src="/image/cs168-textbook/routing/2-031-static.png">
+<p>即使我们没有与某个目的地直接相连，也可以使用静态路由在转发表中硬编码该目的地的条目。如果有一条永远不会改变的路由，而我们希望无论路由协议在做什么，这条路由都始终保留在转发表中，那么这种做法会很有用。</p> </article> <hr class="my-8 border-dashed"> <a href="https://github.com/howIdobetter/My-Blog/edit/main/src/content/posts/cs168-routing-03-routing-states.md" target="_blank" rel="noopener noreferrer" class="hover:text-accent text-muted-foreground flex justify-baseline gap-1.5 sm:hidden"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M7 7H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-1" /><path d="M20.385 6.585a2.1 2.1 0 0 0-2.97-2.97L9 12v3h3zM16 5l3 3" /></svg><span>编辑文章</span></a> <div id="btt-btn-container" class="fixed inset-e-4 bottom-8 z-50 md:sticky md:inset-e-auto md:float-end md:me-1 translate-y-14 opacity-0 transition duration-500"> <button data-button="back-to-top" aria-label="回到顶部" class="group bg-background relative px-2 py-1 size-14 rounded-full shadow-xl md:h-8 md:w-fit md:rounded-md md:shadow-none md:focus-visible:rounded-none md:bg-background/35 md:bg-clip-padding md:backdrop-blur-lg"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block rotate-90 md:hidden" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 12h14M5 12l6 6M5 12l6-6" /></svg> <span class="group-hover:text-accent sr-only text-sm md:not-sr-only"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block size-4" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" /><path d="M12 5v14M16 9l-4-4M8 9l4-4" /></svg> 回到顶部 </span> </button> </div> <script data-astro-rerun>
+  function backToTop() {
+    const btnContainer = document.querySelector("#btt-btn-container");
+    const backToTopBtn = document.querySelector("[data-button='back-to-top']");
+    const pageHeader = document.querySelector("body > header");
+
+    if (!btnContainer || !backToTopBtn || !pageHeader) return;
+
+    backToTopBtn.addEventListener("click", () => {
+      document.body.scrollTop = 0;
+      document.documentElement.scrollTop = 0;
+    });
+
+    const observer = new IntersectionObserver(([entry]) => {
+      const isVisible = !entry.isIntersecting;
+      if (entry) {
+        btnContainer.classList.toggle("opacity-100", isVisible);
+        btnContainer.classList.toggle("translate-y-0", isVisible);
+        btnContainer.classList.toggle("opacity-0", !isVisible);
+        btnContainer.classList.toggle("translate-y-14", !isVisible);
+      }
+    });
+    observer.observe(pageHeader);
+  }
+  backToTop();
+</script> <ul class="mt-4 mb-8 flex flex-wrap gap-4 sm:my-8"> <li> <a href="/tags/networking/" class="border-border flex items-center gap-1 rounded-full border transition-colors hover:border-accent hover:text-accent focus-visible:text-accent focus-visible:no-underline px-3 py-1.5 text-sm" data-astro-transition-scope="astro-36ssibgs-1"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="text-accent opacity-80 size-3.5" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 9h14M5 15h14M11 4 7 20M17 4l-4 16" /></svg> networking </a> </li><li> <a href="/tags/cs168/" class="border-border flex items-center gap-1 rounded-full border transition-colors hover:border-accent hover:text-accent focus-visible:text-accent focus-visible:no-underline px-3 py-1.5 text-sm" data-astro-transition-scope="astro-36ssibgs-2"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="text-accent opacity-80 size-3.5" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 9h14M5 15h14M11 4 7 20M17 4l-4 16" /></svg> cs168 </a> </li><li> <a href="/tags/course-notes/" class="border-border flex items-center gap-1 rounded-full border transition-colors hover:border-accent hover:text-accent focus-visible:text-accent focus-visible:no-underline px-3 py-1.5 text-sm" data-astro-transition-scope="astro-36ssibgs-3"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="text-accent opacity-80 size-3.5" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 9h14M5 15h14M11 4 7 20M17 4l-4 16" /></svg> course-notes </a> </li><li> <a href="/tags/routing/" class="border-border flex items-center gap-1 rounded-full border transition-colors hover:border-accent hover:text-accent focus-visible:text-accent focus-visible:no-underline px-3 py-1.5 text-sm" data-astro-transition-scope="astro-36ssibgs-4"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="text-accent opacity-80 size-3.5" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 9h14M5 15h14M11 4 7 20M17 4l-4 16" /></svg> routing </a> </li> </ul>  <hr class="my-8 border-dashed"> <div data-pagefind-ignore class="my-8 grid grid-cols-1 gap-4 sm:grid-cols-2"> <a href="/posts/cs168-routing-02-intradomain-model/" class="soft-panel hover:border-accent/70 hover:text-accent flex w-full gap-3 p-4 transition"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block flex-none rtl:rotate-180" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 12h14M5 12l6 6M5 12l6-6" /></svg> <div> <span class="mono-label">上一篇</span> <div class="mt-1 text-sm leading-6">域内路由模型</div> </div> </a> <a href="/posts/cs168-routing-04-distance-vector/" class="soft-panel hover:border-accent/70 hover:text-accent flex w-full justify-end gap-3 p-4 text-end transition sm:col-start-2"> <div> <span class="mono-label">下一篇</span> <div class="mt-1 text-sm leading-6">距离向量协议</div> </div> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block flex-none rtl:rotate-180" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 12h14M13 18l6-6M13 6l6 6" /></svg> </a> </div> </main> <footer class="app-layout mt-auto"> <div class="border-border text-muted-foreground flex flex-col items-start justify-between gap-6 border-t py-9 text-sm sm:flex-row sm:items-end"> <div> <p class="text-foreground font-semibold">随便做做</p> <p class="mt-1">先记下来，再慢慢改对。</p> </div> <div class="flex items-center gap-5"> <div class="flex flex-wrap items-center gap-1"> <a href="https://github.com/howIdobetter" title="GitHub" class="group inline-flex items-center gap-1 hover:text-accent p-2 hover:rotate-6 sm:p-1">  <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block size-6 scale-125 fill-transparent stroke-current stroke-2 opacity-90 group-hover:fill-transparent sm:scale-110" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" /><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21" /></svg> <span class="sr-only">GitHub</span>  </a> </div> <span class="whitespace-nowrap">© 2026 一剑留名ing</span> </div> </div> </footer>   <script type="module">const a="theme",n="light",r="dark";function i(){const e=localStorage.getItem(a);return e||(window.matchMedia("(prefers-color-scheme: dark)").matches?r:n)}let o=window.__theme?.value??i();function s(){localStorage.setItem(a,o),m()}function m(){const e=document.firstElementChild;e?.setAttribute("data-theme",o),e?.classList.toggle("dark",o===r);const t=document.querySelector("#theme-btn"),c=o===n?t?.dataset.labelDark:t?.dataset.labelLight;c&&(t?.setAttribute("aria-label",c),t?.setAttribute("title",c));const l=window.getComputedStyle(document.body).backgroundColor;document.querySelector("meta[name='theme-color']")?.setAttribute("content",l)}function d(){m(),document.querySelector("#theme-btn")?.addEventListener("click",()=>{o=o===n?r:n,s()})}d();document.addEventListener("astro:after-swap",d);document.addEventListener("astro:before-swap",e=>{const t=document.querySelector("meta[name='theme-color']")?.getAttribute("content");t&&e.newDocument.querySelector("meta[name='theme-color']")?.setAttribute("content",t)});window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change",({matches:e})=>{o=e?r:n,s()});</script> </body> </html> <script data-astro-rerun>
+  function addHeadingLinks() {
+    const isZh = document.documentElement.lang === "zh-CN";
+    const headings = Array.from(
+      document.querySelectorAll("h2, h3, h4, h5, h6")
+    );
+    for (const heading of headings) {
+      heading.classList.add("group");
+      const link = document.createElement("a");
+      link.className =
+        "heading-link ms-2 no-underline opacity-75 md:opacity-0 md:group-hover:opacity-100 md:focus:opacity-100";
+      link.href = "#" + heading.id;
+      link.setAttribute(
+        "aria-label",
+        isZh
+          ? `链接到本节：${heading.textContent}`
+          : `Link to section: ${heading.textContent}`
+      );
+
+      const span = document.createElement("span");
+      span.ariaHidden = "true";
+      span.innerText = "#";
+      link.appendChild(span);
+      heading.appendChild(link);
+    }
+  }
+  addHeadingLinks();
+
+  function attachCopyButtons() {
+    const isZh = document.documentElement.lang === "zh-CN";
+    const copyButtonLabel = isZh ? "复制" : "Copy";
+    const copiedButtonLabel = isZh ? "已复制" : "Copied";
+    const codeBlocks = Array.from(document.querySelectorAll("pre"));
+
+    for (const codeBlock of codeBlocks) {
+      const wrapper = document.createElement("div");
+      wrapper.style.position = "relative";
+
+      const computedStyle = getComputedStyle(codeBlock);
+      const hasFileNameOffset =
+        computedStyle.getPropertyValue("--file-name-offset").trim() !== "";
+
+      const topClass = hasFileNameOffset
+        ? "top-(--file-name-offset)"
+        : "-top-3";
+
+      const copyButton = document.createElement("button");
+      copyButton.className = `copy-code absolute end-3 ${topClass} rounded bg-muted border border-muted px-2 py-1 text-xs leading-4 text-foreground font-medium`;
+      copyButton.innerHTML = copyButtonLabel;
+      copyButton.setAttribute("aria-label", copyButtonLabel);
+      copyButton.setAttribute("aria-live", "polite");
+      codeBlock.setAttribute("tabindex", "0");
+      codeBlock.appendChild(copyButton);
+
+      codeBlock?.parentNode?.insertBefore(wrapper, codeBlock);
+      wrapper.appendChild(codeBlock);
+
+      copyButton.addEventListener("click", async () => {
+        await copyCode(codeBlock, copyButton);
+      });
+    }
+
+    async function copyCode(block, button) {
+      const code = block.querySelector("code");
+      const text = code?.innerText;
+
+      await navigator.clipboard.writeText(text ?? "");
+
+      button.innerText = copiedButtonLabel;
+      button.setAttribute("aria-label", copiedButtonLabel);
+
+      setTimeout(() => {
+        button.innerText = copyButtonLabel;
+        button.setAttribute("aria-label", copyButtonLabel);
+      }, 700);
+    }
+  }
+  attachCopyButtons();
+
+  /** Accessible image lightbox for article images. */
+  function initLightbox() {
+    const article = document.getElementById("article");
+    if (!article) return;
+
+    const prefersReducedMotion = () =>
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    let overlay = null;
+    let lastFocused = null;
+
+    // Defer attribute mutations so they don't push the LCP timestamp.
+    // Event listeners below use delegation and don't need the attributes to exist yet.
+    requestAnimationFrame(() => {
+      const images = Array.from(article.querySelectorAll("img"));
+      for (const image of images) {
+        if (image.closest("a")) continue;
+        image.setAttribute("role", "button");
+        image.setAttribute("tabindex", "0");
+        image.setAttribute("aria-haspopup", "dialog");
+        image.setAttribute(
+          "aria-label",
+          image.alt ? `Zoom image: ${image.alt}` : "Zoom image"
+        );
+      }
+    });
+
+    function open(src, alt, trigger) {
+      if (overlay) return;
+      lastFocused = trigger ?? document.activeElement;
+
+      overlay = document.createElement("div");
+      overlay.setAttribute("role", "dialog");
+      overlay.setAttribute("aria-modal", "true");
+      overlay.setAttribute(
+        "aria-label",
+        alt ? `Image preview: ${alt}` : "Image preview"
+      );
+      overlay.className =
+        "fixed inset-0 z-50 flex cursor-zoom-out items-center justify-center bg-black/70 backdrop-blur-sm opacity-0 transition-opacity duration-200 motion-reduce:transition-none";
+
+      const closeButton = document.createElement("button");
+      closeButton.type = "button";
+      closeButton.setAttribute("aria-label", "Close image preview");
+      closeButton.className =
+        "absolute end-4 top-4 rounded p-2 text-3xl leading-none text-white";
+      closeButton.innerHTML = "&#10005;";
+      closeButton.addEventListener("click", close);
+
+      const image = document.createElement("img");
+      image.src = src;
+      image.alt = "";
+      image.className =
+        "max-h-[90dvh] max-w-[90dvw] cursor-default object-contain";
+
+      overlay.append(closeButton, image);
+      overlay.addEventListener("click", e => {
+        if (e.target === overlay && currentScale <= 1) close();
+      });
+
+      let currentScale = 1;
+      let translateX = 0;
+      let translateY = 0;
+      let initialDist = 0;
+      let initialScale = 1;
+      let panStartX = 0;
+      let panStartY = 0;
+      let panStartTranslateX = 0;
+      let panStartTranslateY = 0;
+      let lastTapTime = 0;
+
+      function applyTransform() {
+        image.style.transform = `scale(${currentScale}) translate(${translateX}px, ${translateY}px)`;
+      }
+
+      function resetTransform() {
+        currentScale = 1;
+        translateX = 0;
+        translateY = 0;
+        image.style.transform = "";
+      }
+
+      overlay.addEventListener(
+        "touchstart",
+        e => {
+          const t = e.touches;
+          if (t.length === 2) {
+            initialDist = Math.hypot(
+              t[1].clientX - t[0].clientX,
+              t[1].clientY - t[0].clientY
+            );
+            initialScale = currentScale;
+          } else if (t.length === 1) {
+            const now = Date.now();
+            if (now - lastTapTime < 300) {
+              e.preventDefault();
+              if (currentScale > 1) {
+                resetTransform();
+              } else {
+                currentScale = 2;
+                translateX = 0;
+                translateY = 0;
+                applyTransform();
+              }
+              lastTapTime = 0;
+              panStartX = t[0].clientX;
+              panStartY = t[0].clientY;
+              panStartTranslateX = translateX;
+              panStartTranslateY = translateY;
+            } else {
+              lastTapTime = now;
+              if (currentScale > 1) {
+                panStartX = t[0].clientX;
+                panStartY = t[0].clientY;
+                panStartTranslateX = translateX;
+                panStartTranslateY = translateY;
+              }
+            }
+          }
+        },
+        { passive: false }
+      );
+
+      overlay.addEventListener(
+        "touchmove",
+        e => {
+          const t = e.touches;
+          if (t.length === 2) {
+            e.preventDefault();
+            const dist = Math.hypot(
+              t[1].clientX - t[0].clientX,
+              t[1].clientY - t[0].clientY
+            );
+            currentScale = Math.min(
+              4,
+              Math.max(1, initialScale * (dist / initialDist))
+            );
+            applyTransform();
+          } else if (t.length === 1) {
+            if (currentScale > 1) {
+              e.preventDefault();
+              translateX =
+                panStartTranslateX + (t[0].clientX - panStartX) / currentScale;
+              translateY =
+                panStartTranslateY + (t[0].clientY - panStartY) / currentScale;
+              const maxX = Math.max(
+                0,
+                (image.clientWidth - overlay.clientWidth / currentScale) / 2
+              );
+              const maxY = Math.max(
+                0,
+                (image.clientHeight - overlay.clientHeight / currentScale) / 2
+              );
+              translateX = Math.min(maxX, Math.max(-maxX, translateX));
+              translateY = Math.min(maxY, Math.max(-maxY, translateY));
+              applyTransform();
+            } else {
+              e.preventDefault();
+            }
+          }
+        },
+        { passive: false }
+      );
+
+      overlay.addEventListener("touchend", e => {
+        if (e.touches.length === 0 && currentScale <= 1.05) {
+          resetTransform();
+        }
+      });
+
+      overlay.addEventListener("touchcancel", e => {
+        if (e.touches.length === 0 && currentScale <= 1.05) {
+          resetTransform();
+        }
+      });
+
+      document.body.appendChild(overlay);
+      document.body.style.overflow = "hidden";
+      document.addEventListener("keydown", onKeyDown);
+      window.__closeLightbox = close;
+
+      requestAnimationFrame(() => overlay?.classList.add("opacity-100"));
+      closeButton.focus();
+    }
+
+    function close() {
+      if (!overlay) return;
+      const el = overlay;
+      overlay = null;
+      window.__closeLightbox = null;
+
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = "";
+      lastFocused?.focus();
+      lastFocused = null;
+
+      if (prefersReducedMotion()) {
+        el.remove();
+        return;
+      }
+      const remove = () => el.remove();
+      el.addEventListener("transitionend", remove, { once: true });
+      setTimeout(remove, 250); // fallback in case transitionend never fires
+      el.classList.remove("opacity-100");
+    }
+
+    function onKeyDown(e) {
+      if (e.key === "Escape") {
+        close();
+      } else if (e.key === "Tab") {
+        trapFocus(e);
+      }
+    }
+
+    // Keep keyboard focus inside the open dialog.
+    function trapFocus(e) {
+      if (!overlay) return;
+      const focusables = overlay.querySelectorAll(
+        'a[href], button, [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+
+    function triggerFromEvent(e) {
+      const image = e.target.closest("img");
+      if (!image || !article.contains(image) || image.closest("a")) return null;
+      return image;
+    }
+
+    function activate(image) {
+      open(image.currentSrc || image.src, image.alt, image);
+    }
+
+    article.addEventListener("click", e => {
+      const image = triggerFromEvent(e);
+      if (!image) return;
+      e.preventDefault();
+      activate(image);
+    });
+
+    article.addEventListener("keydown", e => {
+      if (e.key !== "Enter" && e.key !== " " && e.key !== "Spacebar") return;
+      const image = triggerFromEvent(e);
+      if (!image) return;
+      e.preventDefault();
+      activate(image);
+    });
+  }
+  initLightbox();
+
+  if (!window.__lightboxSwapBound) {
+    window.__lightboxSwapBound = true;
+    document.addEventListener("astro:before-swap", () =>
+      window.__closeLightbox?.()
+    );
+  }
+
+  document.addEventListener("astro:after-swap", () =>
+    window.scrollTo({ left: 0, top: 0, behavior: "instant" })
+  );
+</script>

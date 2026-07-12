@@ -1,0 +1,682 @@
+<!DOCTYPE html><html dir="ltr" lang="zh-CN" class="overflow-y-scroll scroll-smooth"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="canonical" href="https://howidobetter.github.io/posts/cs168-beyond-08-collective-implementations/"><meta name="generator" content="Astro v6.4.2"><!-- Primary meta --><title>集合操作的实现 | 随便做做</title><meta name="title" content="集合操作的实现 | 随便做做"><meta name="description" content="比较全规约的全网状、单节点规约、树形与环形实现，并讨论覆盖拓扑和底层拓扑的匹配。"><meta name="author" content="一剑留名ing"><link rel="sitemap" href="/sitemap-index.xml"><!-- Open Graph --><meta property="og:type" content="article"><meta property="og:site_name" content="随便做做"><meta property="og:title" content="集合操作的实现 | 随便做做"><meta property="og:description" content="比较全规约的全网状、单节点规约、树形与环形实现，并讨论覆盖拓扑和底层拓扑的匹配。"><meta property="og:url" content="https://howidobetter.github.io/posts/cs168-beyond-08-collective-implementations/"><meta property="og:image" content="https://howidobetter.github.io/default-og.png"><!-- Twitter / X --><meta property="twitter:card" content="summary_large_image"><meta property="twitter:url" content="https://howidobetter.github.io/posts/cs168-beyond-08-collective-implementations/"><meta property="twitter:title" content="集合操作的实现 | 随便做做"><meta property="twitter:description" content="比较全规约的全网状、单节点规约、树形与环形实现，并讨论覆盖拓扑和底层拓扑的匹配。"><meta property="twitter:image" content="https://howidobetter.github.io/default-og.png"><!-- RSS autodiscovery --><link rel="alternate" type="application/rss+xml" title="随便做做" href="https://howidobetter.github.io/rss.xml"><!-- Filled at runtime by theme.ts to match the current background colour --><meta name="theme-color" content=""><!-- Extra head content injected by child layouts (e.g. JSON-LD, article meta) --><meta property="article:published_time" content="2026-07-12T00:00:00.000Z"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"集合操作的实现 | 随便做做","description":"比较全规约的全网状、单节点规约、树形与环形实现，并讨论覆盖拓扑和底层拓扑的匹配。","url":"https://howidobetter.github.io/posts/cs168-beyond-08-collective-implementations/","image":"https://howidobetter.github.io/default-og.png","datePublished":"2026-07-12T00:00:00.000Z","author":[{"@type":"Person","name":"一剑留名ing","url":"https://github.com/howIdobetter"}]}</script> <!--
+      Inline FOUC-prevention script: sets data-theme on <html> before
+      the browser paints. Runs synchronously, no defer/async.
+    --><script>
+      (function () {
+        const stored = localStorage.getItem("theme");
+        const prefersDark = window.matchMedia(
+          "(prefers-color-scheme: dark)"
+        ).matches;
+        const theme = stored ?? (prefersDark ? "dark" : "light");
+        const root = document.firstElementChild;
+        root?.setAttribute("data-theme", theme);
+        root?.classList.toggle("dark", theme === "dark");
+        // Expose value so theme.ts can skip re-detection.
+        window.__theme = { value: theme };
+      })();
+    </script><meta name="astro-view-transitions-enabled" content="true"><meta name="astro-view-transitions-fallback" content="animate"><script type="module" src="/_astro/ClientRouter.astro_astro_type_script_index_0_lang.CAqDO0tx.js"></script><link rel="stylesheet" href="/_astro/Footer.W6Wz50NF.css">
+<style>@keyframes astroFadeInOut{0%{opacity:1}to{opacity:0}}@keyframes astroFadeIn{0%{opacity:0;mix-blend-mode:plus-lighter}to{opacity:1;mix-blend-mode:plus-lighter}}@keyframes astroFadeOut{0%{opacity:1;mix-blend-mode:plus-lighter}to{opacity:0;mix-blend-mode:plus-lighter}}@keyframes astroSlideFromRight{0%{transform:translate(100%)}}@keyframes astroSlideFromLeft{0%{transform:translate(-100%)}}@keyframes astroSlideToRight{to{transform:translate(100%)}}@keyframes astroSlideToLeft{to{transform:translate(-100%)}}@media(prefers-reduced-motion){::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}[data-astro-transition-scope]{animation:none!important}}
+</style><style>[data-astro-transition-scope="astro-36ssibgs-1"] { view-transition-name: networking; }@layer astro { ::view-transition-old(networking) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(networking) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(networking) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(networking) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-1"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-1"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-1"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-1"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style><style>[data-astro-transition-scope="astro-36ssibgs-2"] { view-transition-name: cs168; }@layer astro { ::view-transition-old(cs168) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(cs168) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(cs168) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(cs168) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style><style>[data-astro-transition-scope="astro-36ssibgs-3"] { view-transition-name: course-notes; }@layer astro { ::view-transition-old(course-notes) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(course-notes) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(course-notes) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(course-notes) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style><style>[data-astro-transition-scope="astro-36ssibgs-4"] { view-transition-name: beyond-client-server; }@layer astro { ::view-transition-old(beyond-client-server) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(beyond-client-server) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(beyond-client-server) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(beyond-client-server) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style></head> <body class="bg-background font-app text-foreground selection:bg-accent/75 selection:text-accent-foreground flex min-h-svh flex-col">    <a id="skip-to-content" href="#main-content" class="bg-background text-accent absolute inset-s-4 -top-full z-50 border px-3 py-2 transition-[top] focus:top-3"> 跳到正文 </a> <header class="border-border bg-background/90 relative z-30 border-b backdrop-blur"> <div class="app-layout relative flex min-h-18 w-full items-baseline justify-between sm:items-center"> <a href="/" class="absolute inline-flex items-baseline gap-3 py-1 text-lg leading-8 font-semibold whitespace-nowrap sm:static sm:my-auto sm:text-xl sm:leading-none"> <span>随便做做</span> <span class="text-muted-foreground hidden font-mono text-[0.68rem] font-normal sm:inline">
+howIdobetter
+</span> </a> <nav id="nav-menu" class="flex w-full flex-col items-center sm:ms-2 sm:flex-row sm:justify-end sm:py-0"> <button id="menu-btn" class="focus-outline self-end p-3 sm:hidden" aria-label="打开菜单" aria-expanded="false" aria-controls="menu-items" data-label-open="打开菜单" data-label-close="关闭菜单"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="hidden" viewBox="0 0 24 24" id="close-icon"><path stroke="none" d="M0 0h24v24H0z" /><path d="M18 6 6 18M6 6l12 12" /></svg> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="icon icon-tabler icons-tabler-outline icon-tabler-menu-deep" viewBox="0 0 24 24" id="menu-icon"><path stroke="none" d="M0 0h24v24H0z" /><path d="M4 6h16M7 12h13M10 18h10" /></svg> </button> <ul id="menu-items" class="border-border [&>li>a]:hover:text-accent mt-3 hidden w-full grid-cols-2 place-content-center gap-1 border-t py-3 sm:mt-0 sm:flex sm:w-auto sm:items-center sm:gap-x-1 sm:border-0 sm:py-0 [&>li>a]:block [&>li>a]:px-4 [&>li>a]:py-3 [&>li>a]:text-center [&>li>a]:font-medium [&>li>a]:transition-colors sm:[&>li>a]:px-3 sm:[&>li>a]:py-2"> <li class="col-span-2"> <a href="/posts/" class="active-nav"> 文章 </a> </li> <li class="col-span-2"> <a href="/tags/"> 标签 </a> </li> <li class="col-span-2"> <a href="/about/"> 关于 </a> </li> <li class="col-span-2"> <a href="/archives/" title="归档" aria-label="归档" class="group inline-flex items-center gap-1 hover:text-accent focus-outline flex size-full justify-center p-3 sm:relative sm:size-10 sm:p-0">  <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="hidden sm:absolute sm:top-1/2 sm:left-1/2 sm:block sm:size-6 sm:-translate-x-1/2 sm:-translate-y-1/2" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v0a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8M10 12h4" /></svg> <span class="sm:sr-only">归档</span>  </a> </li> <li class="col-span-1 flex items-center justify-center"> <a href="/search/" title="搜索" aria-label="搜索" class="group inline-flex items-center gap-1 hover:text-accent focus-outline relative size-11 sm:size-10">  <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="absolute top-1/2 left-1/2 size-6 -translate-x-1/2 -translate-y-1/2" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M3 10a7 7 0 1 0 14 0 7 7 0 1 0-14 0M21 21l-6-6" /></svg> <span class="sr-only">搜索</span>  </a> </li> <li class="col-span-1 flex items-center justify-center"> <div class="border-border flex overflow-hidden rounded-full border text-xs font-semibold" aria-label="Language"> <a href="/posts/cs168-beyond-08-collective-implementations/" title="中文" aria-current="true" class="px-2 py-1 transition-colors bg-accent text-accent-foreground"> 中 </a><a href="/en/posts/cs168-beyond-08-collective-implementations/" title="English" class="px-2 py-1 transition-colors hover:text-accent"> EN </a> </div> </li> <li class="col-span-1 flex items-center justify-center"> <button id="theme-btn" class="focus-outline hover:[&>svg]:stroke-accent relative size-12 rounded-full p-4 transition-colors sm:size-10" title="切换主题" aria-label="auto" aria-live="polite" data-label-light="切换为浅色主题" data-label-dark="切换为深色主题"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="absolute top-[50%] left-[50%] translate-[-50%] scale-100 rotate-0 transition-[transform,opacity] dark:scale-0 dark:-rotate-90" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M12 3h.393a7.5 7.5 0 0 0 7.92 12.446A9 9 0 1 1 12 2.992z" /></svg> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="absolute top-[50%] left-[50%] translate-[-50%] scale-0 rotate-90 transition-[transform,opacity] dark:scale-100 dark:rotate-0" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M14.828 14.828a4 4 0 1 0-5.656-5.656 4 4 0 0 0 5.656 5.656M6.343 17.657l-1.414 1.414M6.343 6.343 4.929 4.929M17.657 6.343l1.414-1.414M17.657 17.657l1.414 1.414M4 12H2M12 4V2M20 12h2M12 20v2" /></svg> </button> </li> </ul> </nav> </div> </header> <script type="module">function c(){const e=document.querySelector("#menu-btn"),t=document.querySelector("#menu-items"),n=document.querySelector("#menu-icon"),s=document.querySelector("#close-icon");if(!e||!t||!n||!s)return;const a=e.dataset.labelOpen??"Open menu",l=e.dataset.labelClose??"Close menu";e.addEventListener("click",()=>{const o=e.getAttribute("aria-expanded")==="true";e.setAttribute("aria-expanded",o?"false":"true"),e.setAttribute("aria-label",o?a:l),t.classList.toggle("hidden"),t.classList.toggle("grid"),n.classList.toggle("hidden"),s.classList.toggle("hidden")})}c();document.addEventListener("astro:after-swap",c);</script> <div class="reading-progress" aria-hidden="true"> <div class="reading-progress-bar"></div> </div> <div class="app-layout flex items-center justify-start"><a id="back-button" href="/" class="group inline-flex items-center gap-1 hover:text-accent focus-outline hover:text-foreground/75 -ms-2 mt-8 mb-2"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block size-6 rtl:rotate-180" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="m15 6-6 6 6 6" /></svg><span>返回</span> </a></div><script type="module">function o(){const t=document.querySelector("#back-button"),e=sessionStorage.getItem("backUrl");e&&t&&(t.href=e)}document.addEventListener("astro:page-load",o);o();</script> <main id="main-content" class="app-layout pb-8" data-pagefind-body> <header class="border-border max-w-readable border-b pt-8 pb-8 sm:pt-12"> <h1 style="view-transition-name:u0096c6u005408u0064cdu004f5cu007684u005b9eu0073b0" class="text-foreground text-3xl leading-tight font-semibold text-balance sm:text-5xl"> 集合操作的实现 </h1> <p class="text-muted-foreground mt-4 text-lg leading-8 text-pretty"> 比较全规约的全网状、单节点规约、树形与环形实现，并讨论覆盖拓扑和底层拓扑的匹配。 </p> <div class="mt-5 flex flex-wrap items-center gap-3"> <div class="text-muted-foreground flex items-center gap-x-2 font-mono"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block size-5 min-w-5" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" /><path d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM16 3v4M8 3v4M4 11h16M7 14h.013M10.01 14h.005M13.01 14h.005M16.015 14h.005M13.015 17h.005M7.01 17h.005M10.01 17h.005" /></svg>  <time class="text-sm sm:text-base" datetime="2026-07-12T00:00:00.000Z"> 2026年7月12日 </time> </div> <a href="https://github.com/howIdobetter/My-Blog/edit/main/src/content/posts/cs168-beyond-08-collective-implementations.md" target="_blank" rel="noopener noreferrer" class="hover:text-accent text-muted-foreground flex justify-baseline gap-1.5 max-sm:hidden"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M7 7H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-1" /><path d="M20.385 6.585a2.1 2.1 0 0 0-2.97-2.97L9 12v3h3zM16 5l3 3" /></svg><span>编辑文章</span></a> </div> </header> <aside class="border-border mt-8 border-y"> <details class="group py-4 sm:hidden"> <summary class="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4"> <span> <span class="mono-label block"> CS168 · 超越客户端—服务器 </span> <span class="text-accent mt-1 block text-sm font-semibold"> 8 / 8 </span> </span> <span aria-hidden="true" class="text-muted-foreground text-xl transition-transform group-open:rotate-45">
++
+</span> </summary> <ol class="border-border mt-3 border-t pt-2"> <li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-beyond-01-multicast/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 01 </span> <span>多播</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-beyond-02-ip-multicast/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 02 </span> <span>IP 多播</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-beyond-03-dvmrp/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 03 </span> <span>距离向量组播路由协议（DVMRP）</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-beyond-04-core-based-trees/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 04 </span> <span>基于核心的树（CBT）</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-beyond-05-ip-multicast-challenges/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 05 </span> <span>IP 多播面临的挑战</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-beyond-06-overlay-multicast/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 06 </span> <span>覆盖多播</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-beyond-07-collective-operations/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 07 </span> <span>集合操作</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-beyond-08-collective-implementations/" aria-current="page" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm text-accent font-semibold"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 08 </span> <span>集合操作的实现</span> </a> </li> </ol> </details> <div class="hidden py-5 sm:block"> <div class="flex items-baseline justify-between gap-4"> <p class="mono-label">CS168 · 超越客户端—服务器</p> <p class="text-accent text-sm font-semibold"> 8 / 8 </p> </div> <ol class="border-border mt-4 grid border-t sm:grid-cols-3 lg:grid-cols-6"> <li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-beyond-01-multicast/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 01 </span> <span class="mt-1 block"> 多播 </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-beyond-02-ip-multicast/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 02 </span> <span class="mt-1 block"> IP 多播 </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-beyond-03-dvmrp/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 03 </span> <span class="mt-1 block"> 距离向量组播路由协议（DVMRP） </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-beyond-04-core-based-trees/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 04 </span> <span class="mt-1 block"> 基于核心的树（CBT） </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-beyond-05-ip-multicast-challenges/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 05 </span> <span class="mt-1 block"> IP 多播面临的挑战 </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-beyond-06-overlay-multicast/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 06 </span> <span class="mt-1 block"> 覆盖多播 </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-beyond-07-collective-operations/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 07 </span> <span class="mt-1 block"> 集合操作 </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-beyond-08-collective-implementations/" aria-current="page" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors bg-muted/60 text-accent font-semibold"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 08 </span> <span class="mt-1 block"> 集合操作的实现 </span> </a> </li> </ol> </div> </aside> <article id="article" class="mt-8 w-full app-prose max-w-readable prose-pre:bg-(--shiki-light-bg) dark:prose-pre:bg-(--shiki-dark-bg)"> <aside class="border-border bg-muted/35 mb-8 border-s-2 px-5 py-4 text-sm leading-6"> <p class="m-0">
+本文译自  <a href="https://textbook.cs168.io/beyond-client-server/collective-implementations.html">Collective Implementations</a> 
+，依照 <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh-hans"> CC BY-SA 4.0 </a> 
+许可发布
+
+。<span> 中文翻译；为适应中文阅读习惯调整了部分术语表达，未改变原意。</span> </p> </aside> <h2 id="集合操作的实现">集合操作的实现</h2>
+<h2 id="动机实现全规约">动机：实现全规约</h2>
+<p>现在我们已经定义了 7 种集合操作，接下来可以开始思考如何在网络中实现它们。要实现一种集合操作，需要回答两个问题：使用什么拓扑连接节点？为了高效完成操作，节点之间必须交换哪些数据？</p>
+<p>决定使用什么拓扑以及交换什么数据之后，就可以分析设计的性能。总共使用了多少网络带宽？操作用了多长时间才完成？还可以关注其他性能指标，但在这份讲义中，我们将重点关注这两个指标。</p>
+<p>为了衡量性能，我们将定义一些变量。总共有 $$p$$ 个节点。每个向量总计为 $$D$$ 字节。这意味着每个向量元素（即图中的每个方框）为 $$D/p$$ 字节。</p>
+<p>在本节中，我们令 $$p=5$$，以便让一些演示更加直观。请注意，这也意味着每个向量现在有 5 个元素，而不是 4 个。（补充说明：请记住，向量代表任意数据，我们把每个向量划分成 $$p$$ 个大小相等的子向量，其中 $$p$$ 是节点总数。将 $$p$$ 从 4 增加到 5 并不一定意味着数据更多，也可能只是把同样的数据拆成了 5 块而不是 4 块。）</p>
+<p>本节将重点讨论全规约（AllReduce）集合操作的实现，不过这些思想也适用于其他集合操作。回想一下，全规约会计算各向量逐元素之和，然后将和向量发送给所有节点。</p>
+<img width="900px" src="/image/cs168-textbook/beyond-client-server/7-082-allreduce-reminder.png">
+<h2 id="方法-1全网状拓扑">方法 1：全网状拓扑</h2>
+<p>首先考虑全网状拓扑（full mesh），其中每个节点都与其他每个节点直接相连。</p>
+<img width="900px" src="/image/cs168-textbook/beyond-client-server/7-083-mesh-1.png">
+<p>在这种拓扑中，可以通过以下步骤实现全规约：首先，每个节点都把自己的整个向量直接发送给其他所有节点。</p>
+<img width="900px" src="/image/cs168-textbook/beyond-client-server/7-084-mesh-2.png">
+<p>然后，每个节点把收到的所有向量相加。</p>
+<img width="900px" src="/image/cs168-textbook/beyond-client-server/7-085-mesh-3.png">
+<p>这种方法使用多少带宽？每个节点都需要把整个向量（$$D$$ 字节）发送给其他 $$p-1$$ 个节点，因此每个节点发送 $$D(p-1)$$ 字节。共有 $$p$$ 个节点，所以发送的数据总量为 $$Dp(p-1) = O(D \cdot p^2)$$ 字节。</p>
+<p>这种方法需要多长时间？这取决于节点和链路的具体资源限制；但假设没有资源限制，所有向量都可以同时发送，在一个时间步内完成。换句话说，节点 1 同时使用它的全部 3 条出站链路向其他所有节点发送数据。与此同时，节点 2 也可以同时使用它的全部 3 条出站链路向其他所有节点发送数据。假设没有资源限制，这种方法只需一个时间步即可完成，其中每个节点每个时间步需要发送和接收 $$2 \cdot D \cdot (p-1)$$ 字节。（每个节点发送 $$D \cdot (p-1)$$ 字节并接收 $$D \cdot (p-1)$$ 字节，两者相加便得到额外的因子 2。）</p>
+<h2 id="方法-2在单个节点上规约">方法 2：在单个节点上规约</h2>
+<p>在下一个拓扑中，让单个节点完成全部计算工作：</p>
+<img width="900px" src="/image/cs168-textbook/beyond-client-server/7-086-root-1.png">
+<p>运行全规约时：首先，除节点 1 外的每个节点都把自己的向量发送给节点 1。</p>
+<img width="800px" src="/image/cs168-textbook/beyond-client-server/7-087-root-2.png">
+<p>然后，节点 1 计算总和，再把和发送回每个节点。</p>
+<img width="900px" src="/image/cs168-textbook/beyond-client-server/7-088-root-3.png">
+<p>这种方法使用多少带宽？除节点 1 外，每个节点都需要把整个向量发送给节点 1，这意味着每个节点发送 $$D$$ 字节。需要发送数据的节点有 $$p-1$$ 个，因此第一步发送的数据总量为 $$D(p-1)$$ 字节。</p>
+<p>接下来在第二步中，节点 1 必须把和向量发送给其他所有节点。和向量大小为 $$D$$ 字节，需要发送给其他 $$p-1$$ 个节点，因此第二步发送的数据总量同样为 $$D(p-1)$$ 字节。</p>
+<p>两步合计发送了 $$2 \cdot D \cdot (p-1) = O(D \cdot p)$$ 字节。请注意，这比全网状方法好 $$p$$ 倍；全网状方法发送了 $$O(D \cdot p^2)$$ 字节。</p>
+<p>这种方法需要多长时间？同样，这取决于具体的资源限制；但假设没有资源限制，每个节点都可以同时把自己的向量发送给节点 1。然后，我们必须等待节点 1 计算总和。计算完成后，节点 1 可以同时把总和发回其他所有节点。总体而言，这种方法需要 2 个时间步才能完成，其中节点 1 每个时间步必须发送或接收 $$D \cdot (p-1)$$ 字节。</p>
+<p>这里我们并没有精确测量一个“时间步”究竟有多长，但比较的重点是：采用这种方法时，第一步中的所有发送都必须完成，第二步中的发送才能开始。相比之下，在第一种方法中，所有数据发送都可以同时进行。</p>
+<p>这种方法的一个缺点是节点 1 成了单点故障（single point of failure）。实践中并不常用这种方法。</p>
+<h2 id="方法-3基于树">方法 3：基于树</h2>
+<p>在下一个拓扑中，我们将构建一棵二叉树。请记住，这里的“二叉”意味着每个节点至多有 2 个子节点。</p>
+<img width="800px" src="/image/cs168-textbook/beyond-client-server/7-089-tree-1.png">
+<p>运行全规约时：从底部的叶节点开始，每个节点把自己的向量发送给父节点。</p>
+<img width="800px" src="/image/cs168-textbook/beyond-client-server/7-090-tree-2.png">
+<p>当你收到所有子节点的向量后，应当把它们与你自己的向量相加。</p>
+<img width="800px" src="/image/cs168-textbook/beyond-client-server/7-091-tree-3.png">
+<p>然后，应当把得到的和向量发送给父节点。</p>
+<img width="700px" src="/image/cs168-textbook/beyond-client-server/7-092-tree-4.png">
+<p>沿树的各层向上重复这一步骤后，根节点应已计算出总和。</p>
+<img width="700px" src="/image/cs168-textbook/beyond-client-server/7-093-tree-5.png">
+<p>随后在第二步中，根节点把总和向量沿树向下发送给它的子节点。当你从父节点收到和向量时，应当把该和向量的一个副本发送给自己的所有子节点。</p>
+<img width="800px" src="/image/cs168-textbook/beyond-client-server/7-094-tree-6.png">
+<img width="800px" src="/image/cs168-textbook/beyond-client-server/7-095-tree-7.png">
+<p>这种方法使用多少带宽？在步骤 1 中，每个节点从子节点接收至多 2 个向量（回想一下：这棵树是二叉树），并向父节点发送 1 个向量。因此每个节点最多传输 $$3D$$ 字节，步骤 1 中总共传输 $$3D \cdot p$$ 字节。</p>
+<p>然后在第二步中，每个节点从父节点接收 1 个向量，并向子节点发送至多 2 个向量。同样，每个节点最多传输 $$3D$$ 字节，步骤 2 中总共传输 $$3D \cdot p$$ 字节。</p>
+<p>两步合计发送了 $$6 \cdot D \cdot p = O(D \cdot p)$$ 字节。这比全网状方法好 $$p$$ 倍，与在单个节点上规约的方法相同。</p>
+<p>这种方法需要多长时间？你必须等到从子节点收到向量后，才能把和（即你自己的向量与子节点向量之和）发送给父节点。总体而言，沿树向上发送向量需要 $$O(\log p)$$ 个时间步，再沿树向下发送总和需要另外 $$O(\log p)$$ 个时间步，合计仍为 $$O(\log p)$$ 个时间步。每个节点在每个时间步必须发送或接收 $$3D$$ 字节（注意，这比其他方法每个时间步传输的字节数少）。要进行精确的时间比较，需要代入 $$D$$ 的数值和网络中的资源限制；但粗略地说，这种方法需要更多时间步，不过由于每个时间步传输的数据较少，每个时间步或许可以更快完成。</p>
+<p>请注意，我们在该实现中利用了规约操作。每个节点把自己的向量与子节点的向量相加，因此只需向父节点发送一个和向量。若采用更朴素的方法，每个节点会向父节点发送 3 个向量（自己的向量以及两个子节点的向量），但我们利用规约节省了带宽。</p>
+<p>更一般地说，归并类集合操作（规约、规约散发、全规约）为优化实现提供了机会。在规约和规约散发中，接收的数据总量实际上小于发送的数据总量，我们可以在实现中利用这一点。例如，如果知道输出是所有向量之和，而我们收到两个向量，就可以把它们相加后转发一个求和后的向量，而不是分别转发这两个向量。</p>
+<h2 id="方法-4基于环朴素实现">方法 4：基于环（朴素实现）</h2>
+<p>在最后两种方法中，我们将构建环形拓扑。请注意，从节点 1 到节点 5 的环回链路与其他链路相比并没有任何特殊之处（也就是说，图上画得更长不代表任何含义）。</p>
+<img width="900px" src="/image/cs168-textbook/beyond-client-server/7-096-naive-ring-1.png">
+<p>朴素地运行全规约时：节点 5 首先向左发送自己的向量。</p>
+<img width="900px" src="/image/cs168-textbook/beyond-client-server/7-097-naive-ring-2.png">
+<p>当你从右侧邻居收到一个向量时，应当将其与你自己的向量相加。</p>
+<img width="900px" src="/image/cs168-textbook/beyond-client-server/7-098-naive-ring-3.png">
+<p>然后，应当把得到的和向量发送给左侧邻居。</p>
+<img width="900px" src="/image/cs168-textbook/beyond-client-server/7-099-naive-ring-4.png">
+<img width="900px" src="/image/cs168-textbook/beyond-client-server/7-100-naive-ring-5.png">
+<p>最终，这一过程将沿整个环进行一周。</p>
+<img width="900px" src="/image/cs168-textbook/beyond-client-server/7-101-naive-ring-6.png">
+<img width="900px" src="/image/cs168-textbook/beyond-client-server/7-102-naive-ring-7.png">
+<p>最后，节点 1 将计算出总和。</p>
+<img width="900px" src="/image/cs168-textbook/beyond-client-server/7-103-naive-ring-8.png">
+<img width="900px" src="/image/cs168-textbook/beyond-client-server/7-104-naive-ring-9.png">
+<p>然后，在第二步中，我们将总和沿环发送一周，让每个节点都获得一个副本。节点 5 首先向左发送总和。当你从右侧邻居收到总和向量时，应当把该和向量的一个副本发送给左侧邻居。最终，这一过程会沿整个环进行一周，每个节点都会收到总和的一个副本。</p>
+<img width="900px" src="/image/cs168-textbook/beyond-client-server/7-105-naive-ring-10.png">
+<p>这种方法使用多少带宽？在步骤 1 中，每个节点从右侧邻居接收一个向量，并向左侧邻居发送一个向量。因此每个节点最多传输 $$2D$$ 字节，步骤 1 中总共传输 $$2D \cdot p$$ 字节。</p>
+<p>在第二步中，每个节点同样接收 1 个向量并发送 1 个向量。因此每个节点仍最多传输 $$2D$$ 字节，步骤 2 中总共传输 $$2D \cdot p$$ 字节。</p>
+<p>两步合计发送了 $$4 \cdot D \cdot p = O(D \cdot p)$$ 字节。</p>
+<p>这种方法需要多长时间？你必须等到（从右侧）收到向量后，才能（向左侧）发送向量。总体而言，第一步需要 $$p$$ 个时间步绕环一周，第二步还需要 $$p$$ 个时间步让总和绕环一周，合计为 $$2p = O(p)$$ 个时间步。每个节点每个时间步必须发送或接收至多 $$2D$$ 字节。</p>
+<p>与基于树的拓扑一样，要进行精确的时间比较，需要代入 $$D$$ 的数值和网络中的资源限制。粗略地说，与前两种方法相比，这种方法需要更多时间步，但由于每个时间步传输的数据较少，每个时间步或许可以更快完成。</p>
+<p>注意：我们选择节点 5 作为起点，但其他起点同样可行。同样，我们也可以在环中从左向右移动，而不是从右向左。</p>
+<h2 id="方法-5基于环优化实现">方法 5：基于环（优化实现）</h2>
+<p>目前见过的方法都能得出正确答案，但它们会产生突发式工作负载。在朴素的环形方法中，每个节点大部分时间都处于空闲状态，什么也不做。在某个时刻，你突然收到整个向量，必须立即把它与你自己的向量相加，再将结果发送到左侧。其他所有节点都必须等你完成这项操作。</p>
+<p>为了产生突发性更低、更加均衡的工作负载，可以错开朴素环形全规约的各个步骤。一次性把整个向量发送到左侧，会给左侧邻居带来一阵突发工作。相反，你可以逐步向左发送向量，每个时间步发送一个元素。</p>
+<img width="900px" src="/image/cs168-textbook/beyond-client-server/7-106-optimized-ring-1.png">
+<img width="900px" src="/image/cs168-textbook/beyond-client-server/7-107-optimized-ring-2.png">
+<p>当你（从右侧）收到单个元素时，可以把它与你自己的对应元素相加。然后，可以把得到的和（仍是单个元素）发送到左侧。</p>
+<img width="900px" src="/image/cs168-textbook/beyond-client-server/7-108-optimized-ring-3.png">
+<img width="900px" src="/image/cs168-textbook/beyond-client-server/7-109-optimized-ring-4.png">
+<p>除了错开发送每个向量的时机外，请注意起点也错开了。现在不再以节点 5 发送自己的全部元素为起点，而是让第 $$i$$ 个节点从发送自己的第 $$i$$ 个元素开始。</p>
+<img width="900px" src="/image/cs168-textbook/beyond-client-server/7-110-optimized-ring-5.png">
+<img width="900px" src="/image/cs168-textbook/beyond-client-server/7-111-optimized-ring-6.png">
+<p>沿这两个维度错开操作（每个节点一次发送一个元素，而且每个节点从不同元素开始），就可以产生更加均衡的工作负载。在每个时间步，每个节点恰好从右侧接收一个元素，计算一次加法，并恰好向左侧发送一个元素。</p>
+<img width="900px" src="/image/cs168-textbook/beyond-client-server/7-112-optimized-ring-7.png">
+<img width="900px" src="/image/cs168-textbook/beyond-client-server/7-113-optimized-ring-8.png">
+<p>如果将此过程重复 $$p$$ 次，每个元素都会完整绕环一周。</p>
+<img width="900px" src="/image/cs168-textbook/beyond-client-server/7-114-optimized-ring-9.png">
+<p>不过，并非每个节点都知道和向量的所有元素，因此必须再绕环一周。与朴素方法一样，在第二轮中，当你收到总和的一个元素时，只需把它的副本发送到右侧。</p>
+<img width="900px" src="/image/cs168-textbook/beyond-client-server/7-115-optimized-ring-10.png">
+<img width="900px" src="/image/cs168-textbook/beyond-client-server/7-116-optimized-ring-11.png">
+<img width="900px" src="/image/cs168-textbook/beyond-client-server/7-117-optimized-ring-12.png">
+<img width="900px" src="/image/cs168-textbook/beyond-client-server/7-118-optimized-ring-13.png">
+<p>观看这段动画演示时，请试着关注我们错开操作的两个维度。如果关注某一列，会发现我们一次发送一个元素，也一次接收一个元素。</p>
+<p>此外，如果关注某一行，会发现每个节点都接收当前为止所有第 $$i$$ 个元素之和，加上自己的第 $$i$$ 个元素，再把新的和向左发送。由于此操作会经过所有节点，我们知道最终会把所有第 $$i$$ 个元素加在一起。</p>
+<p>总而言之，优化后的环形全规约执行的操作与朴素环形全规约完全相同。唯一的区别是，我们错开了向量的发送与接收，从而降低每个节点上工作负载的突发性。</p>
+<p>优化后的环形全规约与朴素环形全规约的带宽和时间分析相同。每个节点在第一步中接收/发送 $$2D$$ 字节，在第二步中再接收/发送 $$2D$$ 字节，总计为 $$4 \cdot D \cdot p = O(D \cdot p)$$ 字节。我们仍然需要 $$O(p)$$ 个时间步才能绕环两周。</p>
+<p>不过，优化方法改善了每个时间步的带宽需求。在朴素方法中，每个节点必须在一个时间步内接收并发送整个向量，因此在一个时间步内总共传输 $$2D$$ 字节。在优化方法中，每个节点每个时间步只需接收和发送一个元素，因此在一个时间步内总共传输 $$2D/p$$ 字节。</p>
+<h2 id="覆盖拓扑与底层拓扑">覆盖拓扑与底层拓扑</h2>
+<p>回想一下，这些集合操作的定义允许用户（即 AI 训练程序）选择任意一组 $$p$$ 台主机，并要求它们运行全规约操作。当用户选出 $$p$$ 台主机时，它们不太可能已经恰好以环形拓扑良好连接。如果主机本身没有在物理上连接成环形拓扑，我们要如何实现环形全规约？</p>
+<p>答案是使用覆盖网络（overlays）。我们可以绘制虚拟链路，将主机连接成环形拓扑：</p>
+<img width="900px" src="/image/cs168-textbook/beyond-client-server/7-119-ring-overlay-1.png">
+<p>当节点 D 把向量发送给节点 B 时，从覆盖网络的视角看，节点 D 沿一条（虚拟）链路把向量发送给直接邻居。从底层网络（underlay）的视角看，这个向量实际上必须经过多跳才能到达目的地节点 B。</p>
+<p>正如讨论基于覆盖网络的多播时所见，覆盖拓扑与底层网络的匹配程度会影响覆盖网络的性能。在 AI 训练场景中，性能尤其重要，因为我们传输的数据量极大。</p>
+<p>为了说明覆盖拓扑为何重要，假设 4 个节点希望运行全规约操作。如何为节点编号才能获得最佳性能？</p>
+<p>首先请注意，无论怎样为节点编号，都能得到正确的全规约结果。换句话说，任意节点都可以作为节点 1，任意节点也都可以作为节点 2，依此类推。（并非所有集合操作都如此，但全规约确实如此。）</p>
+<p>下面是两种可能的节点编号方式：</p>
+<img width="900px" src="/image/cs168-textbook/beyond-client-server/7-120-ring-overlay-2.png">
+<p>第一种方法得到的平均伸展（average stretch）为 3.5。尤其要注意，C 到 D 和 B 到 A 的虚拟链路需要穿过底层网络中的许多链路。</p>
+<img width="900px" src="/image/cs168-textbook/beyond-client-server/7-121-ring-overlay-3.png">
+<p>相比之下，第二种方法得到的平均伸展为 2.5。这组虚拟链路使环中相邻节点在物理网络中也更加接近。</p>
+<img width="900px" src="/image/cs168-textbook/beyond-client-server/7-122-ring-overlay-4.png">
+<p>更一般地说，为了优化环形全规约的性能，我们希望相邻节点（例如节点 $$i$$ 与节点 $$i+1$$）在网络中彼此接近。</p>
+<p>此图展示的是任意的底层网络拓扑，但同样的思想也适用于 AI 训练使用的高度结构化、类似数据中心的拓扑。回想一下，在这些类似数据中心的拓扑中，一些节点之间具有性能极高的连接（例如同一机器上的两个 GPU），另一些节点之间的连接性能较差（例如位于不同机架的两个 GPU）。</p>
+<p>AI 训练任务是可预测的，底层拓扑也是固定且规则的。这意味着我们有许多机会优化训练任务的性能。例如，可以把特定任务分配给特定节点，让集合操作在邻近节点上执行（例如同一机架中的所有节点）。寻找优化 AI 训练任务的方法是一个活跃的研究领域。</p>
+<h2 id="抽象层次">抽象层次</h2>
+<p>总而言之，可以从三个抽象层次思考集合操作：</p>
+<ol>
+<li>
+<p>定义。在最高抽象层，我们通过指定输入和预期输出来定义操作。用户只需要理解这些定义即可使用集合操作，无需知道操作如何实现。</p>
+</li>
+<li>
+<p>覆盖网络。向下一个抽象层，可以思考覆盖拓扑中交换了哪些数据。在这一层，可以假设节点按某种有用的拓扑（例如树形或环形）组织，并能沿该拓扑中的虚拟链路发送数据。</p>
+</li>
+<li>
+<p>底层网络。在最低抽象层，我们思考虚拟链路（覆盖网络）如何对应到底层网络中的实际物理链路。当节点 5 向节点 4 发送向量时，该向量实际上必须经过多个物理路由器和链路转发。</p>
+</li>
+</ol> </article> <hr class="my-8 border-dashed"> <a href="https://github.com/howIdobetter/My-Blog/edit/main/src/content/posts/cs168-beyond-08-collective-implementations.md" target="_blank" rel="noopener noreferrer" class="hover:text-accent text-muted-foreground flex justify-baseline gap-1.5 sm:hidden"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M7 7H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-1" /><path d="M20.385 6.585a2.1 2.1 0 0 0-2.97-2.97L9 12v3h3zM16 5l3 3" /></svg><span>编辑文章</span></a> <div id="btt-btn-container" class="fixed inset-e-4 bottom-8 z-50 md:sticky md:inset-e-auto md:float-end md:me-1 translate-y-14 opacity-0 transition duration-500"> <button data-button="back-to-top" aria-label="回到顶部" class="group bg-background relative px-2 py-1 size-14 rounded-full shadow-xl md:h-8 md:w-fit md:rounded-md md:shadow-none md:focus-visible:rounded-none md:bg-background/35 md:bg-clip-padding md:backdrop-blur-lg"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block rotate-90 md:hidden" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 12h14M5 12l6 6M5 12l6-6" /></svg> <span class="group-hover:text-accent sr-only text-sm md:not-sr-only"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block size-4" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" /><path d="M12 5v14M16 9l-4-4M8 9l4-4" /></svg> 回到顶部 </span> </button> </div> <script data-astro-rerun>
+  function backToTop() {
+    const btnContainer = document.querySelector("#btt-btn-container");
+    const backToTopBtn = document.querySelector("[data-button='back-to-top']");
+    const pageHeader = document.querySelector("body > header");
+
+    if (!btnContainer || !backToTopBtn || !pageHeader) return;
+
+    backToTopBtn.addEventListener("click", () => {
+      document.body.scrollTop = 0;
+      document.documentElement.scrollTop = 0;
+    });
+
+    const observer = new IntersectionObserver(([entry]) => {
+      const isVisible = !entry.isIntersecting;
+      if (entry) {
+        btnContainer.classList.toggle("opacity-100", isVisible);
+        btnContainer.classList.toggle("translate-y-0", isVisible);
+        btnContainer.classList.toggle("opacity-0", !isVisible);
+        btnContainer.classList.toggle("translate-y-14", !isVisible);
+      }
+    });
+    observer.observe(pageHeader);
+  }
+  backToTop();
+</script> <ul class="mt-4 mb-8 flex flex-wrap gap-4 sm:my-8"> <li> <a href="/tags/networking/" class="border-border flex items-center gap-1 rounded-full border transition-colors hover:border-accent hover:text-accent focus-visible:text-accent focus-visible:no-underline px-3 py-1.5 text-sm" data-astro-transition-scope="astro-36ssibgs-1"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="text-accent opacity-80 size-3.5" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 9h14M5 15h14M11 4 7 20M17 4l-4 16" /></svg> networking </a> </li><li> <a href="/tags/cs168/" class="border-border flex items-center gap-1 rounded-full border transition-colors hover:border-accent hover:text-accent focus-visible:text-accent focus-visible:no-underline px-3 py-1.5 text-sm" data-astro-transition-scope="astro-36ssibgs-2"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="text-accent opacity-80 size-3.5" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 9h14M5 15h14M11 4 7 20M17 4l-4 16" /></svg> cs168 </a> </li><li> <a href="/tags/course-notes/" class="border-border flex items-center gap-1 rounded-full border transition-colors hover:border-accent hover:text-accent focus-visible:text-accent focus-visible:no-underline px-3 py-1.5 text-sm" data-astro-transition-scope="astro-36ssibgs-3"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="text-accent opacity-80 size-3.5" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 9h14M5 15h14M11 4 7 20M17 4l-4 16" /></svg> course-notes </a> </li><li> <a href="/tags/beyond-client-server/" class="border-border flex items-center gap-1 rounded-full border transition-colors hover:border-accent hover:text-accent focus-visible:text-accent focus-visible:no-underline px-3 py-1.5 text-sm" data-astro-transition-scope="astro-36ssibgs-4"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="text-accent opacity-80 size-3.5" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 9h14M5 15h14M11 4 7 20M17 4l-4 16" /></svg> beyond-client-server </a> </li> </ul>  <hr class="my-8 border-dashed"> <div data-pagefind-ignore class="my-8 grid grid-cols-1 gap-4 sm:grid-cols-2"> <a href="/posts/cs168-beyond-07-collective-operations/" class="soft-panel hover:border-accent/70 hover:text-accent flex w-full gap-3 p-4 transition"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block flex-none rtl:rotate-180" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 12h14M5 12l6 6M5 12l6-6" /></svg> <div> <span class="mono-label">上一篇</span> <div class="mt-1 text-sm leading-6">集合操作</div> </div> </a> <a href="/posts/cs168-datacenter-01-topology/" class="soft-panel hover:border-accent/70 hover:text-accent flex w-full justify-end gap-3 p-4 text-end transition sm:col-start-2"> <div> <span class="mono-label">下一篇</span> <div class="mt-1 text-sm leading-6">CS168：数据中心拓扑</div> </div> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block flex-none rtl:rotate-180" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 12h14M13 18l6-6M13 6l6 6" /></svg> </a> </div> </main> <footer class="app-layout mt-auto"> <div class="border-border text-muted-foreground flex flex-col items-start justify-between gap-6 border-t py-9 text-sm sm:flex-row sm:items-end"> <div> <p class="text-foreground font-semibold">随便做做</p> <p class="mt-1">先记下来，再慢慢改对。</p> </div> <div class="flex items-center gap-5"> <div class="flex flex-wrap items-center gap-1"> <a href="https://github.com/howIdobetter" title="GitHub" class="group inline-flex items-center gap-1 hover:text-accent p-2 hover:rotate-6 sm:p-1">  <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block size-6 scale-125 fill-transparent stroke-current stroke-2 opacity-90 group-hover:fill-transparent sm:scale-110" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" /><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21" /></svg> <span class="sr-only">GitHub</span>  </a> </div> <span class="whitespace-nowrap">© 2026 一剑留名ing</span> </div> </div> </footer>   <script type="module">const a="theme",n="light",r="dark";function i(){const e=localStorage.getItem(a);return e||(window.matchMedia("(prefers-color-scheme: dark)").matches?r:n)}let o=window.__theme?.value??i();function s(){localStorage.setItem(a,o),m()}function m(){const e=document.firstElementChild;e?.setAttribute("data-theme",o),e?.classList.toggle("dark",o===r);const t=document.querySelector("#theme-btn"),c=o===n?t?.dataset.labelDark:t?.dataset.labelLight;c&&(t?.setAttribute("aria-label",c),t?.setAttribute("title",c));const l=window.getComputedStyle(document.body).backgroundColor;document.querySelector("meta[name='theme-color']")?.setAttribute("content",l)}function d(){m(),document.querySelector("#theme-btn")?.addEventListener("click",()=>{o=o===n?r:n,s()})}d();document.addEventListener("astro:after-swap",d);document.addEventListener("astro:before-swap",e=>{const t=document.querySelector("meta[name='theme-color']")?.getAttribute("content");t&&e.newDocument.querySelector("meta[name='theme-color']")?.setAttribute("content",t)});window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change",({matches:e})=>{o=e?r:n,s()});</script> </body> </html> <script data-astro-rerun>
+  function addHeadingLinks() {
+    const isZh = document.documentElement.lang === "zh-CN";
+    const headings = Array.from(
+      document.querySelectorAll("h2, h3, h4, h5, h6")
+    );
+    for (const heading of headings) {
+      heading.classList.add("group");
+      const link = document.createElement("a");
+      link.className =
+        "heading-link ms-2 no-underline opacity-75 md:opacity-0 md:group-hover:opacity-100 md:focus:opacity-100";
+      link.href = "#" + heading.id;
+      link.setAttribute(
+        "aria-label",
+        isZh
+          ? `链接到本节：${heading.textContent}`
+          : `Link to section: ${heading.textContent}`
+      );
+
+      const span = document.createElement("span");
+      span.ariaHidden = "true";
+      span.innerText = "#";
+      link.appendChild(span);
+      heading.appendChild(link);
+    }
+  }
+  addHeadingLinks();
+
+  function attachCopyButtons() {
+    const isZh = document.documentElement.lang === "zh-CN";
+    const copyButtonLabel = isZh ? "复制" : "Copy";
+    const copiedButtonLabel = isZh ? "已复制" : "Copied";
+    const codeBlocks = Array.from(document.querySelectorAll("pre"));
+
+    for (const codeBlock of codeBlocks) {
+      const wrapper = document.createElement("div");
+      wrapper.style.position = "relative";
+
+      const computedStyle = getComputedStyle(codeBlock);
+      const hasFileNameOffset =
+        computedStyle.getPropertyValue("--file-name-offset").trim() !== "";
+
+      const topClass = hasFileNameOffset
+        ? "top-(--file-name-offset)"
+        : "-top-3";
+
+      const copyButton = document.createElement("button");
+      copyButton.className = `copy-code absolute end-3 ${topClass} rounded bg-muted border border-muted px-2 py-1 text-xs leading-4 text-foreground font-medium`;
+      copyButton.innerHTML = copyButtonLabel;
+      copyButton.setAttribute("aria-label", copyButtonLabel);
+      copyButton.setAttribute("aria-live", "polite");
+      codeBlock.setAttribute("tabindex", "0");
+      codeBlock.appendChild(copyButton);
+
+      codeBlock?.parentNode?.insertBefore(wrapper, codeBlock);
+      wrapper.appendChild(codeBlock);
+
+      copyButton.addEventListener("click", async () => {
+        await copyCode(codeBlock, copyButton);
+      });
+    }
+
+    async function copyCode(block, button) {
+      const code = block.querySelector("code");
+      const text = code?.innerText;
+
+      await navigator.clipboard.writeText(text ?? "");
+
+      button.innerText = copiedButtonLabel;
+      button.setAttribute("aria-label", copiedButtonLabel);
+
+      setTimeout(() => {
+        button.innerText = copyButtonLabel;
+        button.setAttribute("aria-label", copyButtonLabel);
+      }, 700);
+    }
+  }
+  attachCopyButtons();
+
+  /** Accessible image lightbox for article images. */
+  function initLightbox() {
+    const article = document.getElementById("article");
+    if (!article) return;
+
+    const prefersReducedMotion = () =>
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    let overlay = null;
+    let lastFocused = null;
+
+    // Defer attribute mutations so they don't push the LCP timestamp.
+    // Event listeners below use delegation and don't need the attributes to exist yet.
+    requestAnimationFrame(() => {
+      const images = Array.from(article.querySelectorAll("img"));
+      for (const image of images) {
+        if (image.closest("a")) continue;
+        image.setAttribute("role", "button");
+        image.setAttribute("tabindex", "0");
+        image.setAttribute("aria-haspopup", "dialog");
+        image.setAttribute(
+          "aria-label",
+          image.alt ? `Zoom image: ${image.alt}` : "Zoom image"
+        );
+      }
+    });
+
+    function open(src, alt, trigger) {
+      if (overlay) return;
+      lastFocused = trigger ?? document.activeElement;
+
+      overlay = document.createElement("div");
+      overlay.setAttribute("role", "dialog");
+      overlay.setAttribute("aria-modal", "true");
+      overlay.setAttribute(
+        "aria-label",
+        alt ? `Image preview: ${alt}` : "Image preview"
+      );
+      overlay.className =
+        "fixed inset-0 z-50 flex cursor-zoom-out items-center justify-center bg-black/70 backdrop-blur-sm opacity-0 transition-opacity duration-200 motion-reduce:transition-none";
+
+      const closeButton = document.createElement("button");
+      closeButton.type = "button";
+      closeButton.setAttribute("aria-label", "Close image preview");
+      closeButton.className =
+        "absolute end-4 top-4 rounded p-2 text-3xl leading-none text-white";
+      closeButton.innerHTML = "&#10005;";
+      closeButton.addEventListener("click", close);
+
+      const image = document.createElement("img");
+      image.src = src;
+      image.alt = "";
+      image.className =
+        "max-h-[90dvh] max-w-[90dvw] cursor-default object-contain";
+
+      overlay.append(closeButton, image);
+      overlay.addEventListener("click", e => {
+        if (e.target === overlay && currentScale <= 1) close();
+      });
+
+      let currentScale = 1;
+      let translateX = 0;
+      let translateY = 0;
+      let initialDist = 0;
+      let initialScale = 1;
+      let panStartX = 0;
+      let panStartY = 0;
+      let panStartTranslateX = 0;
+      let panStartTranslateY = 0;
+      let lastTapTime = 0;
+
+      function applyTransform() {
+        image.style.transform = `scale(${currentScale}) translate(${translateX}px, ${translateY}px)`;
+      }
+
+      function resetTransform() {
+        currentScale = 1;
+        translateX = 0;
+        translateY = 0;
+        image.style.transform = "";
+      }
+
+      overlay.addEventListener(
+        "touchstart",
+        e => {
+          const t = e.touches;
+          if (t.length === 2) {
+            initialDist = Math.hypot(
+              t[1].clientX - t[0].clientX,
+              t[1].clientY - t[0].clientY
+            );
+            initialScale = currentScale;
+          } else if (t.length === 1) {
+            const now = Date.now();
+            if (now - lastTapTime < 300) {
+              e.preventDefault();
+              if (currentScale > 1) {
+                resetTransform();
+              } else {
+                currentScale = 2;
+                translateX = 0;
+                translateY = 0;
+                applyTransform();
+              }
+              lastTapTime = 0;
+              panStartX = t[0].clientX;
+              panStartY = t[0].clientY;
+              panStartTranslateX = translateX;
+              panStartTranslateY = translateY;
+            } else {
+              lastTapTime = now;
+              if (currentScale > 1) {
+                panStartX = t[0].clientX;
+                panStartY = t[0].clientY;
+                panStartTranslateX = translateX;
+                panStartTranslateY = translateY;
+              }
+            }
+          }
+        },
+        { passive: false }
+      );
+
+      overlay.addEventListener(
+        "touchmove",
+        e => {
+          const t = e.touches;
+          if (t.length === 2) {
+            e.preventDefault();
+            const dist = Math.hypot(
+              t[1].clientX - t[0].clientX,
+              t[1].clientY - t[0].clientY
+            );
+            currentScale = Math.min(
+              4,
+              Math.max(1, initialScale * (dist / initialDist))
+            );
+            applyTransform();
+          } else if (t.length === 1) {
+            if (currentScale > 1) {
+              e.preventDefault();
+              translateX =
+                panStartTranslateX + (t[0].clientX - panStartX) / currentScale;
+              translateY =
+                panStartTranslateY + (t[0].clientY - panStartY) / currentScale;
+              const maxX = Math.max(
+                0,
+                (image.clientWidth - overlay.clientWidth / currentScale) / 2
+              );
+              const maxY = Math.max(
+                0,
+                (image.clientHeight - overlay.clientHeight / currentScale) / 2
+              );
+              translateX = Math.min(maxX, Math.max(-maxX, translateX));
+              translateY = Math.min(maxY, Math.max(-maxY, translateY));
+              applyTransform();
+            } else {
+              e.preventDefault();
+            }
+          }
+        },
+        { passive: false }
+      );
+
+      overlay.addEventListener("touchend", e => {
+        if (e.touches.length === 0 && currentScale <= 1.05) {
+          resetTransform();
+        }
+      });
+
+      overlay.addEventListener("touchcancel", e => {
+        if (e.touches.length === 0 && currentScale <= 1.05) {
+          resetTransform();
+        }
+      });
+
+      document.body.appendChild(overlay);
+      document.body.style.overflow = "hidden";
+      document.addEventListener("keydown", onKeyDown);
+      window.__closeLightbox = close;
+
+      requestAnimationFrame(() => overlay?.classList.add("opacity-100"));
+      closeButton.focus();
+    }
+
+    function close() {
+      if (!overlay) return;
+      const el = overlay;
+      overlay = null;
+      window.__closeLightbox = null;
+
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = "";
+      lastFocused?.focus();
+      lastFocused = null;
+
+      if (prefersReducedMotion()) {
+        el.remove();
+        return;
+      }
+      const remove = () => el.remove();
+      el.addEventListener("transitionend", remove, { once: true });
+      setTimeout(remove, 250); // fallback in case transitionend never fires
+      el.classList.remove("opacity-100");
+    }
+
+    function onKeyDown(e) {
+      if (e.key === "Escape") {
+        close();
+      } else if (e.key === "Tab") {
+        trapFocus(e);
+      }
+    }
+
+    // Keep keyboard focus inside the open dialog.
+    function trapFocus(e) {
+      if (!overlay) return;
+      const focusables = overlay.querySelectorAll(
+        'a[href], button, [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+
+    function triggerFromEvent(e) {
+      const image = e.target.closest("img");
+      if (!image || !article.contains(image) || image.closest("a")) return null;
+      return image;
+    }
+
+    function activate(image) {
+      open(image.currentSrc || image.src, image.alt, image);
+    }
+
+    article.addEventListener("click", e => {
+      const image = triggerFromEvent(e);
+      if (!image) return;
+      e.preventDefault();
+      activate(image);
+    });
+
+    article.addEventListener("keydown", e => {
+      if (e.key !== "Enter" && e.key !== " " && e.key !== "Spacebar") return;
+      const image = triggerFromEvent(e);
+      if (!image) return;
+      e.preventDefault();
+      activate(image);
+    });
+  }
+  initLightbox();
+
+  if (!window.__lightboxSwapBound) {
+    window.__lightboxSwapBound = true;
+    document.addEventListener("astro:before-swap", () =>
+      window.__closeLightbox?.()
+    );
+  }
+
+  document.addEventListener("astro:after-swap", () =>
+    window.scrollTo({ left: 0, top: 0, behavior: "instant" })
+  );
+</script>

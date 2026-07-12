@@ -1,0 +1,703 @@
+<!DOCTYPE html><html dir="ltr" lang="en" class="overflow-y-scroll scroll-smooth"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="canonical" href="https://howidobetter.github.io/en/posts/cs168-wireless-02-cellular/"><meta name="generator" content="Astro v6.4.2"><!-- Primary meta --><title>CS168 无线网络 2：蜂窝网络 | 随便做做</title><meta name="title" content="CS168 无线网络 2：蜂窝网络 | 随便做做"><meta name="description" content="理解蜂窝网络的无线接入网、核心网、注册、发现、附着、数据交换、切换与漫游。"><meta name="author" content="一剑留名ing"><link rel="sitemap" href="/sitemap-index.xml"><!-- Open Graph --><meta property="og:type" content="article"><meta property="og:site_name" content="随便做做"><meta property="og:title" content="CS168 无线网络 2：蜂窝网络 | 随便做做"><meta property="og:description" content="理解蜂窝网络的无线接入网、核心网、注册、发现、附着、数据交换、切换与漫游。"><meta property="og:url" content="https://howidobetter.github.io/en/posts/cs168-wireless-02-cellular/"><meta property="og:image" content="https://howidobetter.github.io/default-og.png"><!-- Twitter / X --><meta property="twitter:card" content="summary_large_image"><meta property="twitter:url" content="https://howidobetter.github.io/en/posts/cs168-wireless-02-cellular/"><meta property="twitter:title" content="CS168 无线网络 2：蜂窝网络 | 随便做做"><meta property="twitter:description" content="理解蜂窝网络的无线接入网、核心网、注册、发现、附着、数据交换、切换与漫游。"><meta property="twitter:image" content="https://howidobetter.github.io/default-og.png"><!-- RSS autodiscovery --><link rel="alternate" type="application/rss+xml" title="随便做做" href="https://howidobetter.github.io/rss.xml"><!-- Filled at runtime by theme.ts to match the current background colour --><meta name="theme-color" content=""><!-- Extra head content injected by child layouts (e.g. JSON-LD, article meta) --><meta property="article:published_time" content="2026-07-12T00:00:00.000Z"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"CS168 无线网络 2：蜂窝网络 | 随便做做","description":"理解蜂窝网络的无线接入网、核心网、注册、发现、附着、数据交换、切换与漫游。","url":"https://howidobetter.github.io/en/posts/cs168-wireless-02-cellular/","image":"https://howidobetter.github.io/default-og.png","datePublished":"2026-07-12T00:00:00.000Z","author":[{"@type":"Person","name":"一剑留名ing","url":"https://github.com/howIdobetter"}]}</script> <!--
+      Inline FOUC-prevention script: sets data-theme on <html> before
+      the browser paints. Runs synchronously, no defer/async.
+    --><script>
+      (function () {
+        const stored = localStorage.getItem("theme");
+        const prefersDark = window.matchMedia(
+          "(prefers-color-scheme: dark)"
+        ).matches;
+        const theme = stored ?? (prefersDark ? "dark" : "light");
+        const root = document.firstElementChild;
+        root?.setAttribute("data-theme", theme);
+        root?.classList.toggle("dark", theme === "dark");
+        // Expose value so theme.ts can skip re-detection.
+        window.__theme = { value: theme };
+      })();
+    </script><meta name="astro-view-transitions-enabled" content="true"><meta name="astro-view-transitions-fallback" content="animate"><script type="module" src="/_astro/ClientRouter.astro_astro_type_script_index_0_lang.CAqDO0tx.js"></script><link rel="stylesheet" href="/_astro/Footer.W6Wz50NF.css">
+<style>@keyframes astroFadeInOut{0%{opacity:1}to{opacity:0}}@keyframes astroFadeIn{0%{opacity:0;mix-blend-mode:plus-lighter}to{opacity:1;mix-blend-mode:plus-lighter}}@keyframes astroFadeOut{0%{opacity:1;mix-blend-mode:plus-lighter}to{opacity:0;mix-blend-mode:plus-lighter}}@keyframes astroSlideFromRight{0%{transform:translate(100%)}}@keyframes astroSlideFromLeft{0%{transform:translate(-100%)}}@keyframes astroSlideToRight{to{transform:translate(100%)}}@keyframes astroSlideToLeft{to{transform:translate(-100%)}}@media(prefers-reduced-motion){::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}[data-astro-transition-scope]{animation:none!important}}
+</style><style>[data-astro-transition-scope="astro-36ssibgs-1"] { view-transition-name: networking; }@layer astro { ::view-transition-old(networking) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(networking) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(networking) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(networking) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-1"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-1"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-1"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-1"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style><style>[data-astro-transition-scope="astro-36ssibgs-2"] { view-transition-name: cs168; }@layer astro { ::view-transition-old(cs168) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(cs168) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(cs168) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(cs168) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style><style>[data-astro-transition-scope="astro-36ssibgs-3"] { view-transition-name: course-notes; }@layer astro { ::view-transition-old(course-notes) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(course-notes) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(course-notes) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(course-notes) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style><style>[data-astro-transition-scope="astro-36ssibgs-4"] { view-transition-name: wireless; }@layer astro { ::view-transition-old(wireless) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(wireless) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(wireless) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(wireless) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style></head> <body class="bg-background font-app text-foreground selection:bg-accent/75 selection:text-accent-foreground flex min-h-svh flex-col">    <a id="skip-to-content" href="#main-content" class="bg-background text-accent absolute inset-s-4 -top-full z-50 border px-3 py-2 transition-[top] focus:top-3"> Skip to content </a> <header class="border-border bg-background/90 relative z-30 border-b backdrop-blur"> <div class="app-layout relative flex min-h-18 w-full items-baseline justify-between sm:items-center"> <a href="/en/" class="absolute inline-flex items-baseline gap-3 py-1 text-lg leading-8 font-semibold whitespace-nowrap sm:static sm:my-auto sm:text-xl sm:leading-none"> <span>随便做做</span> <span class="text-muted-foreground hidden font-mono text-[0.68rem] font-normal sm:inline">
+howIdobetter
+</span> </a> <nav id="nav-menu" class="flex w-full flex-col items-center sm:ms-2 sm:flex-row sm:justify-end sm:py-0"> <button id="menu-btn" class="focus-outline self-end p-3 sm:hidden" aria-label="Open menu" aria-expanded="false" aria-controls="menu-items" data-label-open="Open menu" data-label-close="Close menu"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="hidden" viewBox="0 0 24 24" id="close-icon"><path stroke="none" d="M0 0h24v24H0z" /><path d="M18 6 6 18M6 6l12 12" /></svg> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="icon icon-tabler icons-tabler-outline icon-tabler-menu-deep" viewBox="0 0 24 24" id="menu-icon"><path stroke="none" d="M0 0h24v24H0z" /><path d="M4 6h16M7 12h13M10 18h10" /></svg> </button> <ul id="menu-items" class="border-border [&>li>a]:hover:text-accent mt-3 hidden w-full grid-cols-2 place-content-center gap-1 border-t py-3 sm:mt-0 sm:flex sm:w-auto sm:items-center sm:gap-x-1 sm:border-0 sm:py-0 [&>li>a]:block [&>li>a]:px-4 [&>li>a]:py-3 [&>li>a]:text-center [&>li>a]:font-medium [&>li>a]:transition-colors sm:[&>li>a]:px-3 sm:[&>li>a]:py-2"> <li class="col-span-2"> <a href="/en/posts/" class="active-nav"> Posts </a> </li> <li class="col-span-2"> <a href="/en/tags/"> Tags </a> </li> <li class="col-span-2"> <a href="/en/about/"> About </a> </li> <li class="col-span-2"> <a href="/en/archives/" title="Archives" aria-label="Archives" class="group inline-flex items-center gap-1 hover:text-accent focus-outline flex size-full justify-center p-3 sm:relative sm:size-10 sm:p-0">  <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="hidden sm:absolute sm:top-1/2 sm:left-1/2 sm:block sm:size-6 sm:-translate-x-1/2 sm:-translate-y-1/2" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v0a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8M10 12h4" /></svg> <span class="sm:sr-only">Archives</span>  </a> </li> <li class="col-span-1 flex items-center justify-center"> <a href="/en/search/" title="Search" aria-label="Search" class="group inline-flex items-center gap-1 hover:text-accent focus-outline relative size-11 sm:size-10">  <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="absolute top-1/2 left-1/2 size-6 -translate-x-1/2 -translate-y-1/2" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M3 10a7 7 0 1 0 14 0 7 7 0 1 0-14 0M21 21l-6-6" /></svg> <span class="sr-only">Search</span>  </a> </li> <li class="col-span-1 flex items-center justify-center"> <div class="border-border flex overflow-hidden rounded-full border text-xs font-semibold" aria-label="Language"> <a href="/posts/cs168-wireless-02-cellular/" title="中文" class="px-2 py-1 transition-colors hover:text-accent"> 中 </a><a href="/en/posts/cs168-wireless-02-cellular/" title="English" aria-current="true" class="px-2 py-1 transition-colors bg-accent text-accent-foreground"> EN </a> </div> </li> <li class="col-span-1 flex items-center justify-center"> <button id="theme-btn" class="focus-outline hover:[&>svg]:stroke-accent relative size-12 rounded-full p-4 transition-colors sm:size-10" title="Toggle theme" aria-label="auto" aria-live="polite" data-label-light="Switch to light theme" data-label-dark="Switch to dark theme"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="absolute top-[50%] left-[50%] translate-[-50%] scale-100 rotate-0 transition-[transform,opacity] dark:scale-0 dark:-rotate-90" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M12 3h.393a7.5 7.5 0 0 0 7.92 12.446A9 9 0 1 1 12 2.992z" /></svg> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="absolute top-[50%] left-[50%] translate-[-50%] scale-0 rotate-90 transition-[transform,opacity] dark:scale-100 dark:rotate-0" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M14.828 14.828a4 4 0 1 0-5.656-5.656 4 4 0 0 0 5.656 5.656M6.343 17.657l-1.414 1.414M6.343 6.343 4.929 4.929M17.657 6.343l1.414-1.414M17.657 17.657l1.414 1.414M4 12H2M12 4V2M20 12h2M12 20v2" /></svg> </button> </li> </ul> </nav> </div> </header> <script type="module">function c(){const e=document.querySelector("#menu-btn"),t=document.querySelector("#menu-items"),n=document.querySelector("#menu-icon"),s=document.querySelector("#close-icon");if(!e||!t||!n||!s)return;const a=e.dataset.labelOpen??"Open menu",l=e.dataset.labelClose??"Close menu";e.addEventListener("click",()=>{const o=e.getAttribute("aria-expanded")==="true";e.setAttribute("aria-expanded",o?"false":"true"),e.setAttribute("aria-label",o?a:l),t.classList.toggle("hidden"),t.classList.toggle("grid"),n.classList.toggle("hidden"),s.classList.toggle("hidden")})}c();document.addEventListener("astro:after-swap",c);</script> <div class="reading-progress" aria-hidden="true"> <div class="reading-progress-bar"></div> </div> <div class="app-layout flex items-center justify-start"><a id="back-button" href="/en/" class="group inline-flex items-center gap-1 hover:text-accent focus-outline hover:text-foreground/75 -ms-2 mt-8 mb-2"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block size-6 rtl:rotate-180" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="m15 6-6 6 6 6" /></svg><span>Back</span> </a></div><script type="module">function o(){const t=document.querySelector("#back-button"),e=sessionStorage.getItem("backUrl");e&&t&&(t.href=e)}document.addEventListener("astro:page-load",o);o();</script> <main id="main-content" class="app-layout pb-8" data-pagefind-body> <header class="border-border max-w-readable border-b pt-8 pb-8 sm:pt-12"> <h1 style="view-transition-name:cs-168-u0065e0u007ebfu007f51u007edc-2-u00ff1au008702u007a9du007f51u007edc" class="text-foreground text-3xl leading-tight font-semibold text-balance sm:text-5xl"> CS168 无线网络 2：蜂窝网络 </h1> <p class="text-muted-foreground mt-4 text-lg leading-8 text-pretty"> 理解蜂窝网络的无线接入网、核心网、注册、发现、附着、数据交换、切换与漫游。 </p> <div class="mt-5 flex flex-wrap items-center gap-3"> <div class="text-muted-foreground flex items-center gap-x-2 font-mono"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block size-5 min-w-5" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" /><path d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM16 3v4M8 3v4M4 11h16M7 14h.013M10.01 14h.005M13.01 14h.005M16.015 14h.005M13.015 17h.005M7.01 17h.005M10.01 17h.005" /></svg>  <time class="text-sm sm:text-base" datetime="2026-07-12T00:00:00.000Z"> July 12, 2026 </time> </div> <a href="https://github.com/howIdobetter/My-Blog/edit/main/src/content/posts/cs168-wireless-02-cellular.md" target="_blank" rel="noopener noreferrer" class="hover:text-accent text-muted-foreground flex justify-baseline gap-1.5 max-sm:hidden"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M7 7H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-1" /><path d="M20.385 6.585a2.1 2.1 0 0 0-2.97-2.97L9 12v3h3zM16 5l3 3" /></svg><span>Edit post</span></a> </div> </header> <aside class="border-border mt-8 border-y"> <details class="group py-4 sm:hidden"> <summary class="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4"> <span> <span class="mono-label block"> CS168 · 无线网络 </span> <span class="text-accent mt-1 block text-sm font-semibold"> 2 / 2 </span> </span> <span aria-hidden="true" class="text-muted-foreground text-xl transition-transform group-open:rotate-45">
++
+</span> </summary> <ol class="border-border mt-3 border-t pt-2"> <li class="border-border border-b last:border-b-0"> <a href="/en/posts/cs168-wireless-01-wireless-links/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 01 </span> <span>CS168 无线网络 1：无线链路</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/en/posts/cs168-wireless-02-cellular/" aria-current="page" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm text-accent font-semibold"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 02 </span> <span>CS168 无线网络 2：蜂窝网络</span> </a> </li> </ol> </details> <div class="hidden py-5 sm:block"> <div class="flex items-baseline justify-between gap-4"> <p class="mono-label">CS168 · 无线网络</p> <p class="text-accent text-sm font-semibold"> 2 / 2 </p> </div> <ol class="border-border mt-4 grid border-t sm:grid-cols-3 lg:grid-cols-6"> <li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/en/posts/cs168-wireless-01-wireless-links/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 01 </span> <span class="mt-1 block"> CS168 无线网络 1：无线链路 </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/en/posts/cs168-wireless-02-cellular/" aria-current="page" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors bg-muted/60 text-accent font-semibold"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 02 </span> <span class="mt-1 block"> CS168 无线网络 2：蜂窝网络 </span> </a> </li> </ol> </div> </aside> <article id="article" class="mt-8 w-full app-prose max-w-readable prose-pre:bg-(--shiki-light-bg) dark:prose-pre:bg-(--shiki-dark-bg)"> <aside class="border-border bg-muted/35 mb-8 border-s-2 px-5 py-4 text-sm leading-6"> <p class="m-0">
+本文译自  <a href="https://textbook.cs168.io/wireless/cellular.html">Cellular — CS 168 Textbook</a> 
+，依照 <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh-hans"> CC BY-SA 4.0 </a> 
+许可发布
+
+。<span> 中文完整翻译；对术语和排版作了适配。原文作者为 Peyrin Kao，课程内容基于 Sylvia Ratnasamy、Rob Shakir 等人的讲授。</span> </p> </aside> <h2 id="蜂窝网络">蜂窝网络</h2>
+<h2 id="为什么学习蜂窝网络">为什么学习蜂窝网络？</h2>
+<p>无线移动连接已经成为现代标准。即使坐在行驶的汽车里，手机也能连接互联网。</p>
+<p>传统互联网无法支持这种能力。你也许能从卧室走到厨房而不断网，因为你仍在家用无线路由器的覆盖范围内，而路由器再通过线缆连接互联网。但传统互联网不能在很长距离的移动中，例如乘车时，提供无缝连接。</p>
+<p>无线移动连接有许多实现方式，但蜂窝网络是当今占主导地位的接入技术。如今超过一半的 Web 流量来自蜂窝设备。</p>
+<p>蜂窝网络只是移动无线连接技术之一。卫星、自由空间光通信等技术同样存在，不过蜂窝网络仍是主流。</p>
+<p>未来，自动驾驶、虚拟现实等依赖无线移动技术的高性能应用可能推动更多创新。若要扩展现有蜂窝网络来支持这些应用，成本可能高得难以承受；而 AT&#x26;T、Verizon 等蜂窝运营商也不以快速创新闻名。普遍看法是，这个领域很可能在不久的将来受到颠覆，因此也是活跃的研究方向。</p>
+<img width="700px" src="/image/cs168-textbook/wireless/8-029-cellular-taxonomy.png">
+<h2 id="蜂窝网络简史">蜂窝网络简史</h2>
+<p>蜂窝技术源自传统电话系统。它最初让用户摆脱有线座机，无线拨打电话。第一部移动电话于 1983 年售出，价格为 4000 美元；考虑通胀后，今天会贵得多。</p>
+<img width="900px" class="real-photo" src="/image/cs168-textbook/wireless/8-030-first-phone.png">
+<p>蜂窝技术来自电话网而非互联网，因此许多设计选择与传统互联网不同。多年来，蜂窝技术（例如智能手机出现前用于语音通话的手机）与互联网并行发展，两者采用了不同的架构选择。</p>
+<p>例如蜂窝网络采用资源预留，现代互联网采用分组交换；蜂窝网络常以单个用户为单位思考，互联网主要以流或分组为单位；蜂窝网络可按通话分钟计费，而互联网通常不会如此细致地记录用量。</p>
+<p>近年蜂窝网络逐渐与传统互联网兼容。今天可以把它看成一种专用的第 2 层局域网，能够与传统 TCP/IP 互联网的其他部分交互。</p>
+<h2 id="蜂窝标准">蜂窝标准</h2>
+<p>传统互联网由标准组织帮助统一 TCP、IP 等协议，蜂窝网络也由多个标准组织合作制定标准。</p>
+<p>在某些方面，蜂窝标准组织面对的现实政治复杂性更高。为了互操作，所有手机制造商和网络运营商（例如建设基站的 Verizon）必须从物理层开始就对协议达成一致。</p>
+<p>蜂窝领域的关键标准组织是 3GPP（第三代合作伙伴计划），大型设备供应商与电信公司都参与其中。3GPP 提出标准，再提交给 ITU（国际电信联盟）。ITU 隶属联合国，每个国家都有一票，因此标准制定也涉及政治。例如每国一票意味着美国可能被欧盟国家的票数压过。</p>
+<p>通常每十年引入一代新技术，这就是 2G、3G、4G、5G 中数字的含义。5G 在 2020 年前后定义，运营商仍在部署；6G 标准的规划会在 2020 年代后期开始。</p>
+<p>每一代都从多个维度改进上一代，包括峰值理论速率、用户平均速率、移动性（高速移动时保持连接）、连接密度（指定区域内设备数量）等。各维度通常都比上一代提高约十倍。</p>
+<img width="900px" src="/image/cs168-textbook/wireless/8-031-cellular-generations.png">
+<p>除性能外，架构也逐代从电话网设计转向互联网设计。1G 手机完全是模拟的，面向语音通话；2G/3G 仍以电路交换和语音为主，辅以少量短信，互联网流量很少；4G 起转向分组交换，语音只是网络承载的众多应用之一。</p>
+<p>蜂窝规范有数千页、数百份文档，几乎没人会完整读完。更麻烦的是，每次换代几乎所有组件都会改名。例如蜂窝塔曾依次叫 base station、NodeB、evolved NodeB（eNodeB）、next-gen Node B（gNB），其实都指同类组件。本课会自行采用更直观的名称。教材或规范可能使用不同术语，但概念总体一致。</p>
+<h2 id="关键挑战移动性">关键挑战：移动性</h2>
+<p>蜂窝网络最难处理的是移动性。可以把它想成手机在高速公路移动时仍播放视频（当然不要边开车边看）。我们会研究四个根本挑战：</p>
+<ol>
+<li><strong>发现</strong>：移动过程中，如何知道应连接哪个蜂窝塔？</li>
+<li><strong>认证</strong>：AT&#x26;T 的塔可能只愿为自家客户提供连接，如何确认用户身份？</li>
+<li><strong>无缝通信</strong>：离开一座塔、进入另一座塔覆盖范围时，连接应不中断。</li>
+<li><strong>问责与计量</strong>：客户只购买 6 GB 流量时，超额后网络应停止连接或降低服务质量。这继承自按通话分钟计费的旧蜂窝网络，也因为蜂窝资源稀缺而保留。</li>
+</ol>
+<h2 id="基础设施组件无线电塔">基础设施组件：无线电塔</h2>
+<p>蜂窝网络的第一个组件是无线电塔。塔上有天线；内部的无线电收发器把数字比特转换为经空中接口传送的模拟信号；无线电控制器则决定如何分配无线资源。</p>
+<img width="900px" class="real-photo" src="/image/cs168-textbook/wireless/8-032-towers.png">
+<p>可以把控制器想成运行调度器的 CPU。它根据需求和商业模式，例如客户付费多少，把不同频段和时段分给不同客户。这其实是很困难的调度问题，这里不再展开。</p>
+<p>下面是控制器分配资源的简化模型。每个彩色矩形表示某用户（用颜色区分）可在特定时刻使用特定频率。</p>
+<img width="900px" src="/image/cs168-textbook/wireless/8-033-scheduling.png">
+<p>每条竖截面代表一个时隙，显示该时隙内频率如何分配。例如第一个时隙中，蓝色用户得到 3 个频率槽，橙色用户 5 个，灰色用户 4 个。</p>
+<p>每条横截面代表一个频率，显示它随时间如何分给用户。例如最上行的频率先给灰色，后来依次给绿色、蓝色、红色等。</p>
+<p>这个模型通过资源预留而非尽力而为来共享资源。用户只能在控制器分配给自己的频率和时间发送。</p>
+<p>传统上无线电控制器安装在塔内或附近；如今也有人把控制器迁移到云端，以便维护和管理。</p>
+<p>每个运营商在全国布置许多蜂窝塔，让用户无论身在何处都能连接，最终形成<strong>无线接入网（RAN）</strong>。</p>
+<img width="400px" src="/image/cs168-textbook/wireless/8-034-ran.png">
+<p>通常每座塔有自己的一组可用频率，相邻塔使用不同频段，从而避免互相干扰。图中每种颜色代表一组频率；两座塔可以都使用蓝色频段，只要它们不相邻。任何相邻塔的频率都不重叠。频率也常按需求分配，例如旧金山市中心的塔会比荒郊野外的塔获得更多频率。</p>
+<h2 id="基础设施组件蜂窝核心网">基础设施组件：蜂窝核心网</h2>
+<p>移动用户把数据发送到蜂窝塔后，塔还要把它送往互联网。每座塔通过有线链路接入<strong>蜂窝核心网</strong>，可把核心网理解为不直接面向用户的后端基础设施。</p>
+<img width="900px" src="/image/cs168-textbook/wireless/8-035-core.png">
+<p>核心网包含数据平面组件，类似普通路由器与交换机，在用户（经塔）和网络其他部分之间转发分组。这里关注两类特殊路由器。</p>
+<p><strong>无线网关</strong>是 RAN（蜂窝塔）与核心网的边界，塔把数据转给其中一个无线网关。核心网另一端的<strong>分组网关</strong>是蜂窝网络与互联网的边界；用户数据最终抵达分组网关，并作为标准 TCP/IP 分组发往互联网。</p>
+<p>核心网还有传统互联网中没有的控制平面组件，用户流量不会经过它们。这里关注其中两个。</p>
+<p><strong>数据库</strong>保存客户信息：客户有哪些设备、订购何种套餐、设备目前在哪里（例如连着哪座塔）。</p>
+<p><strong>移动性管理器</strong>是管理网络功能的控制器，可把它想成 CPU。它帮助认证用户，例如确认对方确实是 Verizon 客户，也会随着用户移动更新配置。</p>
+<p>总的来说，用户设备向 RAN 中的塔发送数据；塔把数据转给无线网关进入核心网；数据最终到达分组网关，再转入互联网。核心网中还有移动性管理器、数据库等控制组件，用于保存和管理客户信息。</p>
+<h2 id="蜂窝网络运行的高层步骤">蜂窝网络运行的高层步骤</h2>
+<p>步骤 0，<strong>注册</strong>。用户登记蜂窝服务，例如去 Verizon 门店购买套餐、签订合同；运营商把用户与套餐信息存入数据库。</p>
+<img width="900px" src="/image/cs168-textbook/wireless/8-036-step0.png">
+<p>步骤 1，<strong>发现</strong>。用户在某处打开手机，手机必须发现附近有哪些塔，并选择一座。</p>
+<img width="900px" src="/image/cs168-textbook/wireless/8-037-step1.png">
+<p>步骤 2，<strong>附着</strong>。设备选好塔后请求连接。塔必须询问移动性管理器是否允许，例如用户是否已超出配额。</p>
+<img width="900px" src="/image/cs168-textbook/wireless/8-038-step2.png">
+<p>若认证通过，管理器配置塔和路由器，建立一条经塔与路由器从用户通往互联网的路径。</p>
+<img width="900px" src="/image/cs168-textbook/wireless/8-039-step2-part2.png">
+<p>步骤 3，<strong>数据交换</strong>。用户现在可沿配置好的路径收发数据。</p>
+<img width="900px" src="/image/cs168-textbook/wireless/8-040-step3.png">
+<p>步骤 4，<strong>切换</strong>。用户移动时可能远离原塔、接近同一运营商 RAN 中的新塔。旧塔、新塔和设备共同决定是否切换。</p>
+<img width="900px" src="/image/cs168-textbook/wireless/8-041-step4.png">
+<p>各方同意后通知移动性管理器，由它重新配置塔和路由器，经新塔（也可能经不同路由器）建立新路径。切换必须无缝：整个过程中用户仍可能收发数据，不应受到干扰。为此，网络必须持续紧盯用户设备。</p>
+<img width="900px" src="/image/cs168-textbook/wireless/8-042-step4-part2.png">
+<p>用户不断移动、最佳塔不断变化时，步骤 3 与 4 会反复进行。</p>
+<img width="900px" src="/image/cs168-textbook/wireless/8-043-step4-part3.png">
+<p>最后还要实现<strong>漫游</strong>。用户去德国时，美国运营商 Verizon 可能没有覆盖，但它可以与德国电信签约，让自家客户使用后者的基础设施。德国电信因而既要服务自家用户，也要服务 Verizon 等其他网络的用户。</p>
+<img width="900px" src="/image/cs168-textbook/wireless/8-044-step-roaming.png">
+<p>在访客网络中连接的步骤总体相似，只是访问地网络和归属网络的移动性管理器还须协调，例如德国电信向 Verizon 确认用户是否购买漫游服务。</p>
+<h2 id="步骤-0注册">步骤 0：注册</h2>
+<p>登记套餐时会获得 <strong>IMSI（International Mobile Subscriber Identity，国际移动用户识别码）</strong>，这是与订阅绑定的唯一标识，安全地存放在 SIM 卡硬件中。</p>
+<p>这就是运营商给你 SIM 卡的原因。换手机但不换套餐时，只需把 SIM 卡移到新手机，新手机便关联同一 IMSI；换套餐但继续用原手机时，换一张 SIM 卡，手机就关联新的 IMSI。</p>
+<p>IMSI 前 3 位是标识国家的移动国家码；接下来 2 至 3 位是代表服务商（如 Verizon、AT&#x26;T）的移动网络码；剩余位是移动用户识别号，在该服务商内部标识具体用户。IMSI 总长不超过 15 位。</p>
+<img width="600px" src="/image/cs168-textbook/wireless/8-045-imsi.png">
+<p>IMSI 不等于 IP 地址。购买一年套餐后，全年 IMSI 不变；但每次附着并连接网络时，都可能得到不同 IP 地址。</p>
+<p>蜂窝网络还使用两个不同于 IMSI 的标识，这里不深入讨论。**IMEI（International Mobile Equipment Identity，国际移动设备识别码）**唯一标识物理设备，编码制造商和型号，例如“这是一部 iPhone 13”，换套餐后仍不变。同一套餐覆盖两部手机时，会有两个 IMEI，但只有一个 IMSI。</p>
+<p>另一个标识是电话号码，它同样不同于 IMSI、IMEI，各位数字含义也不同，例如区号。电话网需把电话号码与特定 IMSI 关联，才能确定对应套餐。</p>
+<p>注册并取得 IMSI 后，运营商把 IMSI 和套餐信息存入数据库。</p>
+<img width="600px" src="/image/cs168-textbook/wireless/8-046-registration.png">
+<p>注册时，用户设备（SIM 卡）和运营商（数据库）还约定一个共享密钥，附着时会用到。</p>
+<h2 id="步骤-1发现">步骤 1：发现</h2>
+<p>设备如何发现覆盖范围内、属于自己运营商的塔？</p>
+<p>每座塔周期性发送信标（问候消息），告诉覆盖范围内的所有设备自己存在。信标也包含运营商，例如“我是 Verizon 的塔”，运营商用 2 至 3 位移动网络码标识。SIM 卡上的 IMSI 同样含移动网络码，设备因此可比较：“我的 SIM 属于网络 220，这座塔也声明网络 220，所以可以使用。”</p>
+<p>信标在专用的<strong>控制信道</strong>频率上传输，以免干扰数据。每个频段都有对应控制信道；相邻塔使用互不重叠的频段，也就使用不同控制信道，从而避免干扰。</p>
+<p>设备可能听见多个信标。它测量不同塔的信号强度，从属于本运营商的塔中选择信号最佳者。</p>
+<img width="300px" src="/image/cs168-textbook/wireless/8-047-discovery.png">
+<p>还有一个自举问题：设备如何知道应监听哪个控制信道？它必须先调到控制信道，才能接收信标。</p>
+<p>解决办法有几种：设备可以扫描并尝试很多频率，虽慢却有时是唯一选择；运营商可在注册时预置控制信道列表；设备也可缓存以前用过的信道。</p>
+<p>发现后的后续塔扫描并非必要。切换时，旧塔会准确告知设备新塔所用的数据频率。因此切换约需 0.01 至 0.1 秒，远快于发现阶段扫描所需的 10 至 100 秒。</p>
+<h2 id="步骤-2附着">步骤 2：附着</h2>
+<ol>
+<li>用户发现一座塔后，向它发送附着请求，并在请求中带上 IMSI（用户标识）。</li>
+<li>塔把请求发送给真正负责处理的移动性管理器。</li>
+<li>管理器用 IMSI 查询数据库，获取套餐详情；还利用设备和数据库共同掌握的密钥执行认证（省略密码学细节）。</li>
+</ol>
+<p>认证成功说明用户身份真实；数据库又显示用户有权使用服务时，管理器批准附着请求。</p>
+<img width="700px" src="/image/cs168-textbook/wireless/8-048-attachment1.png">
+<ol start="4">
+<li>请求获批后，管理器配置数据平面。它先给设备分配 IP 地址，再配置塔，告诉无线电控制器为该用户分配多少资源；随后配置塔与路由器，建立设备到互联网的路径；最后初始化计数器和流量整形器，记录设备的互联网用量。</li>
+</ol>
+<p>连接建立后，管理器把用户位置写入数据库，具体来说是把 IMSI 映射到 IP 地址及当前路径（所用塔和网关）。</p>
+<img width="700px" src="/image/cs168-textbook/wireless/8-049-attachment2.png">
+<p>整个附着过程都在控制信道上进行。用户尚未获分配数据频率，只能用专用控制信道通信。</p>
+<img width="700px" src="/image/cs168-textbook/wireless/8-050-attachment3.png">
+<h2 id="步骤-3数据交换">步骤 3：数据交换</h2>
+<p>此时网络已配置完毕，设备可用自己的 IP 地址收发消息。</p>
+<img width="900px" src="/image/cs168-textbook/wireless/8-051-exchange1.png">
+<p>蜂窝网络中的塔、无线网关和分组网关如何转发？用户不断移动，若运行距离向量等传统路由算法，路由将永远无法收敛。</p>
+<p>因此，管理器用<strong>隧道</strong>建立设备到互联网的路径。分组依次经过设备、塔、无线网关和分组网关。</p>
+<p>概念上，我们告诉塔：“收到该用户的分组，就沿此方向送入蓝色隧道。”分组在有线链路另一端离开蓝色隧道，到达无线网关；再告诉无线网关：“收到从该隧道出来的分组，就沿此方向送入绿色隧道。”分组穿过绿色隧道到达分组网关，由后者转入互联网。</p>
+<img width="900px" src="/image/cs168-textbook/wireless/8-052-exchange2.png">
+<p>入站分组也走隧道。告诉分组网关：“收到发往用户 A 的分组，就放入通向无线网关的绿色隧道”；再告诉无线网关：“收到离开绿色隧道的分组，就放入通向塔的蓝色隧道。”</p>
+<p>这些组件都不运行路由协议来寻路，而是由管理器直接告知转发方式。每个用户需要自己的一组隧道，因此网络保存每用户状态，例如每个在线用户一条表项。</p>
+<p>规则如何实现？例如无线网关怎样知道入站分组来自蓝色隧道？可以使用封装：进入隧道时增加一个首部，注明分组正通过哪条隧道；分组在另一端离开时，网关读取额外首部，得知来源隧道，并据此决定下一跳。</p>
+<img width="900px" src="/image/cs168-textbook/wireless/8-053-exchange3.png">
+<p>使用隧道和封装后，路由器从不依据用户 IP 转发。用户一直移动，IP 无法表示位置；必须由预配置隧道决定转发方向。</p>
+<h2 id="步骤-4切换">步骤 4：切换</h2>
+<p>用户从一座塔移到另一座时会怎样？下面看一个稍作简化的协议，把两座塔称为旧塔与新塔。</p>
+<img width="900px" src="/image/cs168-textbook/wireless/8-054-handover1.png">
+<ol>
+<li>设备持续测量与旧塔间的信号强度并上报。旧塔发现信号过弱时，给出同一运营商附近塔及其控制信道频率，让设备测量它们。</li>
+<li>设备测量邻近塔信号并上报旧塔；旧塔按运营商策略选择最佳新塔。</li>
+<li>旧塔通知新塔用户即将到来，使新塔为该用户分配频率资源。</li>
+<li>新塔把已分配的频率资源告知旧塔。</li>
+<li>旧塔通知用户按这些频率连接新塔。</li>
+<li>新塔向移动性管理器报告自己已成为该用户的新塔。管理器更新用户位置，并更新隧道，经新塔以及可能不同的无线网关、分组网关建立新路径。</li>
+<li>最后，新塔通知旧塔切换完成。</li>
+</ol>
+<p>切换如此复杂，是因为要让用户在塔间移动时无缝通信、完全不中断。这需要用户、两座塔、移动性管理器和网关共同协作。</p>
+<p>无缝通信困难还因为切换不是原子操作，过程中用户仍在收发数据。例如外部服务器的回复可能已经把一批入站分组发往旧塔；切换期间旧塔继续缓冲该用户的数据，完成后再把缓冲数据送给新塔，由新塔转给用户。传统 TCP/IP 网络不需如此缓冲；这是为移动中的无缝切换新增的能力。</p>
+<p>切换决策始终由运营商作出，设备不能自行选择下一座塔。好处是运营商控制力更强，例如某塔过载时可把用户负载均衡到另一座塔，也可把低优先级用户送往较差的塔；代价是更慢，需要更多往返和更高复杂度。</p>
+<p>切换期间用户 IP 地址不变，只更新隧道，让发往该 IP 的分组改走另一条路径。</p>
+<p>切换复杂且需要更新网络中的每用户状态。用户数量增加或移动极快时，协议会遇到扩展性挑战。现代蜂窝网络仍能在大规模下良好运作，是因为这些协议经过了大量优化；这也解释了标准为何动辄数千页。</p>
+<h2 id="漫游">漫游</h2>
+<p>用户在国外或自家运营商没有覆盖的地方，可以漫游并连接其他网络。</p>
+<p>在访客网络中的发现、附着与切换和归属网络总体类似，主要差别是访客网络的移动性管理器必须与归属网络的管理器通信。</p>
+<p>例如访客网络需要归属网络协助认证用户、确认是否购买漫游；还要把跟踪数据发回归属网络，让它知道用户位置。</p>
+<p>访客网络如何知道归属网络在哪里？附着时设备会提交 IMSI，其中的移动网络码标识用户运营商。</p>
+<p>用户到互联网之间可用两种隧道方案。</p>
+<p>**归属路由（home routing）**让流量穿过归属网络的分组网关。所有分组必须从访客网络返回归属网络，再转往互联网。好处是归属网关可跟踪用户；缺点是美国用户在德国漫游并访问德国网站时，分组得从德国去美国网关，再返回德国。</p>
+<img width="900px" src="/image/cs168-textbook/wireless/8-055-roaming1.png">
+<p>**本地疏导（local breakout）**让流量穿过访客网络的分组网关，分组无需先回归属网络，路径更短；但用量核算更复杂，因为漫游网络必须计量并把数据发回归属网络。</p>
+<img width="900px" src="/image/cs168-textbook/wireless/8-056-roaming2.png">
+<h2 id="其他操作">其他操作</h2>
+<p>前面介绍了蜂窝网络的关键操作，实际还存在其他操作。</p>
+<p>**合法监听（lawful intercept）**是所有蜂窝运营商必须满足的法律要求，使持有搜查令的政府能够监听连接和用户发送的分组。</p>
+<p><strong>失窃手机登记库</strong>允许用户报告手机被盗。窃贼尝试让失窃手机接入网络时，运营商的管理器和数据库会发现它被盗，并尝试定位。运营商依据硬编码在手机中的设备标识 IMEI 来识别具体手机，不受用户标识 IMSI 影响。设备接入时必须报告 IMEI，运营商即可检查是否失窃。</p>
+<p>这些操作之所以可行，是因为运营商采用集中控制，掌握所有用户及其位置。</p>
+<h2 id="对蜂窝网络设计的反思">对蜂窝网络设计的反思</h2>
+<p>蜂窝网络与传统互联网有不同的根本目标和设计选择。认证与计量是蜂窝网络的核心目标，却不是传统互联网的目标；资源按预留分配，网络还维护动态变化的每用户状态。</p>
+<p>这种有状态、基于预留的网络增加了复杂性。用户移动时，各组件必须持续重新配置隧道。</p>
+<p>可以考虑其他设计。切换复杂，是因为希望用户移动时保留同一 IP。如果每次切换都改变 IP，地址就能真实反映用户位置，也可重新采用传统路由协议；但 TCP、HTTP 等高层协议会中断，因为 TCP 依赖通信双方保持相同 IP 地址。</p>
+<p>保留 IP 增加复杂度，改变 IP 又会破坏 TCP。一种可能的方案是使用允许 IP 地址变化的传输层协议，例如 Google 开发的 QUIC。这样即使 IP 改变，也能用 IPv6 首部的流标签字段标记同一条流中的所有分组。</p> </article> <hr class="my-8 border-dashed"> <a href="https://github.com/howIdobetter/My-Blog/edit/main/src/content/posts/cs168-wireless-02-cellular.md" target="_blank" rel="noopener noreferrer" class="hover:text-accent text-muted-foreground flex justify-baseline gap-1.5 sm:hidden"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M7 7H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-1" /><path d="M20.385 6.585a2.1 2.1 0 0 0-2.97-2.97L9 12v3h3zM16 5l3 3" /></svg><span>Edit post</span></a> <div id="btt-btn-container" class="fixed inset-e-4 bottom-8 z-50 md:sticky md:inset-e-auto md:float-end md:me-1 translate-y-14 opacity-0 transition duration-500"> <button data-button="back-to-top" aria-label="Back to top" class="group bg-background relative px-2 py-1 size-14 rounded-full shadow-xl md:h-8 md:w-fit md:rounded-md md:shadow-none md:focus-visible:rounded-none md:bg-background/35 md:bg-clip-padding md:backdrop-blur-lg"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block rotate-90 md:hidden" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 12h14M5 12l6 6M5 12l6-6" /></svg> <span class="group-hover:text-accent sr-only text-sm md:not-sr-only"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block size-4" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" /><path d="M12 5v14M16 9l-4-4M8 9l4-4" /></svg> Back to top </span> </button> </div> <script data-astro-rerun>
+  function backToTop() {
+    const btnContainer = document.querySelector("#btt-btn-container");
+    const backToTopBtn = document.querySelector("[data-button='back-to-top']");
+    const pageHeader = document.querySelector("body > header");
+
+    if (!btnContainer || !backToTopBtn || !pageHeader) return;
+
+    backToTopBtn.addEventListener("click", () => {
+      document.body.scrollTop = 0;
+      document.documentElement.scrollTop = 0;
+    });
+
+    const observer = new IntersectionObserver(([entry]) => {
+      const isVisible = !entry.isIntersecting;
+      if (entry) {
+        btnContainer.classList.toggle("opacity-100", isVisible);
+        btnContainer.classList.toggle("translate-y-0", isVisible);
+        btnContainer.classList.toggle("opacity-0", !isVisible);
+        btnContainer.classList.toggle("translate-y-14", !isVisible);
+      }
+    });
+    observer.observe(pageHeader);
+  }
+  backToTop();
+</script> <ul class="mt-4 mb-8 flex flex-wrap gap-4 sm:my-8"> <li> <a href="/en/tags/networking/" class="border-border flex items-center gap-1 rounded-full border transition-colors hover:border-accent hover:text-accent focus-visible:text-accent focus-visible:no-underline px-3 py-1.5 text-sm" data-astro-transition-scope="astro-36ssibgs-1"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="text-accent opacity-80 size-3.5" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 9h14M5 15h14M11 4 7 20M17 4l-4 16" /></svg> networking </a> </li><li> <a href="/en/tags/cs168/" class="border-border flex items-center gap-1 rounded-full border transition-colors hover:border-accent hover:text-accent focus-visible:text-accent focus-visible:no-underline px-3 py-1.5 text-sm" data-astro-transition-scope="astro-36ssibgs-2"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="text-accent opacity-80 size-3.5" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 9h14M5 15h14M11 4 7 20M17 4l-4 16" /></svg> cs168 </a> </li><li> <a href="/en/tags/course-notes/" class="border-border flex items-center gap-1 rounded-full border transition-colors hover:border-accent hover:text-accent focus-visible:text-accent focus-visible:no-underline px-3 py-1.5 text-sm" data-astro-transition-scope="astro-36ssibgs-3"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="text-accent opacity-80 size-3.5" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 9h14M5 15h14M11 4 7 20M17 4l-4 16" /></svg> course-notes </a> </li><li> <a href="/en/tags/wireless/" class="border-border flex items-center gap-1 rounded-full border transition-colors hover:border-accent hover:text-accent focus-visible:text-accent focus-visible:no-underline px-3 py-1.5 text-sm" data-astro-transition-scope="astro-36ssibgs-4"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="text-accent opacity-80 size-3.5" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 9h14M5 15h14M11 4 7 20M17 4l-4 16" /></svg> wireless </a> </li> </ul>  <hr class="my-8 border-dashed"> <div data-pagefind-ignore class="my-8 grid grid-cols-1 gap-4 sm:grid-cols-2"> <a href="/en/posts/cs168-wireless-01-wireless-links/" class="soft-panel hover:border-accent/70 hover:text-accent flex w-full gap-3 p-4 transition"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block flex-none rtl:rotate-180" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 12h14M5 12l6 6M5 12l6-6" /></svg> <div> <span class="mono-label">Previous</span> <div class="mt-1 text-sm leading-6">CS168 无线网络 1：无线链路</div> </div> </a> <a href="/en/posts/cs168-textbook6/" class="soft-panel hover:border-accent/70 hover:text-accent flex w-full justify-end gap-3 p-4 text-end transition sm:col-start-2"> <div> <span class="mono-label">Next</span> <div class="mt-1 text-sm leading-6">CS168 笔记 6：链路、延迟与带宽</div> </div> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block flex-none rtl:rotate-180" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 12h14M13 18l6-6M13 6l6 6" /></svg> </a> </div> </main> <footer class="app-layout mt-auto"> <div class="border-border text-muted-foreground flex flex-col items-start justify-between gap-6 border-t py-9 text-sm sm:flex-row sm:items-end"> <div> <p class="text-foreground font-semibold">随便做做</p> <p class="mt-1">Write it down first. Fix it properly over time.</p> </div> <div class="flex items-center gap-5"> <div class="flex flex-wrap items-center gap-1"> <a href="https://github.com/howIdobetter" title="GitHub" class="group inline-flex items-center gap-1 hover:text-accent p-2 hover:rotate-6 sm:p-1">  <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block size-6 scale-125 fill-transparent stroke-current stroke-2 opacity-90 group-hover:fill-transparent sm:scale-110" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" /><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21" /></svg> <span class="sr-only">GitHub</span>  </a> </div> <span class="whitespace-nowrap">© 2026 一剑留名ing</span> </div> </div> </footer>   <script type="module">const a="theme",n="light",r="dark";function i(){const e=localStorage.getItem(a);return e||(window.matchMedia("(prefers-color-scheme: dark)").matches?r:n)}let o=window.__theme?.value??i();function s(){localStorage.setItem(a,o),m()}function m(){const e=document.firstElementChild;e?.setAttribute("data-theme",o),e?.classList.toggle("dark",o===r);const t=document.querySelector("#theme-btn"),c=o===n?t?.dataset.labelDark:t?.dataset.labelLight;c&&(t?.setAttribute("aria-label",c),t?.setAttribute("title",c));const l=window.getComputedStyle(document.body).backgroundColor;document.querySelector("meta[name='theme-color']")?.setAttribute("content",l)}function d(){m(),document.querySelector("#theme-btn")?.addEventListener("click",()=>{o=o===n?r:n,s()})}d();document.addEventListener("astro:after-swap",d);document.addEventListener("astro:before-swap",e=>{const t=document.querySelector("meta[name='theme-color']")?.getAttribute("content");t&&e.newDocument.querySelector("meta[name='theme-color']")?.setAttribute("content",t)});window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change",({matches:e})=>{o=e?r:n,s()});</script> </body> </html> <script data-astro-rerun>
+  function addHeadingLinks() {
+    const isZh = document.documentElement.lang === "zh-CN";
+    const headings = Array.from(
+      document.querySelectorAll("h2, h3, h4, h5, h6")
+    );
+    for (const heading of headings) {
+      heading.classList.add("group");
+      const link = document.createElement("a");
+      link.className =
+        "heading-link ms-2 no-underline opacity-75 md:opacity-0 md:group-hover:opacity-100 md:focus:opacity-100";
+      link.href = "#" + heading.id;
+      link.setAttribute(
+        "aria-label",
+        isZh
+          ? `链接到本节：${heading.textContent}`
+          : `Link to section: ${heading.textContent}`
+      );
+
+      const span = document.createElement("span");
+      span.ariaHidden = "true";
+      span.innerText = "#";
+      link.appendChild(span);
+      heading.appendChild(link);
+    }
+  }
+  addHeadingLinks();
+
+  function attachCopyButtons() {
+    const isZh = document.documentElement.lang === "zh-CN";
+    const copyButtonLabel = isZh ? "复制" : "Copy";
+    const copiedButtonLabel = isZh ? "已复制" : "Copied";
+    const codeBlocks = Array.from(document.querySelectorAll("pre"));
+
+    for (const codeBlock of codeBlocks) {
+      const wrapper = document.createElement("div");
+      wrapper.style.position = "relative";
+
+      const computedStyle = getComputedStyle(codeBlock);
+      const hasFileNameOffset =
+        computedStyle.getPropertyValue("--file-name-offset").trim() !== "";
+
+      const topClass = hasFileNameOffset
+        ? "top-(--file-name-offset)"
+        : "-top-3";
+
+      const copyButton = document.createElement("button");
+      copyButton.className = `copy-code absolute end-3 ${topClass} rounded bg-muted border border-muted px-2 py-1 text-xs leading-4 text-foreground font-medium`;
+      copyButton.innerHTML = copyButtonLabel;
+      copyButton.setAttribute("aria-label", copyButtonLabel);
+      copyButton.setAttribute("aria-live", "polite");
+      codeBlock.setAttribute("tabindex", "0");
+      codeBlock.appendChild(copyButton);
+
+      codeBlock?.parentNode?.insertBefore(wrapper, codeBlock);
+      wrapper.appendChild(codeBlock);
+
+      copyButton.addEventListener("click", async () => {
+        await copyCode(codeBlock, copyButton);
+      });
+    }
+
+    async function copyCode(block, button) {
+      const code = block.querySelector("code");
+      const text = code?.innerText;
+
+      await navigator.clipboard.writeText(text ?? "");
+
+      button.innerText = copiedButtonLabel;
+      button.setAttribute("aria-label", copiedButtonLabel);
+
+      setTimeout(() => {
+        button.innerText = copyButtonLabel;
+        button.setAttribute("aria-label", copyButtonLabel);
+      }, 700);
+    }
+  }
+  attachCopyButtons();
+
+  /** Accessible image lightbox for article images. */
+  function initLightbox() {
+    const article = document.getElementById("article");
+    if (!article) return;
+
+    const prefersReducedMotion = () =>
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    let overlay = null;
+    let lastFocused = null;
+
+    // Defer attribute mutations so they don't push the LCP timestamp.
+    // Event listeners below use delegation and don't need the attributes to exist yet.
+    requestAnimationFrame(() => {
+      const images = Array.from(article.querySelectorAll("img"));
+      for (const image of images) {
+        if (image.closest("a")) continue;
+        image.setAttribute("role", "button");
+        image.setAttribute("tabindex", "0");
+        image.setAttribute("aria-haspopup", "dialog");
+        image.setAttribute(
+          "aria-label",
+          image.alt ? `Zoom image: ${image.alt}` : "Zoom image"
+        );
+      }
+    });
+
+    function open(src, alt, trigger) {
+      if (overlay) return;
+      lastFocused = trigger ?? document.activeElement;
+
+      overlay = document.createElement("div");
+      overlay.setAttribute("role", "dialog");
+      overlay.setAttribute("aria-modal", "true");
+      overlay.setAttribute(
+        "aria-label",
+        alt ? `Image preview: ${alt}` : "Image preview"
+      );
+      overlay.className =
+        "fixed inset-0 z-50 flex cursor-zoom-out items-center justify-center bg-black/70 backdrop-blur-sm opacity-0 transition-opacity duration-200 motion-reduce:transition-none";
+
+      const closeButton = document.createElement("button");
+      closeButton.type = "button";
+      closeButton.setAttribute("aria-label", "Close image preview");
+      closeButton.className =
+        "absolute end-4 top-4 rounded p-2 text-3xl leading-none text-white";
+      closeButton.innerHTML = "&#10005;";
+      closeButton.addEventListener("click", close);
+
+      const image = document.createElement("img");
+      image.src = src;
+      image.alt = "";
+      image.className =
+        "max-h-[90dvh] max-w-[90dvw] cursor-default object-contain";
+
+      overlay.append(closeButton, image);
+      overlay.addEventListener("click", e => {
+        if (e.target === overlay && currentScale <= 1) close();
+      });
+
+      let currentScale = 1;
+      let translateX = 0;
+      let translateY = 0;
+      let initialDist = 0;
+      let initialScale = 1;
+      let panStartX = 0;
+      let panStartY = 0;
+      let panStartTranslateX = 0;
+      let panStartTranslateY = 0;
+      let lastTapTime = 0;
+
+      function applyTransform() {
+        image.style.transform = `scale(${currentScale}) translate(${translateX}px, ${translateY}px)`;
+      }
+
+      function resetTransform() {
+        currentScale = 1;
+        translateX = 0;
+        translateY = 0;
+        image.style.transform = "";
+      }
+
+      overlay.addEventListener(
+        "touchstart",
+        e => {
+          const t = e.touches;
+          if (t.length === 2) {
+            initialDist = Math.hypot(
+              t[1].clientX - t[0].clientX,
+              t[1].clientY - t[0].clientY
+            );
+            initialScale = currentScale;
+          } else if (t.length === 1) {
+            const now = Date.now();
+            if (now - lastTapTime < 300) {
+              e.preventDefault();
+              if (currentScale > 1) {
+                resetTransform();
+              } else {
+                currentScale = 2;
+                translateX = 0;
+                translateY = 0;
+                applyTransform();
+              }
+              lastTapTime = 0;
+              panStartX = t[0].clientX;
+              panStartY = t[0].clientY;
+              panStartTranslateX = translateX;
+              panStartTranslateY = translateY;
+            } else {
+              lastTapTime = now;
+              if (currentScale > 1) {
+                panStartX = t[0].clientX;
+                panStartY = t[0].clientY;
+                panStartTranslateX = translateX;
+                panStartTranslateY = translateY;
+              }
+            }
+          }
+        },
+        { passive: false }
+      );
+
+      overlay.addEventListener(
+        "touchmove",
+        e => {
+          const t = e.touches;
+          if (t.length === 2) {
+            e.preventDefault();
+            const dist = Math.hypot(
+              t[1].clientX - t[0].clientX,
+              t[1].clientY - t[0].clientY
+            );
+            currentScale = Math.min(
+              4,
+              Math.max(1, initialScale * (dist / initialDist))
+            );
+            applyTransform();
+          } else if (t.length === 1) {
+            if (currentScale > 1) {
+              e.preventDefault();
+              translateX =
+                panStartTranslateX + (t[0].clientX - panStartX) / currentScale;
+              translateY =
+                panStartTranslateY + (t[0].clientY - panStartY) / currentScale;
+              const maxX = Math.max(
+                0,
+                (image.clientWidth - overlay.clientWidth / currentScale) / 2
+              );
+              const maxY = Math.max(
+                0,
+                (image.clientHeight - overlay.clientHeight / currentScale) / 2
+              );
+              translateX = Math.min(maxX, Math.max(-maxX, translateX));
+              translateY = Math.min(maxY, Math.max(-maxY, translateY));
+              applyTransform();
+            } else {
+              e.preventDefault();
+            }
+          }
+        },
+        { passive: false }
+      );
+
+      overlay.addEventListener("touchend", e => {
+        if (e.touches.length === 0 && currentScale <= 1.05) {
+          resetTransform();
+        }
+      });
+
+      overlay.addEventListener("touchcancel", e => {
+        if (e.touches.length === 0 && currentScale <= 1.05) {
+          resetTransform();
+        }
+      });
+
+      document.body.appendChild(overlay);
+      document.body.style.overflow = "hidden";
+      document.addEventListener("keydown", onKeyDown);
+      window.__closeLightbox = close;
+
+      requestAnimationFrame(() => overlay?.classList.add("opacity-100"));
+      closeButton.focus();
+    }
+
+    function close() {
+      if (!overlay) return;
+      const el = overlay;
+      overlay = null;
+      window.__closeLightbox = null;
+
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = "";
+      lastFocused?.focus();
+      lastFocused = null;
+
+      if (prefersReducedMotion()) {
+        el.remove();
+        return;
+      }
+      const remove = () => el.remove();
+      el.addEventListener("transitionend", remove, { once: true });
+      setTimeout(remove, 250); // fallback in case transitionend never fires
+      el.classList.remove("opacity-100");
+    }
+
+    function onKeyDown(e) {
+      if (e.key === "Escape") {
+        close();
+      } else if (e.key === "Tab") {
+        trapFocus(e);
+      }
+    }
+
+    // Keep keyboard focus inside the open dialog.
+    function trapFocus(e) {
+      if (!overlay) return;
+      const focusables = overlay.querySelectorAll(
+        'a[href], button, [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+
+    function triggerFromEvent(e) {
+      const image = e.target.closest("img");
+      if (!image || !article.contains(image) || image.closest("a")) return null;
+      return image;
+    }
+
+    function activate(image) {
+      open(image.currentSrc || image.src, image.alt, image);
+    }
+
+    article.addEventListener("click", e => {
+      const image = triggerFromEvent(e);
+      if (!image) return;
+      e.preventDefault();
+      activate(image);
+    });
+
+    article.addEventListener("keydown", e => {
+      if (e.key !== "Enter" && e.key !== " " && e.key !== "Spacebar") return;
+      const image = triggerFromEvent(e);
+      if (!image) return;
+      e.preventDefault();
+      activate(image);
+    });
+  }
+  initLightbox();
+
+  if (!window.__lightboxSwapBound) {
+    window.__lightboxSwapBound = true;
+    document.addEventListener("astro:before-swap", () =>
+      window.__closeLightbox?.()
+    );
+  }
+
+  document.addEventListener("astro:after-swap", () =>
+    window.scrollTo({ left: 0, top: 0, behavior: "instant" })
+  );
+</script>

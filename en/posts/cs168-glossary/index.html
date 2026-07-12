@@ -1,0 +1,648 @@
+<!DOCTYPE html><html dir="ltr" lang="en" class="overflow-y-scroll scroll-smooth"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="canonical" href="https://howidobetter.github.io/en/posts/cs168-glossary/"><meta name="generator" content="Astro v6.4.2"><!-- Primary meta --><title>CS168 术语表 | 随便做做</title><meta name="title" content="CS168 术语表 | 随便做做"><meta name="description" content="CS168 计算机网络课程术语表，覆盖分层、转发、路由、寻址与可靠传输。"><meta name="author" content="一剑留名ing"><link rel="sitemap" href="/sitemap-index.xml"><!-- Open Graph --><meta property="og:type" content="article"><meta property="og:site_name" content="随便做做"><meta property="og:title" content="CS168 术语表 | 随便做做"><meta property="og:description" content="CS168 计算机网络课程术语表，覆盖分层、转发、路由、寻址与可靠传输。"><meta property="og:url" content="https://howidobetter.github.io/en/posts/cs168-glossary/"><meta property="og:image" content="https://howidobetter.github.io/default-og.png"><!-- Twitter / X --><meta property="twitter:card" content="summary_large_image"><meta property="twitter:url" content="https://howidobetter.github.io/en/posts/cs168-glossary/"><meta property="twitter:title" content="CS168 术语表 | 随便做做"><meta property="twitter:description" content="CS168 计算机网络课程术语表，覆盖分层、转发、路由、寻址与可靠传输。"><meta property="twitter:image" content="https://howidobetter.github.io/default-og.png"><!-- RSS autodiscovery --><link rel="alternate" type="application/rss+xml" title="随便做做" href="https://howidobetter.github.io/rss.xml"><!-- Filled at runtime by theme.ts to match the current background colour --><meta name="theme-color" content=""><!-- Extra head content injected by child layouts (e.g. JSON-LD, article meta) --><meta property="article:published_time" content="2026-07-12T00:00:00.000Z"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"CS168 术语表 | 随便做做","description":"CS168 计算机网络课程术语表，覆盖分层、转发、路由、寻址与可靠传输。","url":"https://howidobetter.github.io/en/posts/cs168-glossary/","image":"https://howidobetter.github.io/default-og.png","datePublished":"2026-07-12T00:00:00.000Z","author":[{"@type":"Person","name":"一剑留名ing","url":"https://github.com/howIdobetter"}]}</script> <!--
+      Inline FOUC-prevention script: sets data-theme on <html> before
+      the browser paints. Runs synchronously, no defer/async.
+    --><script>
+      (function () {
+        const stored = localStorage.getItem("theme");
+        const prefersDark = window.matchMedia(
+          "(prefers-color-scheme: dark)"
+        ).matches;
+        const theme = stored ?? (prefersDark ? "dark" : "light");
+        const root = document.firstElementChild;
+        root?.setAttribute("data-theme", theme);
+        root?.classList.toggle("dark", theme === "dark");
+        // Expose value so theme.ts can skip re-detection.
+        window.__theme = { value: theme };
+      })();
+    </script><meta name="astro-view-transitions-enabled" content="true"><meta name="astro-view-transitions-fallback" content="animate"><script type="module" src="/_astro/ClientRouter.astro_astro_type_script_index_0_lang.CAqDO0tx.js"></script><link rel="stylesheet" href="/_astro/Footer.W6Wz50NF.css">
+<style>@keyframes astroFadeInOut{0%{opacity:1}to{opacity:0}}@keyframes astroFadeIn{0%{opacity:0;mix-blend-mode:plus-lighter}to{opacity:1;mix-blend-mode:plus-lighter}}@keyframes astroFadeOut{0%{opacity:1;mix-blend-mode:plus-lighter}to{opacity:0;mix-blend-mode:plus-lighter}}@keyframes astroSlideFromRight{0%{transform:translate(100%)}}@keyframes astroSlideFromLeft{0%{transform:translate(-100%)}}@keyframes astroSlideToRight{to{transform:translate(100%)}}@keyframes astroSlideToLeft{to{transform:translate(-100%)}}@media(prefers-reduced-motion){::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}[data-astro-transition-scope]{animation:none!important}}
+</style><style>[data-astro-transition-scope="astro-36ssibgs-1"] { view-transition-name: networking; }@layer astro { ::view-transition-old(networking) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(networking) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(networking) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(networking) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-1"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-1"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-1"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-1"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style><style>[data-astro-transition-scope="astro-36ssibgs-2"] { view-transition-name: cs168; }@layer astro { ::view-transition-old(cs168) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(cs168) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(cs168) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(cs168) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style><style>[data-astro-transition-scope="astro-36ssibgs-3"] { view-transition-name: course-notes; }@layer astro { ::view-transition-old(course-notes) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(course-notes) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(course-notes) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(course-notes) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style><style>[data-astro-transition-scope="astro-36ssibgs-4"] { view-transition-name: wireless; }@layer astro { ::view-transition-old(wireless) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(wireless) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(wireless) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(wireless) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style></head> <body class="bg-background font-app text-foreground selection:bg-accent/75 selection:text-accent-foreground flex min-h-svh flex-col">    <a id="skip-to-content" href="#main-content" class="bg-background text-accent absolute inset-s-4 -top-full z-50 border px-3 py-2 transition-[top] focus:top-3"> Skip to content </a> <header class="border-border bg-background/90 relative z-30 border-b backdrop-blur"> <div class="app-layout relative flex min-h-18 w-full items-baseline justify-between sm:items-center"> <a href="/en/" class="absolute inline-flex items-baseline gap-3 py-1 text-lg leading-8 font-semibold whitespace-nowrap sm:static sm:my-auto sm:text-xl sm:leading-none"> <span>随便做做</span> <span class="text-muted-foreground hidden font-mono text-[0.68rem] font-normal sm:inline">
+howIdobetter
+</span> </a> <nav id="nav-menu" class="flex w-full flex-col items-center sm:ms-2 sm:flex-row sm:justify-end sm:py-0"> <button id="menu-btn" class="focus-outline self-end p-3 sm:hidden" aria-label="Open menu" aria-expanded="false" aria-controls="menu-items" data-label-open="Open menu" data-label-close="Close menu"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="hidden" viewBox="0 0 24 24" id="close-icon"><path stroke="none" d="M0 0h24v24H0z" /><path d="M18 6 6 18M6 6l12 12" /></svg> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="icon icon-tabler icons-tabler-outline icon-tabler-menu-deep" viewBox="0 0 24 24" id="menu-icon"><path stroke="none" d="M0 0h24v24H0z" /><path d="M4 6h16M7 12h13M10 18h10" /></svg> </button> <ul id="menu-items" class="border-border [&>li>a]:hover:text-accent mt-3 hidden w-full grid-cols-2 place-content-center gap-1 border-t py-3 sm:mt-0 sm:flex sm:w-auto sm:items-center sm:gap-x-1 sm:border-0 sm:py-0 [&>li>a]:block [&>li>a]:px-4 [&>li>a]:py-3 [&>li>a]:text-center [&>li>a]:font-medium [&>li>a]:transition-colors sm:[&>li>a]:px-3 sm:[&>li>a]:py-2"> <li class="col-span-2"> <a href="/en/posts/" class="active-nav"> Posts </a> </li> <li class="col-span-2"> <a href="/en/tags/"> Tags </a> </li> <li class="col-span-2"> <a href="/en/about/"> About </a> </li> <li class="col-span-2"> <a href="/en/archives/" title="Archives" aria-label="Archives" class="group inline-flex items-center gap-1 hover:text-accent focus-outline flex size-full justify-center p-3 sm:relative sm:size-10 sm:p-0">  <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="hidden sm:absolute sm:top-1/2 sm:left-1/2 sm:block sm:size-6 sm:-translate-x-1/2 sm:-translate-y-1/2" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v0a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8M10 12h4" /></svg> <span class="sm:sr-only">Archives</span>  </a> </li> <li class="col-span-1 flex items-center justify-center"> <a href="/en/search/" title="Search" aria-label="Search" class="group inline-flex items-center gap-1 hover:text-accent focus-outline relative size-11 sm:size-10">  <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="absolute top-1/2 left-1/2 size-6 -translate-x-1/2 -translate-y-1/2" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M3 10a7 7 0 1 0 14 0 7 7 0 1 0-14 0M21 21l-6-6" /></svg> <span class="sr-only">Search</span>  </a> </li> <li class="col-span-1 flex items-center justify-center"> <div class="border-border flex overflow-hidden rounded-full border text-xs font-semibold" aria-label="Language"> <a href="/posts/cs168-glossary/" title="中文" class="px-2 py-1 transition-colors hover:text-accent"> 中 </a><a href="/en/posts/cs168-glossary/" title="English" aria-current="true" class="px-2 py-1 transition-colors bg-accent text-accent-foreground"> EN </a> </div> </li> <li class="col-span-1 flex items-center justify-center"> <button id="theme-btn" class="focus-outline hover:[&>svg]:stroke-accent relative size-12 rounded-full p-4 transition-colors sm:size-10" title="Toggle theme" aria-label="auto" aria-live="polite" data-label-light="Switch to light theme" data-label-dark="Switch to dark theme"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="absolute top-[50%] left-[50%] translate-[-50%] scale-100 rotate-0 transition-[transform,opacity] dark:scale-0 dark:-rotate-90" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M12 3h.393a7.5 7.5 0 0 0 7.92 12.446A9 9 0 1 1 12 2.992z" /></svg> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="absolute top-[50%] left-[50%] translate-[-50%] scale-0 rotate-90 transition-[transform,opacity] dark:scale-100 dark:rotate-0" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M14.828 14.828a4 4 0 1 0-5.656-5.656 4 4 0 0 0 5.656 5.656M6.343 17.657l-1.414 1.414M6.343 6.343 4.929 4.929M17.657 6.343l1.414-1.414M17.657 17.657l1.414 1.414M4 12H2M12 4V2M20 12h2M12 20v2" /></svg> </button> </li> </ul> </nav> </div> </header> <script type="module">function c(){const e=document.querySelector("#menu-btn"),t=document.querySelector("#menu-items"),n=document.querySelector("#menu-icon"),s=document.querySelector("#close-icon");if(!e||!t||!n||!s)return;const a=e.dataset.labelOpen??"Open menu",l=e.dataset.labelClose??"Close menu";e.addEventListener("click",()=>{const o=e.getAttribute("aria-expanded")==="true";e.setAttribute("aria-expanded",o?"false":"true"),e.setAttribute("aria-label",o?a:l),t.classList.toggle("hidden"),t.classList.toggle("grid"),n.classList.toggle("hidden"),s.classList.toggle("hidden")})}c();document.addEventListener("astro:after-swap",c);</script> <div class="reading-progress" aria-hidden="true"> <div class="reading-progress-bar"></div> </div> <div class="app-layout flex items-center justify-start"><a id="back-button" href="/en/" class="group inline-flex items-center gap-1 hover:text-accent focus-outline hover:text-foreground/75 -ms-2 mt-8 mb-2"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block size-6 rtl:rotate-180" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="m15 6-6 6 6 6" /></svg><span>Back</span> </a></div><script type="module">function o(){const t=document.querySelector("#back-button"),e=sessionStorage.getItem("backUrl");e&&t&&(t.href=e)}document.addEventListener("astro:page-load",o);o();</script> <main id="main-content" class="app-layout pb-8" data-pagefind-body> <header class="border-border max-w-readable border-b pt-8 pb-8 sm:pt-12"> <h1 style="view-transition-name:cs-168-u00672fu008bedu008868" class="text-foreground text-3xl leading-tight font-semibold text-balance sm:text-5xl"> CS168 术语表 </h1> <p class="text-muted-foreground mt-4 text-lg leading-8 text-pretty"> CS168 计算机网络课程术语表，覆盖分层、转发、路由、寻址与可靠传输。 </p> <div class="mt-5 flex flex-wrap items-center gap-3"> <div class="text-muted-foreground flex items-center gap-x-2 font-mono"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block size-5 min-w-5" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" /><path d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM16 3v4M8 3v4M4 11h16M7 14h.013M10.01 14h.005M13.01 14h.005M16.015 14h.005M13.015 17h.005M7.01 17h.005M10.01 17h.005" /></svg>  <time class="text-sm sm:text-base" datetime="2026-07-12T00:00:00.000Z"> July 12, 2026 </time> </div> <a href="https://github.com/howIdobetter/My-Blog/edit/main/src/content/posts/cs168-glossary.md" target="_blank" rel="noopener noreferrer" class="hover:text-accent text-muted-foreground flex justify-baseline gap-1.5 max-sm:hidden"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M7 7H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-1" /><path d="M20.385 6.585a2.1 2.1 0 0 0-2.97-2.97L9 12v3h3zM16 5l3 3" /></svg><span>Edit post</span></a> </div> </header>  <article id="article" class="mt-8 w-full app-prose max-w-readable prose-pre:bg-(--shiki-light-bg) dark:prose-pre:bg-(--shiki-dark-bg)"> <aside class="border-border bg-muted/35 mb-8 border-s-2 px-5 py-4 text-sm leading-6"> <p class="m-0">
+本文译自  <a href="https://textbook.cs168.io/glossary.html">Glossary — CS 168 Textbook</a> 
+，依照 <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh-hans"> CC BY-SA 4.0 </a> 
+许可发布
+
+。<span> 中文完整翻译；保留英文术语以便对照。原文作者为 Peyrin Kao，课程内容基于 Sylvia Ratnasamy、Rob Shakir 等人的讲授；原术语表改编自往期 CS 168 课程。</span> </p> </aside> <h2 id="术语表">术语表</h2>
+<p>本术语表改编自 <a href="https://sp24.cs168.io/glossary">往期 CS 168 课程</a>。</p>
+<table>
+<thead><tr><th>术语</th><th>定义</th></tr></thead>
+<tbody>
+<tr><td>ACK（确认）</td><td align="left"><p>设置了 ACK 标志、表示数据已经收到的 TCP 分组。</p></td></tr>
+<tr><td>ARP（地址解析协议）</td><td align="left"><p>让设备在 IP 地址与 MAC 地址之间建立映射的协议。设备广播 ARP <strong>Request</strong>，查询某 IP 对应的 MAC；被查询设备以单播 ARP <strong>Response</strong> 回复。映射缓存在 ARP 表中，表项会超时，属于软状态。</p></td></tr>
+<tr><td>Autonomous System（自治系统）</td><td align="left"><p>由单一实体或组织统一管理的一张或一组网络。一个 ISP 往往是一个 AS，也可能把网络划为多个 AS。每个 AS 有一个编号，BGP 用它标识路径。</p></td></tr>
+<tr><td>AXE</td><td align="left"><p>一种拟议的 STP 替代方案，用重复抑制而非生成树来避免环路，也是世上一些绝妙诗句的来源。</p></td></tr>
+<tr><td>分组可能遭遇的坏事</td><td align="left"><p>丢失、损坏、乱序、延迟、重复。</p></td></tr>
+<tr><td>Bandwidth-Delay Product（带宽时延积）</td><td align="left"><p>带宽与传播时延的乘积，表示“填满管道”所需的比特数，即发送方以链路带宽发送时，已经发出但尚未收到的比特数。</p></td></tr>
+<tr><td>Bellman-Ford Equation（贝尔曼—福特方程）</td><td align="left"><p>到目的地的最短距离，是对所有邻居取“到邻居的代价加邻居到目的地距离”的最小值。具体为：d(u,v) = min（邻居 w）[c(u,w) + d(w,v)]。</p></td></tr>
+<tr><td>Best Effort（尽力而为）</td><td align="left"><p>按需交付；除系统会尽最大努力外，不提供任何性能保证。</p></td></tr>
+<tr><td>Border Router（边界路由器）</td><td align="left"><p>与其他网络中的路由器相连的路由器。</p></td></tr>
+<tr><td>Checksum（校验和）</td><td align="left"><p>用于检测损坏的数值，由分组的某一部分计算得到；具体覆盖范围取决于协议。</p></td></tr>
+<tr><td>CIDR（无类别域间路由）</td><td align="left"><p>把 IP 地址与网络掩码结合，用于确定哪些位属于网络位，比最初的有类别 IP 寻址灵活得多。</p></td></tr>
+<tr><td>Circuit Switching（电路交换）</td><td align="left"><p>端系统沿路径预留带宽、建立电路后通信的数据传输方式，不需要分组。</p></td></tr>
+<tr><td>Classful Addressing（有类别寻址）</td><td align="left"><p>确定 IP 地址网络位与主机位的方案。<strong>A 类</strong>以 0 开头，前 8 位标识网络、后 24 位标识主机；<strong>B 类</strong>以 10 开头，前后各 16 位；<strong>C 类</strong>以 110 开头，前 24 位标识网络、后 8 位标识主机。</p></td></tr>
+<tr><td>Control Plane（控制平面）</td><td align="left"><p>用于计算路由表和其他转发信息的网络机制。</p></td></tr>
+<tr><td>Convergence（收敛）</td><td align="left"><p>当各方都掌握最新信息，且网络拓扑不变时，之后收发的更新都不再改变路由状态，就称算法已经收敛。</p></td></tr>
+<tr><td>Core/Backbone Router（核心/骨干路由器）</td><td align="left"><p>与其他内部路由器相连的路由器。</p></td></tr>
+<tr><td>Cost Table（代价表）</td><td align="left"><p>路由器上保存到所有邻居代价集合的数据结构。</p></td></tr>
+<tr><td>Count-to-Infinity Problem（计数到无穷问题）</td><td align="left"><p>距离向量信息异步传播可能造成的一类路由环路。链路失效后，原来使用故障路径的路由器误以为邻居仍有有效路径，在不知道该路径包含原故障路径一部分的情况下采用它；两个邻居反复接收对方更新并采用这条坏路径。</p></td></tr>
+<tr><td>Cumulative ACK（累积确认）</td><td align="left"><p>表示“直到这个分组（或字节）为止，我都已收到”的 ACK。</p></td></tr>
+<tr><td>Data Plane（数据平面）</td><td align="left"><p>用于转发数据的网络机制。</p></td></tr>
+<tr><td>Datacenters（数据中心）</td><td align="left"><p>规模巨大的机器集合。</p></td></tr>
+<tr><td>David Clark（戴维·克拉克）</td><td align="left"><p>互联网未被充分歌颂的英雄，曾任首席架构师，并提出端到端原则。</p></td></tr>
+<tr><td>Dead End（死路）</td><td align="left"><p>分组到达路由器或交换机后，转发决策找不到输出端口，只能丢弃。</p></td></tr>
+<tr><td>Destination-Based Routing（基于目的地的路由）</td><td align="left"><p>只依赖目的地址的路由。两个不同源到同一目的地的路径一旦重合，之后必须一致。</p></td></tr>
+<tr><td>DHCP（动态主机配置协议）</td><td align="left"><p>主机接入网络时为其提供 IP 地址的协议。主机广播 <strong>Discovery</strong>；服务器用 <strong>Offer</strong> 提供 IP、子网掩码、第一跳路由器 IP 和租期；主机发送 <strong>Request</strong> 选择提议；服务器以 <strong>Acknowledgement/Acceptance</strong> 确认。所有 DHCP 消息都广播。</p></td></tr>
+<tr><td>Distance Vector Routing（距离向量路由）</td><td align="left"><p>可扩展的分布式算法。每台路由器保存到各目的地的距离“向量”和下一跳，把最短距离向量泛洪给邻居；收到向量后，用 Bellman-Ford 更新自身向量。</p></td></tr>
+<tr><td>DNS（域名系统）</td><td align="left"><p>把名称与地址关联的系统，常用于由主机名查询主机地址。</p></td></tr>
+<tr><td>Dotted-quad notation（点分四组表示法）</td><td align="left"><p>把 IPv4 地址写成四个数字、每字节一个数字的表示法，例如 12.34.158.5。</p></td></tr>
+<tr><td>Duplicate ACKs（重复 ACK）</td><td align="left"><p>多次确认同一已收数据的一串累积 ACK，是孤立丢包的信号，因为额外 ACK 表明后续数据仍在抵达。</p></td></tr>
+<tr><td>Edge Router（边缘路由器）</td><td align="left"><p>端主机直接连接到的路由器。</p></td></tr>
+<tr><td>End-to-End Principle（端到端原则）</td><td align="left"><p>帮助判断功能应放在网络内还是只放在端主机。三种解释：<strong>仅在必要时</strong>，主机能实现就不在网络中实现；<strong>仅在充分时</strong>，只有该层能完整实现且可减轻主机负担时才实现；<strong>仅在有用时</strong>，若能改善性能又不给不需要它的应用增加负担，就在网络中实现。</p></td></tr>
+<tr><td>Enterprises（企业网络）</td><td align="left"><p>公司和大学。</p></td></tr>
+<tr><td>Fate Sharing（命运共享）</td><td align="left"><p>把状态存放在依赖该状态的实体中，使该实体不受其他故障影响。</p></td></tr>
+<tr><td>First-hop Router（第一跳路由器）</td><td align="left"><p>主机向第 2 层网络之外的目的地发送分组时，首先把分组交给的路由器。</p></td></tr>
+<tr><td>Flooding（泛洪）</td><td align="left"><p>本课指交换机把分组从除入端口外的所有端口发出。</p></td></tr>
+<tr><td>Flow（流）</td><td align="left"><p>两个进程之间的一串分组。</p></td></tr>
+<tr><td>Forwarding（转发）</td><td align="left"><p>把分组送向目的地：读取首部地址，在路由状态中查找正确输出端口，再由该端口发出。它是路由器内数据平面的局部过程，必须快速完成。</p></td></tr>
+<tr><td>Forwarding Entry（转发表项）</td><td align="left"><p>把一个地址或一组地址映射到输出端口的转发表条目。</p></td></tr>
+<tr><td>Forwarding Table（转发表）</td><td align="left"><p>路由器为指导转发决策而计算的表，利用邻居表和代价表中的信息生成。</p></td></tr>
+<tr><td>Fragmentation（分片）</td><td align="left"><p>把分组拆成更小的分组，以适应链路的最大传输单元（MTU）。</p></td></tr>
+<tr><td>Full-information ACK（全信息确认）</td><td align="left"><p>描述迄今收到的全部数据，例如“直到此分组都已收到，此外还收到这些分组”。</p></td></tr>
+<tr><td>Hard State（硬状态）</td><td align="left"><p>信息不会超时的系统：一旦获得某项知识，就假定它一直真实有效，直到收到明确的相反通知。</p></td></tr>
+<tr><td>Host bits（主机位）</td><td align="left"><p>IP 地址中标识该网络内部主机的部分。</p></td></tr>
+<tr><td>Host/End System（主机/端系统）</td><td align="left"><p>网络端点，负责产生随后由网络路由的数据分组。</p></td></tr>
+<tr><td>Individual ACK（单独确认）</td><td align="left"><p>表示“我收到了这一个特定分组”的 ACK。</p></td></tr>
+<tr><td>Internet（互联网）</td><td align="left"><p>连接所有联网计算设备的核心网络基础设施。</p></td></tr>
+<tr><td>IP Address（IP 地址）</td><td align="left"><p>第 3 层使用的寻址方案。</p></td></tr>
+<tr><td>IPv4</td><td align="left"><p>IP 协议的第 4 版。</p></td></tr>
+<tr><td>ISP/ISP Network（互联网服务提供商/ISP 网络）</td><td align="left"><p>由分组交换机和通信链路组成、为端系统提供网络接入的网络。</p></td></tr>
+<tr><td>LAN（局域网）</td><td align="left"><p>覆盖较小地理区域的第 2 层网络，例如一栋住宅。</p></td></tr>
+<tr><td>Layering（分层）</td><td align="left"><p>把复杂系统拆成彼此构建或依赖的层次。互联网中特指物理层 L1、数据链路层 L2、网络互联层 L3、传输层 L4；每层只与直接上下相邻层交互。</p></td></tr>
+<tr><td>Layers（各层）</td><td align="left"><p><strong>应用层</strong>：为应用提供网络支持；4 <strong>传输层</strong>：可靠或不可靠的端到端交付；3 <strong>网络层</strong>：全局尽力交付；2 <strong>数据链路层</strong>：本地尽力交付；1 <strong>物理层</strong>：在介质上传输比特。</p></td></tr>
+<tr><td>Learning Switches（学习交换机）</td><td align="left"><p>通常在第 2 层与生成树协议配合使用。它维护目的地到输出链路的转发表，从分组源字段学习。收到分组后，若目的地在表中就由对应链路转发，否则泛洪。</p></td></tr>
+<tr><td>Linecard（线卡）</td><td align="left"><p>路由器中收发分组的硬件，更新校验和、TTL 等字段并选择输出端口。</p></td></tr>
+<tr><td>Link（链路）</td><td align="left"><p>连接路由器的物理基础设施。</p></td></tr>
+<tr><td>Link-State Routing（链路状态路由）</td><td align="left"><p>每台路由器用协议专用的广播机制把自身链路状态发给网络中所有路由器，使每台路由器学到完整网络图，再用任意有效算法（如 Dijkstra）计算自己到所有节点的最低代价路径。</p></td></tr>
+<tr><td>Loop（环路）</td><td align="left"><p>分组永远在同一组节点间循环。</p></td></tr>
+<tr><td>LPM（最长前缀匹配）</td><td align="left"><p>IP 地址匹配多个前缀时选择最长者；可想成遍历前缀树，直到地址无法继续匹配。</p></td></tr>
+<tr><td>MAC Address（MAC 地址）</td><td align="left"><p>用于第 2 层路由的 48 位数，写入主机和路由器的网络接口硬件，只读存储使其成为永久标识。</p></td></tr>
+<tr><td>Maximum Transmission Unit, MTU（最大传输单元）</td><td align="left"><p>链路能作为一个单元传输的最大比特数，即可跨链路发送的最大分组大小。</p></td></tr>
+<tr><td>Modularity（模块化）</td><td align="left"><p>把问题分解为任务或抽象，由此产生分层设计原则。</p></td></tr>
+<tr><td>Multihoming（多宿主）</td><td align="left"><p>把一台主机接到多个彼此独立的网络，使一个上游网络离线后主机仍可达；它会阻碍聚合。</p></td></tr>
+<tr><td>NACK（否定确认）</td><td align="left"><p>“我没有收到预期数据”的消息。</p></td></tr>
+<tr><td>Network（网络）</td><td align="left"><p>非正式用法指由端系统、路由器/交换机和链路组成，能在主机间传送数据的系统，例如伯克利校园网。正式用法指 IPv4 中共享同一网络地址的一组网络元素，常与子网同义。</p></td></tr>
+<tr><td>Network Address（网络地址）</td><td align="left"><p>IP 地址中指向网络或子网、而非主机的部分。</p></td></tr>
+<tr><td>Network bits（网络位）</td><td align="left"><p>IP 地址中标识主机所在网络的部分。</p></td></tr>
+<tr><td>Network mask（网络掩码）</td><td align="left"><p>形似 IP 地址的比特串，用于标识 IP 地址中的网络部分；由固定数量的 1（每个网络位对应一个）后接全 0 构成。</p></td></tr>
+<tr><td>Network Name（网络名称）</td><td align="left"><p>主机的名称，通常便于人类理解。</p></td></tr>
+<tr><td>Network Stack（网络栈）</td><td align="left"><p>主机上的网络软件，复现路由器中的部分功能，并增加套接字、TCP 首部等功能。</p></td></tr>
+<tr><td>Packet（分组）</td><td align="left"><p>一袋比特，由<strong>首部</strong>和<strong>主体</strong>组成。首部包含网络与网络栈决策所需信息；主体携带载荷，例如文件、图像或应用层首部。</p></td></tr>
+<tr><td>Packet Switching（分组交换）</td><td align="left"><p>把数据分成分组，路由器/交换机检查各分组首部并独立处理每个分组的传输方式。</p></td></tr>
+<tr><td>Path Vector Routing（路径向量路由）</td><td align="left"><p>类似距离向量路由，但向邻居通告的不是最短距离，而是到各目的地的完整路径。</p></td></tr>
+<tr><td>Payload（载荷）</td><td align="left"><p>分组携带的数据。</p></td></tr>
+<tr><td>Peer Table（邻居表）</td><td align="left"><p>路由器保存各个对等方或邻居所发信息副本的数据结构。</p></td></tr>
+<tr><td>Poison Reverse（毒性逆转）</td><td align="left"><p>缓解计数到无穷的方法：向去往某目的地路径上使用的邻居通告自己到该目的地距离无穷。例如 A 给 C 的临时向量副本中，把所有经 AC 链路到达的目的地距离都设为无穷。</p></td></tr>
+<tr><td>Port, Logical（逻辑端口）</td><td align="left"><p>操作系统分配给套接字、用于标识该套接字的编号。</p></td></tr>
+<tr><td>Port, Router（路由器端口）</td><td align="left"><p>经链路把一台路由器连接到另一台路由器的物理端口。</p></td></tr>
+<tr><td>Prefix Aggregation（前缀聚合）</td><td align="left"><p>用公共前缀把多条路由表项合成一条，例如把 101 和 100 合成 10*。</p></td></tr>
+<tr><td>Prefix Tree（前缀树）</td><td align="left"><p>表示 IP 地址查找中比特匹配过程的二叉树，也就是查找表的遍历结构。</p></td></tr>
+<tr><td>Reliability（可靠性，见健壮性）</td><td align="left"><p>两种解释：一是网络快速从故障中恢复，让未被分区隔开的端点能够通信；二是网络故障不干扰端点语义。</p></td></tr>
+<tr><td>Reliable Delivery（可靠交付）</td><td align="left"><p>在尽力交付之上构建可靠传输服务。</p></td></tr>
+<tr><td>Reliable Transport（可靠传输）</td><td align="left"><p>当且仅当传输机制会重发所有丢失或损坏的分组，并会尝试持续取得进展时，才称其可靠。</p></td></tr>
+<tr><td>Resource Accountability（资源问责）</td><td align="left"><p>知道谁在使用哪些资源（带宽）、从而追究其使用责任的能力；这是互联网架构的一项缺失。</p></td></tr>
+<tr><td>Robustness（健壮性，见可靠性）</td><td align="left"><p>只要网络没有被分区，两台主机最终就应能通信，而且故障绝不应干扰应用语义。</p></td></tr>
+<tr><td>Route Aggregation（路由聚合）</td><td align="left"><p>不为每台主机保存一条转发表项，而为具有相同前缀且都走同一端口的一组主机保存一条。</p></td></tr>
+<tr><td>Route Poisoning（路由毒化）</td><td align="left"><p>缓解网络不一致的过程：A、B 间链路失效时，B 向所有邻居通告自己不再有到 A 的链路，即距离无穷，表示无法到达 A。</p></td></tr>
+<tr><td>Routing（路由）</td><td align="left"><p>引导分组从源到目的地，可用链路状态、距离向量、生成树等多种方式。它本质上是必须具备扩展性的全局过程，在控制平面执行，可以较慢。</p></td></tr>
+<tr><td>Routing Table（路由表）</td><td align="left"><p>类似转发表，但可指路由器掌握的全部信息（包括其他邻居提供的信息），而非只有最佳转发表项。</p></td></tr>
+<tr><td>Slash notation（斜杠表示法）</td><td align="left"><p>表示子网的记法，例如 1.2.0.0/10，其中 1.2.0.0 的前 10 位是子网前缀。</p></td></tr>
+<tr><td>Sliding window（滑动窗口）</td><td align="left"><p>出于效率考虑，停止继续发送前允许在途且未确认的有限分组数量。</p></td></tr>
+<tr><td>Socket（套接字）</td><td align="left"><p>操作系统用于把进程连接到网络栈的机制。</p></td></tr>
+<tr><td>Soft State（软状态）</td><td align="left"><p>允许已存知识在可能变化或失效的假设下超时。软状态系统会周期性“忘记”信息，再通过重新请求或等待新消息学习。DHCP 租期、ARP 缓存超时、距离向量路由的周期消息都是例子。</p></td></tr>
+<tr><td>Spanning Tree Protocol（生成树协议）</td><td align="left"><p>分布式协议：节点 X 的交换机发送格式为 (Y,d,X) 的消息，提议 Y 为根并通告到 Y 的距离 d。协议识别 ID 最小的节点，并以它为根构建生成树。</p></td></tr>
+<tr><td>Split Horizon（水平分割）</td><td align="left"><p>功能与毒性逆转相同，但表达方式不同。用于完整更新时，路由器不会向自己用于到达目的地 X 的那个邻居通告任何到 X 的路由。</p></td></tr>
+<tr><td>Statistical Multiplexing（统计复用）</td><td align="left"><p>各条流最大速率之和，大于把这些流合并后观察到的最大速率。</p></td></tr>
+<tr><td>Subnet（子网）</td><td align="left"><p>本课指由第 2 层连接并共享同一网络地址的那部分网络。</p></td></tr>
+<tr><td>Time to Live, TTL（生存时间）</td><td align="left"><p>在 IP 中指分组被丢弃前可经过的跳数，用于防止环路；更一般地说，TTL 是某项内容（如缓存表项）失效前的剩余时间。</p></td></tr>
+<tr><td>Valid Routing State（有效路由状态）</td><td align="left"><p>在不复制分组时，当且仅当没有环路、没有死路，路由状态才有效；若会复制分组，则要求至少一个副本不会走入死路。</p></td></tr>
+<tr><td>WAN（广域网）</td><td align="left"><p>可指任意第 3 层网络（不只是局域网），也可指跨越较大地理距离的网络（不是数据中心内部网络）。</p></td></tr>
+</tbody>
+</table> </article> <hr class="my-8 border-dashed"> <a href="https://github.com/howIdobetter/My-Blog/edit/main/src/content/posts/cs168-glossary.md" target="_blank" rel="noopener noreferrer" class="hover:text-accent text-muted-foreground flex justify-baseline gap-1.5 sm:hidden"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M7 7H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-1" /><path d="M20.385 6.585a2.1 2.1 0 0 0-2.97-2.97L9 12v3h3zM16 5l3 3" /></svg><span>Edit post</span></a> <div id="btt-btn-container" class="fixed inset-e-4 bottom-8 z-50 md:sticky md:inset-e-auto md:float-end md:me-1 translate-y-14 opacity-0 transition duration-500"> <button data-button="back-to-top" aria-label="Back to top" class="group bg-background relative px-2 py-1 size-14 rounded-full shadow-xl md:h-8 md:w-fit md:rounded-md md:shadow-none md:focus-visible:rounded-none md:bg-background/35 md:bg-clip-padding md:backdrop-blur-lg"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block rotate-90 md:hidden" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 12h14M5 12l6 6M5 12l6-6" /></svg> <span class="group-hover:text-accent sr-only text-sm md:not-sr-only"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block size-4" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" /><path d="M12 5v14M16 9l-4-4M8 9l4-4" /></svg> Back to top </span> </button> </div> <script data-astro-rerun>
+  function backToTop() {
+    const btnContainer = document.querySelector("#btt-btn-container");
+    const backToTopBtn = document.querySelector("[data-button='back-to-top']");
+    const pageHeader = document.querySelector("body > header");
+
+    if (!btnContainer || !backToTopBtn || !pageHeader) return;
+
+    backToTopBtn.addEventListener("click", () => {
+      document.body.scrollTop = 0;
+      document.documentElement.scrollTop = 0;
+    });
+
+    const observer = new IntersectionObserver(([entry]) => {
+      const isVisible = !entry.isIntersecting;
+      if (entry) {
+        btnContainer.classList.toggle("opacity-100", isVisible);
+        btnContainer.classList.toggle("translate-y-0", isVisible);
+        btnContainer.classList.toggle("opacity-0", !isVisible);
+        btnContainer.classList.toggle("translate-y-14", !isVisible);
+      }
+    });
+    observer.observe(pageHeader);
+  }
+  backToTop();
+</script> <ul class="mt-4 mb-8 flex flex-wrap gap-4 sm:my-8"> <li> <a href="/en/tags/networking/" class="border-border flex items-center gap-1 rounded-full border transition-colors hover:border-accent hover:text-accent focus-visible:text-accent focus-visible:no-underline px-3 py-1.5 text-sm" data-astro-transition-scope="astro-36ssibgs-1"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="text-accent opacity-80 size-3.5" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 9h14M5 15h14M11 4 7 20M17 4l-4 16" /></svg> networking </a> </li><li> <a href="/en/tags/cs168/" class="border-border flex items-center gap-1 rounded-full border transition-colors hover:border-accent hover:text-accent focus-visible:text-accent focus-visible:no-underline px-3 py-1.5 text-sm" data-astro-transition-scope="astro-36ssibgs-2"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="text-accent opacity-80 size-3.5" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 9h14M5 15h14M11 4 7 20M17 4l-4 16" /></svg> cs168 </a> </li><li> <a href="/en/tags/course-notes/" class="border-border flex items-center gap-1 rounded-full border transition-colors hover:border-accent hover:text-accent focus-visible:text-accent focus-visible:no-underline px-3 py-1.5 text-sm" data-astro-transition-scope="astro-36ssibgs-3"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="text-accent opacity-80 size-3.5" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 9h14M5 15h14M11 4 7 20M17 4l-4 16" /></svg> course-notes </a> </li><li> <a href="/en/tags/wireless/" class="border-border flex items-center gap-1 rounded-full border transition-colors hover:border-accent hover:text-accent focus-visible:text-accent focus-visible:no-underline px-3 py-1.5 text-sm" data-astro-transition-scope="astro-36ssibgs-4"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="text-accent opacity-80 size-3.5" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 9h14M5 15h14M11 4 7 20M17 4l-4 16" /></svg> wireless </a> </li> </ul>  <hr class="my-8 border-dashed"> <div data-pagefind-ignore class="my-8 grid grid-cols-1 gap-4 sm:grid-cols-2"> <a href="/en/posts/cs168-end-to-end-07-end-to-end/" class="soft-panel hover:border-accent/70 hover:text-accent flex w-full gap-3 p-4 transition"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block flex-none rtl:rotate-180" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 12h14M5 12l6 6M5 12l6-6" /></svg> <div> <span class="mono-label">Previous</span> <div class="mt-1 text-sm leading-6">CS168：端到端连通性</div> </div> </a> <a href="/en/posts/cs168-routing-01-introduction/" class="soft-panel hover:border-accent/70 hover:text-accent flex w-full justify-end gap-3 p-4 text-end transition sm:col-start-2"> <div> <span class="mono-label">Next</span> <div class="mt-1 text-sm leading-6">路由简介</div> </div> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block flex-none rtl:rotate-180" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 12h14M13 18l6-6M13 6l6 6" /></svg> </a> </div> </main> <footer class="app-layout mt-auto"> <div class="border-border text-muted-foreground flex flex-col items-start justify-between gap-6 border-t py-9 text-sm sm:flex-row sm:items-end"> <div> <p class="text-foreground font-semibold">随便做做</p> <p class="mt-1">Write it down first. Fix it properly over time.</p> </div> <div class="flex items-center gap-5"> <div class="flex flex-wrap items-center gap-1"> <a href="https://github.com/howIdobetter" title="GitHub" class="group inline-flex items-center gap-1 hover:text-accent p-2 hover:rotate-6 sm:p-1">  <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block size-6 scale-125 fill-transparent stroke-current stroke-2 opacity-90 group-hover:fill-transparent sm:scale-110" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" /><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21" /></svg> <span class="sr-only">GitHub</span>  </a> </div> <span class="whitespace-nowrap">© 2026 一剑留名ing</span> </div> </div> </footer>   <script type="module">const a="theme",n="light",r="dark";function i(){const e=localStorage.getItem(a);return e||(window.matchMedia("(prefers-color-scheme: dark)").matches?r:n)}let o=window.__theme?.value??i();function s(){localStorage.setItem(a,o),m()}function m(){const e=document.firstElementChild;e?.setAttribute("data-theme",o),e?.classList.toggle("dark",o===r);const t=document.querySelector("#theme-btn"),c=o===n?t?.dataset.labelDark:t?.dataset.labelLight;c&&(t?.setAttribute("aria-label",c),t?.setAttribute("title",c));const l=window.getComputedStyle(document.body).backgroundColor;document.querySelector("meta[name='theme-color']")?.setAttribute("content",l)}function d(){m(),document.querySelector("#theme-btn")?.addEventListener("click",()=>{o=o===n?r:n,s()})}d();document.addEventListener("astro:after-swap",d);document.addEventListener("astro:before-swap",e=>{const t=document.querySelector("meta[name='theme-color']")?.getAttribute("content");t&&e.newDocument.querySelector("meta[name='theme-color']")?.setAttribute("content",t)});window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change",({matches:e})=>{o=e?r:n,s()});</script> </body> </html> <script data-astro-rerun>
+  function addHeadingLinks() {
+    const isZh = document.documentElement.lang === "zh-CN";
+    const headings = Array.from(
+      document.querySelectorAll("h2, h3, h4, h5, h6")
+    );
+    for (const heading of headings) {
+      heading.classList.add("group");
+      const link = document.createElement("a");
+      link.className =
+        "heading-link ms-2 no-underline opacity-75 md:opacity-0 md:group-hover:opacity-100 md:focus:opacity-100";
+      link.href = "#" + heading.id;
+      link.setAttribute(
+        "aria-label",
+        isZh
+          ? `链接到本节：${heading.textContent}`
+          : `Link to section: ${heading.textContent}`
+      );
+
+      const span = document.createElement("span");
+      span.ariaHidden = "true";
+      span.innerText = "#";
+      link.appendChild(span);
+      heading.appendChild(link);
+    }
+  }
+  addHeadingLinks();
+
+  function attachCopyButtons() {
+    const isZh = document.documentElement.lang === "zh-CN";
+    const copyButtonLabel = isZh ? "复制" : "Copy";
+    const copiedButtonLabel = isZh ? "已复制" : "Copied";
+    const codeBlocks = Array.from(document.querySelectorAll("pre"));
+
+    for (const codeBlock of codeBlocks) {
+      const wrapper = document.createElement("div");
+      wrapper.style.position = "relative";
+
+      const computedStyle = getComputedStyle(codeBlock);
+      const hasFileNameOffset =
+        computedStyle.getPropertyValue("--file-name-offset").trim() !== "";
+
+      const topClass = hasFileNameOffset
+        ? "top-(--file-name-offset)"
+        : "-top-3";
+
+      const copyButton = document.createElement("button");
+      copyButton.className = `copy-code absolute end-3 ${topClass} rounded bg-muted border border-muted px-2 py-1 text-xs leading-4 text-foreground font-medium`;
+      copyButton.innerHTML = copyButtonLabel;
+      copyButton.setAttribute("aria-label", copyButtonLabel);
+      copyButton.setAttribute("aria-live", "polite");
+      codeBlock.setAttribute("tabindex", "0");
+      codeBlock.appendChild(copyButton);
+
+      codeBlock?.parentNode?.insertBefore(wrapper, codeBlock);
+      wrapper.appendChild(codeBlock);
+
+      copyButton.addEventListener("click", async () => {
+        await copyCode(codeBlock, copyButton);
+      });
+    }
+
+    async function copyCode(block, button) {
+      const code = block.querySelector("code");
+      const text = code?.innerText;
+
+      await navigator.clipboard.writeText(text ?? "");
+
+      button.innerText = copiedButtonLabel;
+      button.setAttribute("aria-label", copiedButtonLabel);
+
+      setTimeout(() => {
+        button.innerText = copyButtonLabel;
+        button.setAttribute("aria-label", copyButtonLabel);
+      }, 700);
+    }
+  }
+  attachCopyButtons();
+
+  /** Accessible image lightbox for article images. */
+  function initLightbox() {
+    const article = document.getElementById("article");
+    if (!article) return;
+
+    const prefersReducedMotion = () =>
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    let overlay = null;
+    let lastFocused = null;
+
+    // Defer attribute mutations so they don't push the LCP timestamp.
+    // Event listeners below use delegation and don't need the attributes to exist yet.
+    requestAnimationFrame(() => {
+      const images = Array.from(article.querySelectorAll("img"));
+      for (const image of images) {
+        if (image.closest("a")) continue;
+        image.setAttribute("role", "button");
+        image.setAttribute("tabindex", "0");
+        image.setAttribute("aria-haspopup", "dialog");
+        image.setAttribute(
+          "aria-label",
+          image.alt ? `Zoom image: ${image.alt}` : "Zoom image"
+        );
+      }
+    });
+
+    function open(src, alt, trigger) {
+      if (overlay) return;
+      lastFocused = trigger ?? document.activeElement;
+
+      overlay = document.createElement("div");
+      overlay.setAttribute("role", "dialog");
+      overlay.setAttribute("aria-modal", "true");
+      overlay.setAttribute(
+        "aria-label",
+        alt ? `Image preview: ${alt}` : "Image preview"
+      );
+      overlay.className =
+        "fixed inset-0 z-50 flex cursor-zoom-out items-center justify-center bg-black/70 backdrop-blur-sm opacity-0 transition-opacity duration-200 motion-reduce:transition-none";
+
+      const closeButton = document.createElement("button");
+      closeButton.type = "button";
+      closeButton.setAttribute("aria-label", "Close image preview");
+      closeButton.className =
+        "absolute end-4 top-4 rounded p-2 text-3xl leading-none text-white";
+      closeButton.innerHTML = "&#10005;";
+      closeButton.addEventListener("click", close);
+
+      const image = document.createElement("img");
+      image.src = src;
+      image.alt = "";
+      image.className =
+        "max-h-[90dvh] max-w-[90dvw] cursor-default object-contain";
+
+      overlay.append(closeButton, image);
+      overlay.addEventListener("click", e => {
+        if (e.target === overlay && currentScale <= 1) close();
+      });
+
+      let currentScale = 1;
+      let translateX = 0;
+      let translateY = 0;
+      let initialDist = 0;
+      let initialScale = 1;
+      let panStartX = 0;
+      let panStartY = 0;
+      let panStartTranslateX = 0;
+      let panStartTranslateY = 0;
+      let lastTapTime = 0;
+
+      function applyTransform() {
+        image.style.transform = `scale(${currentScale}) translate(${translateX}px, ${translateY}px)`;
+      }
+
+      function resetTransform() {
+        currentScale = 1;
+        translateX = 0;
+        translateY = 0;
+        image.style.transform = "";
+      }
+
+      overlay.addEventListener(
+        "touchstart",
+        e => {
+          const t = e.touches;
+          if (t.length === 2) {
+            initialDist = Math.hypot(
+              t[1].clientX - t[0].clientX,
+              t[1].clientY - t[0].clientY
+            );
+            initialScale = currentScale;
+          } else if (t.length === 1) {
+            const now = Date.now();
+            if (now - lastTapTime < 300) {
+              e.preventDefault();
+              if (currentScale > 1) {
+                resetTransform();
+              } else {
+                currentScale = 2;
+                translateX = 0;
+                translateY = 0;
+                applyTransform();
+              }
+              lastTapTime = 0;
+              panStartX = t[0].clientX;
+              panStartY = t[0].clientY;
+              panStartTranslateX = translateX;
+              panStartTranslateY = translateY;
+            } else {
+              lastTapTime = now;
+              if (currentScale > 1) {
+                panStartX = t[0].clientX;
+                panStartY = t[0].clientY;
+                panStartTranslateX = translateX;
+                panStartTranslateY = translateY;
+              }
+            }
+          }
+        },
+        { passive: false }
+      );
+
+      overlay.addEventListener(
+        "touchmove",
+        e => {
+          const t = e.touches;
+          if (t.length === 2) {
+            e.preventDefault();
+            const dist = Math.hypot(
+              t[1].clientX - t[0].clientX,
+              t[1].clientY - t[0].clientY
+            );
+            currentScale = Math.min(
+              4,
+              Math.max(1, initialScale * (dist / initialDist))
+            );
+            applyTransform();
+          } else if (t.length === 1) {
+            if (currentScale > 1) {
+              e.preventDefault();
+              translateX =
+                panStartTranslateX + (t[0].clientX - panStartX) / currentScale;
+              translateY =
+                panStartTranslateY + (t[0].clientY - panStartY) / currentScale;
+              const maxX = Math.max(
+                0,
+                (image.clientWidth - overlay.clientWidth / currentScale) / 2
+              );
+              const maxY = Math.max(
+                0,
+                (image.clientHeight - overlay.clientHeight / currentScale) / 2
+              );
+              translateX = Math.min(maxX, Math.max(-maxX, translateX));
+              translateY = Math.min(maxY, Math.max(-maxY, translateY));
+              applyTransform();
+            } else {
+              e.preventDefault();
+            }
+          }
+        },
+        { passive: false }
+      );
+
+      overlay.addEventListener("touchend", e => {
+        if (e.touches.length === 0 && currentScale <= 1.05) {
+          resetTransform();
+        }
+      });
+
+      overlay.addEventListener("touchcancel", e => {
+        if (e.touches.length === 0 && currentScale <= 1.05) {
+          resetTransform();
+        }
+      });
+
+      document.body.appendChild(overlay);
+      document.body.style.overflow = "hidden";
+      document.addEventListener("keydown", onKeyDown);
+      window.__closeLightbox = close;
+
+      requestAnimationFrame(() => overlay?.classList.add("opacity-100"));
+      closeButton.focus();
+    }
+
+    function close() {
+      if (!overlay) return;
+      const el = overlay;
+      overlay = null;
+      window.__closeLightbox = null;
+
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = "";
+      lastFocused?.focus();
+      lastFocused = null;
+
+      if (prefersReducedMotion()) {
+        el.remove();
+        return;
+      }
+      const remove = () => el.remove();
+      el.addEventListener("transitionend", remove, { once: true });
+      setTimeout(remove, 250); // fallback in case transitionend never fires
+      el.classList.remove("opacity-100");
+    }
+
+    function onKeyDown(e) {
+      if (e.key === "Escape") {
+        close();
+      } else if (e.key === "Tab") {
+        trapFocus(e);
+      }
+    }
+
+    // Keep keyboard focus inside the open dialog.
+    function trapFocus(e) {
+      if (!overlay) return;
+      const focusables = overlay.querySelectorAll(
+        'a[href], button, [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+
+    function triggerFromEvent(e) {
+      const image = e.target.closest("img");
+      if (!image || !article.contains(image) || image.closest("a")) return null;
+      return image;
+    }
+
+    function activate(image) {
+      open(image.currentSrc || image.src, image.alt, image);
+    }
+
+    article.addEventListener("click", e => {
+      const image = triggerFromEvent(e);
+      if (!image) return;
+      e.preventDefault();
+      activate(image);
+    });
+
+    article.addEventListener("keydown", e => {
+      if (e.key !== "Enter" && e.key !== " " && e.key !== "Spacebar") return;
+      const image = triggerFromEvent(e);
+      if (!image) return;
+      e.preventDefault();
+      activate(image);
+    });
+  }
+  initLightbox();
+
+  if (!window.__lightboxSwapBound) {
+    window.__lightboxSwapBound = true;
+    document.addEventListener("astro:before-swap", () =>
+      window.__closeLightbox?.()
+    );
+  }
+
+  document.addEventListener("astro:after-swap", () =>
+    window.scrollTo({ left: 0, top: 0, behavior: "instant" })
+  );
+</script>

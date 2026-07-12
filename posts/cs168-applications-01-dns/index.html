@@ -1,0 +1,755 @@
+<!DOCTYPE html><html dir="ltr" lang="zh-CN" class="overflow-y-scroll scroll-smooth"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="canonical" href="https://howidobetter.github.io/posts/cs168-applications-01-dns/"><meta name="generator" content="Astro v6.4.2"><!-- Primary meta --><title>DNS | 随便做做</title><meta name="title" content="DNS | 随便做做"><meta name="description" content="DNS 的设计、查询流程、消息格式、管理层级、任播、邮件与负载均衡。"><meta name="author" content="一剑留名ing"><link rel="sitemap" href="/sitemap-index.xml"><!-- Open Graph --><meta property="og:type" content="article"><meta property="og:site_name" content="随便做做"><meta property="og:title" content="DNS | 随便做做"><meta property="og:description" content="DNS 的设计、查询流程、消息格式、管理层级、任播、邮件与负载均衡。"><meta property="og:url" content="https://howidobetter.github.io/posts/cs168-applications-01-dns/"><meta property="og:image" content="https://howidobetter.github.io/default-og.png"><!-- Twitter / X --><meta property="twitter:card" content="summary_large_image"><meta property="twitter:url" content="https://howidobetter.github.io/posts/cs168-applications-01-dns/"><meta property="twitter:title" content="DNS | 随便做做"><meta property="twitter:description" content="DNS 的设计、查询流程、消息格式、管理层级、任播、邮件与负载均衡。"><meta property="twitter:image" content="https://howidobetter.github.io/default-og.png"><!-- RSS autodiscovery --><link rel="alternate" type="application/rss+xml" title="随便做做" href="https://howidobetter.github.io/rss.xml"><!-- Filled at runtime by theme.ts to match the current background colour --><meta name="theme-color" content=""><!-- Extra head content injected by child layouts (e.g. JSON-LD, article meta) --><meta property="article:published_time" content="2026-07-12T00:00:00.000Z"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"DNS | 随便做做","description":"DNS 的设计、查询流程、消息格式、管理层级、任播、邮件与负载均衡。","url":"https://howidobetter.github.io/posts/cs168-applications-01-dns/","image":"https://howidobetter.github.io/default-og.png","datePublished":"2026-07-12T00:00:00.000Z","author":[{"@type":"Person","name":"一剑留名ing","url":"https://github.com/howIdobetter"}]}</script> <!--
+      Inline FOUC-prevention script: sets data-theme on <html> before
+      the browser paints. Runs synchronously, no defer/async.
+    --><script>
+      (function () {
+        const stored = localStorage.getItem("theme");
+        const prefersDark = window.matchMedia(
+          "(prefers-color-scheme: dark)"
+        ).matches;
+        const theme = stored ?? (prefersDark ? "dark" : "light");
+        const root = document.firstElementChild;
+        root?.setAttribute("data-theme", theme);
+        root?.classList.toggle("dark", theme === "dark");
+        // Expose value so theme.ts can skip re-detection.
+        window.__theme = { value: theme };
+      })();
+    </script><meta name="astro-view-transitions-enabled" content="true"><meta name="astro-view-transitions-fallback" content="animate"><script type="module" src="/_astro/ClientRouter.astro_astro_type_script_index_0_lang.CAqDO0tx.js"></script><link rel="stylesheet" href="/_astro/Footer.W6Wz50NF.css">
+<style>@keyframes astroFadeInOut{0%{opacity:1}to{opacity:0}}@keyframes astroFadeIn{0%{opacity:0;mix-blend-mode:plus-lighter}to{opacity:1;mix-blend-mode:plus-lighter}}@keyframes astroFadeOut{0%{opacity:1;mix-blend-mode:plus-lighter}to{opacity:0;mix-blend-mode:plus-lighter}}@keyframes astroSlideFromRight{0%{transform:translate(100%)}}@keyframes astroSlideFromLeft{0%{transform:translate(-100%)}}@keyframes astroSlideToRight{to{transform:translate(100%)}}@keyframes astroSlideToLeft{to{transform:translate(-100%)}}@media(prefers-reduced-motion){::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}[data-astro-transition-scope]{animation:none!important}}
+</style><style>[data-astro-transition-scope="astro-36ssibgs-1"] { view-transition-name: networking; }@layer astro { ::view-transition-old(networking) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(networking) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(networking) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(networking) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-1"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-1"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-1"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-1"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style><style>[data-astro-transition-scope="astro-36ssibgs-2"] { view-transition-name: cs168; }@layer astro { ::view-transition-old(cs168) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(cs168) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(cs168) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(cs168) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style><style>[data-astro-transition-scope="astro-36ssibgs-3"] { view-transition-name: course-notes; }@layer astro { ::view-transition-old(course-notes) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(course-notes) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(course-notes) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(course-notes) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style><style>[data-astro-transition-scope="astro-36ssibgs-4"] { view-transition-name: applications; }@layer astro { ::view-transition-old(applications) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(applications) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(applications) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(applications) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style></head> <body class="bg-background font-app text-foreground selection:bg-accent/75 selection:text-accent-foreground flex min-h-svh flex-col">    <a id="skip-to-content" href="#main-content" class="bg-background text-accent absolute inset-s-4 -top-full z-50 border px-3 py-2 transition-[top] focus:top-3"> 跳到正文 </a> <header class="border-border bg-background/90 relative z-30 border-b backdrop-blur"> <div class="app-layout relative flex min-h-18 w-full items-baseline justify-between sm:items-center"> <a href="/" class="absolute inline-flex items-baseline gap-3 py-1 text-lg leading-8 font-semibold whitespace-nowrap sm:static sm:my-auto sm:text-xl sm:leading-none"> <span>随便做做</span> <span class="text-muted-foreground hidden font-mono text-[0.68rem] font-normal sm:inline">
+howIdobetter
+</span> </a> <nav id="nav-menu" class="flex w-full flex-col items-center sm:ms-2 sm:flex-row sm:justify-end sm:py-0"> <button id="menu-btn" class="focus-outline self-end p-3 sm:hidden" aria-label="打开菜单" aria-expanded="false" aria-controls="menu-items" data-label-open="打开菜单" data-label-close="关闭菜单"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="hidden" viewBox="0 0 24 24" id="close-icon"><path stroke="none" d="M0 0h24v24H0z" /><path d="M18 6 6 18M6 6l12 12" /></svg> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="icon icon-tabler icons-tabler-outline icon-tabler-menu-deep" viewBox="0 0 24 24" id="menu-icon"><path stroke="none" d="M0 0h24v24H0z" /><path d="M4 6h16M7 12h13M10 18h10" /></svg> </button> <ul id="menu-items" class="border-border [&>li>a]:hover:text-accent mt-3 hidden w-full grid-cols-2 place-content-center gap-1 border-t py-3 sm:mt-0 sm:flex sm:w-auto sm:items-center sm:gap-x-1 sm:border-0 sm:py-0 [&>li>a]:block [&>li>a]:px-4 [&>li>a]:py-3 [&>li>a]:text-center [&>li>a]:font-medium [&>li>a]:transition-colors sm:[&>li>a]:px-3 sm:[&>li>a]:py-2"> <li class="col-span-2"> <a href="/posts/" class="active-nav"> 文章 </a> </li> <li class="col-span-2"> <a href="/tags/"> 标签 </a> </li> <li class="col-span-2"> <a href="/about/"> 关于 </a> </li> <li class="col-span-2"> <a href="/archives/" title="归档" aria-label="归档" class="group inline-flex items-center gap-1 hover:text-accent focus-outline flex size-full justify-center p-3 sm:relative sm:size-10 sm:p-0">  <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="hidden sm:absolute sm:top-1/2 sm:left-1/2 sm:block sm:size-6 sm:-translate-x-1/2 sm:-translate-y-1/2" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v0a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8M10 12h4" /></svg> <span class="sm:sr-only">归档</span>  </a> </li> <li class="col-span-1 flex items-center justify-center"> <a href="/search/" title="搜索" aria-label="搜索" class="group inline-flex items-center gap-1 hover:text-accent focus-outline relative size-11 sm:size-10">  <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="absolute top-1/2 left-1/2 size-6 -translate-x-1/2 -translate-y-1/2" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M3 10a7 7 0 1 0 14 0 7 7 0 1 0-14 0M21 21l-6-6" /></svg> <span class="sr-only">搜索</span>  </a> </li> <li class="col-span-1 flex items-center justify-center"> <div class="border-border flex overflow-hidden rounded-full border text-xs font-semibold" aria-label="Language"> <a href="/posts/cs168-applications-01-dns/" title="中文" aria-current="true" class="px-2 py-1 transition-colors bg-accent text-accent-foreground"> 中 </a><a href="/en/posts/cs168-applications-01-dns/" title="English" class="px-2 py-1 transition-colors hover:text-accent"> EN </a> </div> </li> <li class="col-span-1 flex items-center justify-center"> <button id="theme-btn" class="focus-outline hover:[&>svg]:stroke-accent relative size-12 rounded-full p-4 transition-colors sm:size-10" title="切换主题" aria-label="auto" aria-live="polite" data-label-light="切换为浅色主题" data-label-dark="切换为深色主题"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="absolute top-[50%] left-[50%] translate-[-50%] scale-100 rotate-0 transition-[transform,opacity] dark:scale-0 dark:-rotate-90" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M12 3h.393a7.5 7.5 0 0 0 7.92 12.446A9 9 0 1 1 12 2.992z" /></svg> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="absolute top-[50%] left-[50%] translate-[-50%] scale-0 rotate-90 transition-[transform,opacity] dark:scale-100 dark:rotate-0" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M14.828 14.828a4 4 0 1 0-5.656-5.656 4 4 0 0 0 5.656 5.656M6.343 17.657l-1.414 1.414M6.343 6.343 4.929 4.929M17.657 6.343l1.414-1.414M17.657 17.657l1.414 1.414M4 12H2M12 4V2M20 12h2M12 20v2" /></svg> </button> </li> </ul> </nav> </div> </header> <script type="module">function c(){const e=document.querySelector("#menu-btn"),t=document.querySelector("#menu-items"),n=document.querySelector("#menu-icon"),s=document.querySelector("#close-icon");if(!e||!t||!n||!s)return;const a=e.dataset.labelOpen??"Open menu",l=e.dataset.labelClose??"Close menu";e.addEventListener("click",()=>{const o=e.getAttribute("aria-expanded")==="true";e.setAttribute("aria-expanded",o?"false":"true"),e.setAttribute("aria-label",o?a:l),t.classList.toggle("hidden"),t.classList.toggle("grid"),n.classList.toggle("hidden"),s.classList.toggle("hidden")})}c();document.addEventListener("astro:after-swap",c);</script> <div class="reading-progress" aria-hidden="true"> <div class="reading-progress-bar"></div> </div> <div class="app-layout flex items-center justify-start"><a id="back-button" href="/" class="group inline-flex items-center gap-1 hover:text-accent focus-outline hover:text-foreground/75 -ms-2 mt-8 mb-2"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block size-6 rtl:rotate-180" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="m15 6-6 6 6 6" /></svg><span>返回</span> </a></div><script type="module">function o(){const t=document.querySelector("#back-button"),e=sessionStorage.getItem("backUrl");e&&t&&(t.href=e)}document.addEventListener("astro:page-load",o);o();</script> <main id="main-content" class="app-layout pb-8" data-pagefind-body> <header class="border-border max-w-readable border-b pt-8 pb-8 sm:pt-12"> <h1 style="view-transition-name:dns" class="text-foreground text-3xl leading-tight font-semibold text-balance sm:text-5xl"> DNS </h1> <p class="text-muted-foreground mt-4 text-lg leading-8 text-pretty"> DNS 的设计、查询流程、消息格式、管理层级、任播、邮件与负载均衡。 </p> <div class="mt-5 flex flex-wrap items-center gap-3"> <div class="text-muted-foreground flex items-center gap-x-2 font-mono"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block size-5 min-w-5" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" /><path d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM16 3v4M8 3v4M4 11h16M7 14h.013M10.01 14h.005M13.01 14h.005M16.015 14h.005M13.015 17h.005M7.01 17h.005M10.01 17h.005" /></svg>  <time class="text-sm sm:text-base" datetime="2026-07-12T00:00:00.000Z"> 2026年7月12日 </time> </div> <a href="https://github.com/howIdobetter/My-Blog/edit/main/src/content/posts/cs168-applications-01-dns.md" target="_blank" rel="noopener noreferrer" class="hover:text-accent text-muted-foreground flex justify-baseline gap-1.5 max-sm:hidden"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M7 7H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-1" /><path d="M20.385 6.585a2.1 2.1 0 0 0-2.97-2.97L9 12v3h3zM16 5l3 3" /></svg><span>编辑文章</span></a> </div> </header> <aside class="border-border mt-8 border-y"> <details class="group py-4 sm:hidden"> <summary class="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4"> <span> <span class="mono-label block"> CS168 · 应用 </span> <span class="text-accent mt-1 block text-sm font-semibold"> 1 / 2 </span> </span> <span aria-hidden="true" class="text-muted-foreground text-xl transition-transform group-open:rotate-45">
++
+</span> </summary> <ol class="border-border mt-3 border-t pt-2"> <li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-applications-01-dns/" aria-current="page" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm text-accent font-semibold"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 01 </span> <span>DNS</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-applications-02-http/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 02 </span> <span>HTTP</span> </a> </li> </ol> </details> <div class="hidden py-5 sm:block"> <div class="flex items-baseline justify-between gap-4"> <p class="mono-label">CS168 · 应用</p> <p class="text-accent text-sm font-semibold"> 1 / 2 </p> </div> <ol class="border-border mt-4 grid border-t sm:grid-cols-3 lg:grid-cols-6"> <li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-applications-01-dns/" aria-current="page" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors bg-muted/60 text-accent font-semibold"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 01 </span> <span class="mt-1 block"> DNS </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-applications-02-http/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 02 </span> <span class="mt-1 block"> HTTP </span> </a> </li> </ol> </div> </aside> <article id="article" class="mt-8 w-full app-prose max-w-readable prose-pre:bg-(--shiki-light-bg) dark:prose-pre:bg-(--shiki-dark-bg)"> <aside class="border-border bg-muted/35 mb-8 border-s-2 px-5 py-4 text-sm leading-6"> <p class="m-0">
+本文译自  <a href="https://textbook.cs168.io/applications/dns.html">DNS</a> 
+，依照 <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh-hans"> CC BY-SA 4.0 </a> 
+许可发布
+
+。<span> 中文翻译；为适应中文阅读习惯调整了部分术语表达，未改变原意。</span> </p> </aside> <h2 id="dns">DNS</h2>
+<h2 id="dns-有什么用途">DNS 有什么用途？</h2>
+<p>本节将介绍一些常见的应用（第 7 层）；它们运行在我们目前构建的各层之上。</p>
+<img width="400px" src="/image/cs168-textbook/applications/4-01-layer7.png">
+<p>我们首先介绍的应用是 DNS。它是一种运行在第 1～4 层之上的协议，提供名称解析这一重要的网络功能。</p>
+<p>互联网通常用两种不同方式建立索引。人类使用 <code>google.com</code> 和 <code>eecs.berkeley.edu</code> 这样便于阅读的名称来指代网站，计算机则使用 <code>172.217.4.174</code> 和 <code>23.195.69.108</code> 这样的 IP 地址。<strong>DNS</strong>，即<strong>域名系统（Domain Name System）</strong>，就是在二者之间进行转换的协议。</p>
+<img width="700px" src="/image/cs168-textbook/applications/4-02-dns-intro.png">
+<h2 id="dns-简史">DNS 简史</h2>
+<p>要理解 DNS 为何采用这样的设计，回顾它的发展历史会很有帮助。</p>
+<p>在最初的互联网及其前身 ARPANET 上，有三种关键应用。当时万维网和 Web 浏览器尚未出现，大多数应用都在命令行中运行。</p>
+<p>远程终端（telnet）允许用户远程连接另一台机器，并在那台远程计算机上运行命令。你可能听说过 SSH，它是这一协议的现代安全版本。</p>
+<p>文件传输允许用户在本地计算机和远程计算机之间传输文件。你可能听说过 FTP，它是用于文件传输的应用层协议。</p>
+<p>电子邮件允许用户互相交换消息。现代电子邮件在浏览器中带有 Web 客户端，但最初用户必须在终端输入类似 <code>mail alice@46.0.1.2</code> 的命令，其中 46.0.1.2 是收件人的 IP 地址，alice 是那台机器上的收件人用户。</p>
+<p>在这三种情况下，执行操作都需要指定远程主机。但正如我们所说，记住远程主机的 IP 地址很困难，也不方便用户使用。</p>
+<p>解决这个问题的第一次尝试，是为每个 IP 地址分配一个<strong>主机名（hostname）</strong>。每台计算机都有一个名为 <code>hosts.txt</code> 的文件，把每个主机名映射到其 IP 地址。例如，可以把主机名 <code>ucb-arpa</code> 映射到 10.0.0.78，并把 <code>mail mosher@10.0.0.78</code> 改写成 <code>mail mosher@ucb-arpa</code>。</p>
+<p>这个概念实际上沿用至今。如果你曾在自己的计算机上启动服务器，它的 IP 地址很可能是 127.0.0.1，主机名是 <code>localhost</code>。在浏览器中输入二者中的任何一个，结果都相同。</p>
+<p>我们必须确保不同计算机上的 <code>hosts.txt</code> 完全相同。如果你换到另一台计算机并输入 <code>mail mosher@ucb-arpa</code>，理应仍然把邮件发给同一个人。主机文件最初由一个人（Elizabeth Feinler）维护，并通过实际复印纸质文档在用户之间传递。</p>
+<p>最初的纸质主机文件可供人阅读。它把主机名映射到地址，还包含用户全名、所运行的协议（例如 TCP、FTP），甚至电话号码等信息。</p>
+<img width="600px" src="/image/cs168-textbook/applications/4-03-paper-hostsfile.png">
+<p>所有人都认同（1973 年的 RFC606 中也提到）这种情形十分荒唐。拿到一份纸质文件后，你还得手动把它输入计算机。此外，文件以纸张形式传阅，所以你拿到的可能已经过时。</p>
+<p>第一项改进是让列表可供机器读取。这样至少可以不再传递纸质副本，而使用 FTP 等协议共享文件。但这仍无法扩展：我们不能永远要求一个人维护该文件；而且随着文件变大，下载可能非常缓慢，网络连接一旦中断，你还可能只得到不完整的文件。</p>
+<p>DNS 于 1983 年首次被提出（RFC882），用来解决这些问题。此后它经历了一些修改，但其基本系统一直沿用至今。</p>
+<p>趣闻：第一个用于在 Unix 上运行 DNS 服务器的软件是 BIND（1984 年，加州大学伯克利分校），如今它仍然相当常见。</p>
+<h2 id="dns-的设计目标">DNS 的设计目标</h2>
+<p>这段简史揭示了 DNS 的一些设计目标，我们应当牢记这些目标。</p>
+<p>DNS 必须能够扩展。互联网上有数量庞大的主机，每秒都会执行海量查询，主机还可能频繁加入或移除。</p>
+<p>DNS 必须具备高可用性、轻量且快速。几乎每个互联网连接都以一次 DNS 查询开始，把主机名转换为 IP 地址。因此 DNS 必须极快，否则每个连接都会被拖慢。此外，它不能存在单点故障，否则一处故障就会让互联网停止工作。</p>
+<h2 id="名称服务器">名称服务器</h2>
+<p>如果能有一台集中式服务器保存每个域到每个 IP 地址的映射，并供所有人查询，那当然很好。遗憾的是，没有任何服务器既大到足以存储互联网上每个域的 IP 地址，又快到足以处理全世界产生的 DNS 请求量。因此，DNS 使用许多**名称服务器（name server）**组成的集合；这些服务器专门负责响应 DNS 请求。</p>
+<p>每台名称服务器负责一个特定的域区域（zone），因此没有任何一台服务器需要存储互联网上的所有域。例如，负责 <code>.com</code> 区域的名称服务器只需回答以 <code>.com</code> 结尾的域查询，不必存储任何与 <code>wikipedia.org</code> 有关的 DNS 信息。同样，负责 <code>berkeley.edu</code> 区域的名称服务器无需存储任何与 <code>stanford.edu</code> 有关的信息。</p>
+<p>名称服务器虽然用途特殊（响应 DNS 请求），但和互联网上可联系的任何其他服务器一样：每台都有便于人类阅读的域名（例如 <code>a.edu-servers.net</code>）以及便于计算机读取的 IP 地址（例如 <code>192.5.6.30</code>）。注意不要混淆域名和区域。例如，这台名称服务器的域名中含有 <code>.net</code>，但它响应的是 <code>.edu</code> 域的 DNS 请求。</p>
+<h2 id="名称服务器层级">名称服务器层级</h2>
+<p>你可能会注意到这个设计存在两个问题。第一，<code>.com</code> 区域虽然比整个互联网小，但让一台名称服务器存储所有以 <code>.com</code> 结尾的域仍不现实。第二，如果名称服务器很多，计算机怎么知道应该联系哪一台？</p>
+<p>DNS 引入了一个新思路来同时解决这两个问题：查询名称服务器时，它不必总是返回所查询域的 IP 地址，也可以把你引向另一台名称服务器以获取答案。这样，负责 <code>.edu</code> 等大区域的名称服务器就能把查询重定向到负责 <code>berkeley.edu</code> 等较小区域的名称服务器。于是，<code>.edu</code> 区域的名称服务器不必存储 <code>eecs.berkeley.edu</code>、<code>math.berkeley.edu</code> 等信息；它只需存储 <code>berkeley.edu</code> 名称服务器的信息，并将这些请求重定向到一台 <code>berkeley.edu</code> 名称服务器。</p>
+<p>DNS 根据名称服务器负责的区域，把所有名称服务器组织成树状层级：</p>
+<img width="900px" src="/image/cs168-textbook/applications/4-04-basic-tree.png">
+<p>树最顶层的**根服务器（root server）**把所有域都纳入自己的区域（该区域通常写作 <code>.</code>）。树中较低层级的名称服务器负责更小、更具体的区域。</p>
+<h2 id="dns-查询概念">DNS 查询（概念）</h2>
+<p>DNS 查询总是从根开始。根会把查询引向它的某个子名称服务器；随后你查询该子服务器，它再把你重定向到自己的某个子服务器。这个过程不断重复，直到你查询到一台知道答案的名称服务器，它会返回与你的域对应的 IP 地址。</p>
+<p>为了把你重定向到子名称服务器，父名称服务器必须提供子服务器的区域、便于人类阅读的域名和 IP 地址，以便你联系该子服务器获取更多信息。</p>
+<p>例如，对 <code>eecs.berkeley.edu</code> 的一次 DNS 查询可能包含以下步骤。（<a href="https://howdns.works/">howdns.works</a> 提供了这一查询的漫画版本。）</p>
+<img width="900px" src="/image/cs168-textbook/applications/4-05-basic-lookup.png">
+<ol>
+<li>你对根名称服务器说：请告诉我 <code>eecs.berkeley.edu</code> 的 IP 地址。</li>
+<li>根服务器对你说：我不知道，但可以把你引向另一台掌握更多信息的名称服务器。它负责 <code>.edu</code> 区域，便于人类阅读的域名是 <code>a.edu-servers.net</code>，IP 地址是 <code>192.5.6.30</code>。</li>
+<li>你对 <code>.edu</code> 名称服务器说：请告诉我 <code>eecs.berkeley.edu</code> 的 IP 地址。</li>
+<li><code>.edu</code> 名称服务器对你说：我不知道，但可以把你引向另一台掌握更多信息的名称服务器。它负责 <code>berkeley.edu</code> 区域，便于人类阅读的域名是 <code>adns1.berkeley.edu</code>，IP 地址是 <code>128.32.136.3</code>。</li>
+<li>你对 <code>berkeley.edu</code> 名称服务器说：请告诉我 <code>eecs.berkeley.edu</code> 的 IP 地址。</li>
+<li><code>berkeley.edu</code> 名称服务器对你说：好的，<code>eecs.berkeley.edu</code> 的 IP 地址是 <code>23.185.0.1</code>。</li>
+</ol>
+<p>得到答案后，我们可以把它存入缓存，这样以后再次需要这条记录时就不必重新询问。</p>
+<h2 id="存根解析器与递归解析器">存根解析器与递归解析器</h2>
+<p>最初，终端主机（例如你的计算机）会自行执行 DNS 查询，逐一联系各名称服务器。</p>
+<p>如今，本地计算机通常把 DNS 查询任务委托给<strong>DNS 递归解析器（DNS Recursive Resolver）</strong>，由它代为查询名称服务器。执行查询时，计算机上的**DNS 存根解析器（DNS Stub Resolver）**向递归解析器发送查询，让后者完成全部工作，再从它那里接收响应。</p>
+<img width="900px" src="/image/cs168-textbook/applications/4-06-stub-resolver.png">
+<p>我们怎样得知解析器的 IP 地址？第一次连接互联网时，某个服务可以告诉你解析器地址。你也可以手动输入自己希望使用的解析器地址。</p>
+<p>互联网上一些知名解析器包括 Cloudflare 运营的 1.1.1.1 和 Google 运营的 8.8.8.8。它们往往使用容易记忆的 IP 地址，免得我们还要用名称指代它们；否则就得通过 DNS 查询来寻找它们的 IP 地址，而这些服务器存在的目的恰恰是替我们执行 DNS 查询。</p>
+<p>除科技公司外，互联网服务提供商（ISP）也会运营解析器，把它作为销售给客户的互联网服务的一部分。（如果你付费购买互联网服务，却仍不得不在浏览器中输入 IP 地址，那就太糟了。）</p>
+<p>家用路由器也可以充当解析器。使用物理距离较近的路由器可以加快 DNS 查询，因为你和路由器之间的延迟更低。</p>
+<p>解析器的一大优势是缓存效果更好。它会处理许多不同终端主机的查询（不只来自你的计算机），因此能建立大得多的缓存。如果你向解析器询问 <code>eecs.berkeley.edu</code>，而不久前有人问过同样的问题，解析器无需联系其他名称服务器便能直接给出答案。</p>
+<p>请注意，尽管递归解析器保存着更大的缓存，存根解析器仍可维护自己独立的缓存。有些查询甚至不用询问递归解析器，就能由存根解析器的缓存回答。</p>
+<h2 id="冗余">冗余</h2>
+<p>到目前为止，我们一直在说“那台 <code>berkeley.edu</code> 名称服务器”，但实际上每个区域都有多台名称服务器。一个区域的所有名称服务器在功能上相同，每台都能回答该区域内的任何查询。</p>
+<p>这保证了该区域的可用性：一台名称服务器宕机后，其他服务器仍能继续回答查询。按照惯例，一个区域必须有两台名称服务器，不过实际中大多数区域至少有三台。</p>
+<p>通常会指定其中一台为真正管理该区域的主服务器，其余是辅助镜像服务器，只存储并提供主服务器信息的副本。</p>
+<p>因此在 DNS 查询中，名称服务器可能这样回复：“我不知道，但你应该询问 <code>.edu</code> 区域。该区域有 13 台名称服务器，下面是每台的域名和 IP 地址。”随后你可以选择下一台要联系的名称服务器。</p>
+<h2 id="dns-api">DNS API</h2>
+<p>现在我们已经对 DNS 有了概念性认识，接下来看看它实际如何实现。</p>
+<p>首先，程序员怎样利用 DNS 执行查询？</p>
+<p>执行 DNS 查询的应用程序接口（API）相对简单、常见且稳定，在不同编程语言中也相当类似。</p>
+<p>在 C 标准库中，可以用 <code>gethostbyname("foo.com")</code> 查询 <code>foo.com</code> 对应的 IP 地址。不过，该函数仅支持 IPv4，因此现已弃用（尽管你仍会看到有人使用它）。</p>
+<p>更新后的版本同样位于 C 标准库中：<code>getaddrinfo("example.com", NULL, NULL, &#x26;result)</code> 会查询 <code>example.com</code> 的 IP 地址，并把答案存入 <code>result</code> 结构体。不必太在意具体细节和额外参数（这里设为 null）。这个替代 API 不只支持 IPv4，也支持 IPv6 等。</p>
+<p>作为程序员，你无需操心递归解析器或具体名称服务器等 DNS 的复杂细节，只需调用标准库函数。这些函数通常会向操作系统中的存根解析器发出请求。</p>
+<h2 id="dns-使用-udp而非-tcp">DNS 使用 UDP，而非 TCP</h2>
+<p>从根本上说，DNS 是一种客户端—服务器协议。一方（客户端）发送问题，另一方（服务器）返回答案。客户端通常是用户主机或递归解析器，服务器通常是名称服务器。客户端和服务器应当如何组织消息格式？</p>
+<p>DNS 使用 UDP（尽力而为的数据包，不进行 TCP 握手）来保持轻量和快速。我们不必等待 TCP 三次握手完成，也不关心数据包是否按序到达，因为查询和响应通常都能装入一个 UDP 数据包。</p>
+<p>使用 UDP 时，服务器无需为每个连接保存状态（与 TCP 不同，TCP 服务器必须维护缓冲区）。每个数据包都可独立处理。这也有助于保持 DNS 轻量，因为名称服务器会收到大量请求，为每个请求打开新连接代价很高。</p>
+<p>UDP 不可靠且数据包可能丢失，该怎么办？一个简单的重试机制即可解决：如果在某个时限内没有收到回复，就重新发送查询。超时时间因操作系统而异，有时会相当慢。</p>
+<p>正因为 UDP 不可靠且超时缓慢，使用距离近、联系可靠的解析器非常重要。例如，家用路由器中的解析器离你很近，而且很可能相当可靠（家庭网络中不会太拥塞）。还可以设置多个备用解析器来提高可靠性（例如家用路由器和 8.8.8.8）。</p>
+<p>如前所述，DNS 查询和响应通常能放入一个数据包。一个明显例外是主名称服务器与辅助名称服务器之间传输区域时。辅助服务器必须说：“把你的所有记录给我，这样我才能帮你提供它们。”响应很可能非常大，所以这类传输通常通过 TCP 完成。</p>
+<p>DNS 近来的进展加入了安全功能（例如阻止攻击者修改传输途中的记录），这也可能要求从 UDP 切换到 TCP。</p>
+<p>回想一下，UDP 通过端口支持同一台服务器上的多个应用。按照惯例，所有名称服务器都在 UDP 端口 53 上监听 DNS 查询。这个端口号众所周知且固定不变，所有人才能联系名称服务器上的正确端口。</p>
+<h2 id="dns-消息格式">DNS 消息格式</h2>
+<img width="800px" src="/image/cs168-textbook/applications/dns_packet.png">
+<p>第一个字段是 16 位的<strong>标识字段（identification field）</strong>，每次查询随机选择，用于匹配请求和响应。发送 DNS 查询时，ID 字段会填入随机位。由于 UDP 无状态，DNS 响应必须在 ID 字段中原样返回这些位，原查询发送方才能知道该响应对应哪次 DNS 查询。</p>
+<p>接下来的 16 位留给标志。QR 位指明消息是查询（该位为 0）还是响应（该位为 1）。RD 位表示你希望解析器执行递归查询，还是只返回名称服务器给出的内容（即使内容是“我不知道”）。</p>
+<p>理论上可以在标志中指定查询类型，不过 <code>IQUERY</code> 类型已经废弃，<code>STATUS</code> 类型也没有真正定义，所以几乎所有情况都使用 <code>QUERY</code> 类型。</p>
+<p>标志还可以表明查询是否成功（例如查询成功时，回复会设置 <code>NOERROR</code> 标志；查询一个不存在的名称时，回复会设置 <code>NXDOMAIN</code> 标志）。</p>
+<p>下一个字段指定所问问题的数量（实际中始终为 1）。再之后的三个字段用于响应消息，指定消息中所含**资源记录（resource record，RR）**的数量。稍后会深入说明各类 RR。</p>
+<p>消息的其余部分包含 DNS 查询或响应的实际内容。这些内容始终组织为一组 RR，每条 RR 都是带有关联类型的键值对。</p>
+<p>完整地说，DNS 记录的键正式定义为三元组 <code>&#x3C;Name, Class, Type></code>，其中 <code>Name</code> 是实际的键数据，<code>Class</code> 对互联网而言始终是 <code>IN</code>（获取 DNS 自身信息的特殊查询除外），<code>Type</code> 指定记录类型。DNS 记录的值包含 <code>&#x3C;TTL, Value></code>，其中 <code>TTL</code> 是生存时间（记录可缓存多少秒），<code>Value</code> 是实际的值数据。</p>
+<p>DNS 中有三种主要记录。**A 类型记录（A type record）**把域映射到 IPv4 地址，键是域，值是 IP 地址。类似地，<code>AAAA type records</code> 把域映射到 IPv6 地址。**NS 类型记录（NS type record）**把区域映射到域，键是区域，值是域。</p>
+<p>你有时也会遇到 <code>CNAME</code> 类型记录，用于别名或重定向。其名称和值都是域，该记录表示两个域拥有相同的 IP 地址。</p>
+<p>本节要点：每个 DNS 数据包都有一个 16 位随机 ID 字段、一些元数据和一组资源记录。每条记录属于四个类别之一（问题、答案、权威、附加），并包含类型、键和值。记录类型包括 A 和 NS。</p>
+<h2 id="dns-查询实现">DNS 查询（实现）</h2>
+<p>现在来逐步完成一次真实的 DNS 查询，寻找 <code>eecs.berkeley.edu</code> 的 IP 地址。你可以在家使用 <a href="https://en.wikipedia.org/wiki/Dig_(command)"><code>dig</code> 工具</a> 尝试；记得设置 <code>+norecurse</code> 标志，以便自行展开递归过程。</p>
+<p>每次 DNS 查询都从根服务器开始。根服务器的名称和 IP 地址通常以根提示文件的形式硬编码进解析器。感兴趣的话，可以查看这份根提示文件：<a href="https://www.internic.net/domain/named.root">https://www.internic.net/domain/named.root</a>。</p>
+<p>第一台根服务器的域名是 <code>a.root-servers.net</code>，IP 地址是 <code>198.41.0.4</code>。我们可以用 <code>dig</code> 向该地址发送 DNS 请求，询问 <code>eecs.berkeley.edu</code> 的 IP 地址。</p>
+<pre class="astro-code astro-code-themes min-light night-owl" style="--shiki-light:#24292eff;--shiki-dark:#d6deeb;--shiki-light-bg:#ffffff;--shiki-dark-bg:#011627; overflow-x: auto;--file-name-offset: -0.75rem;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ dig +norecurse eecs.berkeley.edu @198.41.0.4</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>;; Got answer:</span></span>
+<span class="line"><span>;; ->>HEADER&#x3C;&#x3C;- opcode: QUERY, status: NOERROR, id: 26114</span></span>
+<span class="line"><span>;; flags: qr; QUERY: 1, ANSWER: 0, AUTHORITY: 13, ADDITIONAL: 27</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>;; QUESTION SECTION:</span></span>
+<span class="line"><span>;eecs.berkeley.edu.          IN   A</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>;; AUTHORITY SECTION:</span></span>
+<span class="line"><span>edu.                172800   IN   NS   a.edu-servers.net.</span></span>
+<span class="line"><span>edu.                172800   IN   NS   b.edu-servers.net.</span></span>
+<span class="line"><span>edu.                172800   IN   NS   c.edu-servers.net.</span></span>
+<span class="line"><span>...</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>;; ADDITIONAL SECTION:</span></span>
+<span class="line"><span>a.edu-servers.net.  172800   IN   A    192.5.6.30</span></span>
+<span class="line"><span>b.edu-servers.net.  172800   IN   A    192.33.14.30</span></span>
+<span class="line"><span>c.edu-servers.net.  172800   IN   A    192.26.92.30</span></span>
+<span class="line"><span>...</span></span></code></pre>
+<p>答案的第一部分显示了头部信息，包括 ID 字段（<code>26114</code>）、返回标志（<code>NOERROR</code>），以及各部分返回的记录数。</p>
+<p>**问题部分（question section）**包含 1 条记录（可查看头部的 <code>QUERY: 1</code> 验证）。它的键是 <code>eecs.berkeley.edu</code>，类型是 <code>A</code>，值为空。这表示我们查询的域（值为空是因为我们不知道对应的 IP 地址）。</p>
+<p>**答案部分（answer section）**为空（头部中为 <code>ANSWER: 0</code>），因为根服务器没有直接回答查询。</p>
+<p>**权威部分（authority section）**包含 13 条记录。第一条以 <code>.edu</code> 为键、<code>NS</code> 为类型、<code>a.edu-servers.net</code> 为值。这是根服务器给出下一批可联系名称服务器的区域和域名。该部分的每条记录都对应一台接下来可能询问的名称服务器。</p>
+<p>注意：名称最靠前（按字母或数字顺序）的服务器通常是主服务器（这里为 <code>a.edu-servers.net</code>），其余是镜像。另外，多条记录使用同一名称（<code>.edu</code>）并无问题；这只表示有多台名称服务器都能回答该区域的查询。</p>
+<p>**附加部分（additional section）**包含 27 条记录。第一条以 <code>a.edu-servers.net</code> 为键、<code>A</code> 为类型、<code>192.5.6.30</code> 为值。这是根服务器通过把权威部分中的域映射到 IP 地址，向我们提供下一台名称服务器的 IP 地址。</p>
+<p>权威部分和附加部分合在一起，提供下一台名称服务器的区域、域名和 IP 地址。为保持 DNS 消息的键值结构，这些信息被分散在两个部分中。</p>
+<p>完整地说：<code>172800</code> 是每条记录的 TTL（生存时间），这里设为 172,800 秒，即 48 小时。<code>IN</code> 是互联网类，基本可以忽略。有时你会看到类型为 <code>AAAA</code> 的记录，对应 IPv6 地址（通常的 <code>A</code> 类型记录对应 IPv4 地址）。</p>
+<p>合理性检查：接下来查询哪台名称服务器？我们怎么知道它位于哪里？要向它查询什么？\footnote{查询 <code>a.edu-servers.net</code>；由于附加部分中的记录，我们知道它的位置。仍像之前一样查询 <code>eecs.berkeley.edu</code> 的 IP 地址。}</p>
+<pre class="astro-code astro-code-themes min-light night-owl" style="--shiki-light:#24292eff;--shiki-dark:#d6deeb;--shiki-light-bg:#ffffff;--shiki-dark-bg:#011627; overflow-x: auto;--file-name-offset: -0.75rem;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ dig +norecurse eecs.berkeley.edu @192.5.6.30</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>;; Got answer:</span></span>
+<span class="line"><span>;; ->>HEADER&#x3C;&#x3C;- opcode: QUERY, status: NOERROR, id: 36257</span></span>
+<span class="line"><span>;; flags: qr; QUERY: 1, ANSWER: 0, AUTHORITY: 3, ADDITIONAL: 5</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>;; QUESTION SECTION:</span></span>
+<span class="line"><span>;eecs.berkeley.edu.           IN   A</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>;; AUTHORITY SECTION:</span></span>
+<span class="line"><span>berkeley.edu.        172800   IN   NS   adns1.berkeley.edu.</span></span>
+<span class="line"><span>berkeley.edu.        172800   IN   NS   adns2.berkeley.edu.</span></span>
+<span class="line"><span>berkeley.edu.        172800   IN   NS   adns3.berkeley.edu.</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>;; ADDITIONAL SECTION:</span></span>
+<span class="line"><span>adns1.berkeley.edu.  172800   IN   A    128.32.136.3</span></span>
+<span class="line"><span>adns2.berkeley.edu.  172800   IN   A    128.32.136.14</span></span>
+<span class="line"><span>adns3.berkeley.edu.  172800   IN   A    192.107.102.142</span></span>
+<span class="line"><span>...</span></span></code></pre>
+<p>下一次查询的答案部分同样为空；权威部分中的 <code>NS</code> 记录和附加部分中的 <code>A</code> 记录给出了负责 <code>berkeley.edu</code> 区域的名称服务器域名和 IP 地址。</p>
+<pre class="astro-code astro-code-themes min-light night-owl" style="--shiki-light:#24292eff;--shiki-dark:#d6deeb;--shiki-light-bg:#ffffff;--shiki-dark-bg:#011627; overflow-x: auto;--file-name-offset: -0.75rem;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ dig +norecurse eecs.berkeley.edu @128.32.136.3</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>;; Got answer:</span></span>
+<span class="line"><span>;; ->>HEADER&#x3C;&#x3C;- opcode: QUERY, status: NOERROR, id: 52788</span></span>
+<span class="line"><span>;; flags: qr aa; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>;; QUESTION SECTION:</span></span>
+<span class="line"><span>;eecs.berkeley.edu.         IN   A</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>;; ANSWER SECTION:</span></span>
+<span class="line"><span>eecs.berkeley.edu.  86400   IN   A   23.185.0.1</span></span></code></pre>
+<p>最后一次查询终于在答案部分以一条 <code>A</code> 类型记录给出了 <code>eecs.berkeley.edu</code> 对应的 IP 地址。</p>
+<p>实际中，递归解析器会尽可能缓存答案，所以大多数查询都可以跳过最初几步，使用缓存的记录，而不必每次询问根服务器和 <code>.edu</code> 之类的高层名称服务器。缓存能减少把域名转换成 IP 地址时必须通过网络发送的数据包，从而加快 DNS；它也能减轻最高层名称服务器的请求负载。</p>
+<p>了解 DNS 如何实现查询后，我们可以看看 DNS 在实践中究竟如何运作，并探讨 DNS 在现实世界中的商业层面。</p>
+<h2 id="dns-权威层级">DNS 权威层级</h2>
+<p>我们画出的树状层级实际上体现了 DNS 的三种不同层级。</p>
+<p>如前所见，DNS 名称具有层级性，因此 <code>eecs.berkeley.edu</code> 这样的域名由点号分隔的多个词组成。</p>
+<img width="900px" src="/image/cs168-textbook/applications/4-07-hierarchy1.png">
+<p>我们也已经看到 DNS 基础设施具有层级性。可以把名称服务器组织成树状层级，每台名称服务器只了解树中自己负责的部分。</p>
+<img width="700px" src="/image/cs168-textbook/applications/4-08-hierarchy2.png">
+<p>第三种层级是权威，它告诉我们由谁定义树中存在的名称。例如，运营 <code>.edu</code> 名称服务器的组织负责 <code>.edu</code> 区域中的所有域。随后，<code>.edu</code> 组织可以把自己区域中部分范围的权威委托给树中的下级组织。</p>
+<p>例如，<code>.edu</code> 组织可以说：“<code>berkeley.edu</code>（及其所有子域）属于我的区域，我把这部分区域的控制权移交给加州大学伯克利分校。”这样就创建了一个由该校拥有的新区域，而 <code>.edu</code> 组织无需了解这个新 <code>berkeley.edu</code> 区域中的更新。加州大学伯克利分校有权在自己的区域中创建新域，或把区域中的某些部分继续委托给下级组织。</p>
+<img width="700px" src="/image/cs168-textbook/applications/4-09-hierarchy3.png">
+<p>把这三种层级都纳入考虑后，可以更准确地说，树中每个节点都表示一个区域。区域正式定义为负责层级中某一部分的管理权威。</p>
+<p>从命名角度看，每个区域包含一个或多个名称—IP 映射，其中名称是该区域的子域。<code>eecs.berkeley.edu</code> 区域可以包含名称 <code>eecs.berkeley.edu</code> 或 <code>iris.eecs.berkeley.edu</code>，但不能包含 <code>math.berkeley.edu</code>。</p>
+<p>从基础设施角度看，该区域由一台或多台名称服务器支撑，它们回答有关区域内域的查询。</p>
+<p>从权威角度看，区域由某个组织控制，该组织从父级获得管理该区域名称的权威。例如，控制 <code>berkeley.edu</code> 区域的加州大学伯克利分校，可以把 <code>eecs.berkeley.edu</code> 区域委托给 EECS 系。</p>
+<h2 id="实际中的-dns-区域">实际中的 DNS 区域</h2>
+<p>现实中这些组织是谁？</p>
+<img width="800px" src="/image/cs168-textbook/applications/4-10-zones.png">
+<p>根区域由互联网名称与数字地址分配机构（Internet Corporation for Assigned Names and Numbers，ICANN）控制。它负责把根区域（代表整个互联网）的各部分委托给特定顶级域。</p>
+<p>树中根节点正下方的所有区域都是<strong>顶级域（top-level domain，TLD）</strong>。互联网最初在美国发展，所以早期 TLD 按用途把互联网划分为不同区域，例如 .com（商业）、.gov（政府）、.edu（教育）和 .mil（军事）。后来又创建了国家 TLD，例如 .fr（法国）和 .jp（日本）。</p>
+<p>历史上 TLD 相对很少。近年 ICANN 开始以 $150,000 的注册价格（另加持续维护费用）出售新 TLD，引发了新 TLD 的激增。截至 2024 年，已有超过 1,500 个 TLD，包括 .google 之类公司专用 TLD，以及 .travel 或 .pizza 等更特别的 TLD。</p>
+<p>每个 TLD 都由某个组织运营，该组织可以自行决定如何继续划分这个 TLD。例如，.uk TLD 由 Nominet 管理；他们决定按用途划分 .uk 区域，创建了 .co.uk（商业）、.ac.uk（学术）等区域。</p>
+<p>树中更低层的区域可以按深度称呼。example.com 是二级域，blog.example.com 是三级域。这些区域通常由不同组织和公司控制，它们从父区域购买相应区域。购买区域时，还必须把所用名称服务器告知父区域，使父区域能把用户重定向到你的名称服务器。</p>
+<p>树中更低层的名称服务器通常由域名注册商运营。注册商是拥有特定区域并允许用户在该区域中特定域上托管服务的公司。例如，我可以按月付费，把网站托管在 <code>blog.foo.com</code>。注册商通常会提出把相应的域—IP 映射加入其名称服务器。</p>
+<p>除了注册商，Google 等公司也可能为自己的应用运营名称服务器（例如提供 <code>maps.google.com</code> 的记录）。Amazon Web Services 也有名为 Route 53 的名称服务器，用户可以向其中添加要提供的记录。</p>
+<h2 id="通过任播实现根服务器可用性">通过任播实现根服务器可用性</h2>
+<p>如果根服务器不可用，后果会非常严重。缓存为空的人无法发起任何 DNS 请求。随着 TTL 到期，每个人的缓存最终都会清空，互联网也将停止工作。</p>
+<p>为提供冗余，世界各地共有 13 台根服务器。我们可以查询这些公开且众所周知的根服务器 <a href="https://www.iana.org/domains/root/servers">IP 地址</a>。</p>
+<p>考虑到整个互联网都依赖它们，13 这个数字似乎仍然很少。为了提供极高可用性，实际上的根服务器远不止 13 台，但列表只包含 13 个 IP 地址，这是因为采用了名为任播的巧妙技术。</p>
+<p>在**任播（anycast）**技术中，我们部署一台根服务器的许多镜像，并让它们全部使用同一个 IP 地址。联系域 <code>k.root-servers.net</code> 或其对应 IP 地址时，你实际可能正在与它的任意一个镜像通信。</p>
+<p>13 台根服务器中的每一台实际都由一组镜像组成。例如，<code>f.root-servers.net</code> 有 3,000 多个实例。这些镜像可以由不同网络运营商运行（例如 Google 和 Cloudflare 可能协助运营根镜像）。</p>
+<p>实现任播时，每个镜像都会在路由协议中宣告同一个 IP 地址，路由协议的其余部分照常工作。你可能收到许多通往 <code>k.root-servers.net</code> 的路由宣告；接受其中任何一条，最终都会把数据包路由到某个镜像。一处镜像宕机后，其余镜像仍在发送宣告，你可以接受另一条路由来维持可用性。</p>
+<p>任播还意味着即使不断增删镜像，根 IP 也很少改变。因此，根提示文件中根名称服务器记录的 TTL 很长（42 天）。</p>
+<img width="500px" src="/image/cs168-textbook/applications/4-11-anycast.png">
+<p>这是 <code>k.root-servers.net</code> 所有镜像的地图。它们都宣告同一个 IP 地址，你的路由器很可能会选择与最近的镜像通信。<code>k.root-servers.net</code> 由 RIPE（位于欧洲）运营，这或许能解释为何欧洲有如此多镜像。</p>
+<p>Google 的 8.8.8.8 等公共解析器同样可以使用任播来实现高可用性。</p>
+<h2 id="dns-与电子邮件">DNS 与电子邮件</h2>
+<p>DNS 不只可以存储并提供域—IP 映射。例如，当你要向 <code>evanbot@berkeley.edu</code> 这样的地址发送电子邮件时，计算机仍需知道该把数据包发到哪里。</p>
+<p>可以使用 <code>MX</code> 类型记录把电子邮件地址转换为邮件服务器。这些记录把 <code>berkeley.edu</code> 等域映射到 <code>aspmx.l.google.com</code> 等邮件服务器。邮件服务器位于不同区域也没问题（例如这里加州大学伯克利分校的邮件服务器由 Google 运营）。</p>
+<p>历史上，一个电子邮件地址对应特定机器上的一个用户，因此邮件服务器就是那台机器。如今，你很可能希望从任何地方访问邮件。所以 MX 记录会映射到 <code>aspmx.l.google.com</code> 之类的邮件服务器，由它们接收邮件，并允许你从任何计算机访问。</p>
+<p>MX 记录的一个关键区别是，其值还包含优先级。如果收到多条 MX 记录，它们把同一个域映射到不同邮件服务器，应当首先尝试优先级最高（数字最小）的邮件服务器。</p>
+<h2 id="dns-与负载均衡">DNS 与负载均衡</h2>
+<p>演示中最后一台名称服务器返回一条 <code>A</code> 类型记录，但实际上可以收到多条 <code>A</code> 类型记录，把一个域映射到多个 IP 地址。这些记录没有顺序，服务器还可能在返回前打乱次序。任意一条都有效，客户端可以选择任何一条（通常是第一条）。提供多个 IP 地址有助于负载均衡和冗余。</p>
+<p>名称服务器还可以根据查询发送者及发送位置，返回不同的 <code>A</code> 类型记录。如果要把 <code>www.google.com</code> 这样的热门域的负载分散到多台服务器，这会很有帮助。例如，可以尝试把用户送往最近的服务器。</p>
+<p>此时名称服务器需要额外的（可能是专有的）逻辑来决定回复哪些记录。它可以检查递归解析器是谁，也可以检查终端客户端是谁，不过这要求扩展 DNS，让解析器的查询包含客户端地址。它甚至可以检查终端用户的地理位置，但这需要 IP 地址到物理位置的映射。MaxMind 等商业数据库就提供这种映射。</p>
+<p>基于用户地理位置的负载均衡并不完美。即使知道服务器和用户的物理位置，我们仍需猜测从网络角度看哪台服务器最近，也不了解用户与不同服务器之间的性能（例如网络带宽）。</p>
+<img width="600px" src="/image/cs168-textbook/applications/4-12-load-balance.png">
+<p>下面是一项检验 Google 地理负载均衡效果的实验。我们分别在旧金山和俄勒冈查询 <code>www.google.com</code>，得到两个不同的 IP 地址。</p>
+<p>随后执行反向查询，把每个 IP 地址匹配到特定服务器名称（每台服务器不同，并非 <code>www.google.com</code>）。结果是一条 <code>PTR</code> 类型记录，它把 IP 地址映射到名称（与 <code>A</code> 类型记录相反）。可以看到，Google 在旧金山给出的 IP 地址映射到名称中含有 <code>sfo03s25</code> 的服务器。假设 <code>sfo</code> 代表旧金山，那确实相当准确！</p>
+<p>再看延迟：从旧金山的计算机连接到为旧金山提供的 IP 地址需要 20 ms，连接到为俄勒冈提供的 IP 地址需要 35 秒。Google 很好地为旧金山的计算机分配了更近的服务器！</p> </article> <hr class="my-8 border-dashed"> <a href="https://github.com/howIdobetter/My-Blog/edit/main/src/content/posts/cs168-applications-01-dns.md" target="_blank" rel="noopener noreferrer" class="hover:text-accent text-muted-foreground flex justify-baseline gap-1.5 sm:hidden"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M7 7H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-1" /><path d="M20.385 6.585a2.1 2.1 0 0 0-2.97-2.97L9 12v3h3zM16 5l3 3" /></svg><span>编辑文章</span></a> <div id="btt-btn-container" class="fixed inset-e-4 bottom-8 z-50 md:sticky md:inset-e-auto md:float-end md:me-1 translate-y-14 opacity-0 transition duration-500"> <button data-button="back-to-top" aria-label="回到顶部" class="group bg-background relative px-2 py-1 size-14 rounded-full shadow-xl md:h-8 md:w-fit md:rounded-md md:shadow-none md:focus-visible:rounded-none md:bg-background/35 md:bg-clip-padding md:backdrop-blur-lg"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block rotate-90 md:hidden" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 12h14M5 12l6 6M5 12l6-6" /></svg> <span class="group-hover:text-accent sr-only text-sm md:not-sr-only"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block size-4" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" /><path d="M12 5v14M16 9l-4-4M8 9l4-4" /></svg> 回到顶部 </span> </button> </div> <script data-astro-rerun>
+  function backToTop() {
+    const btnContainer = document.querySelector("#btt-btn-container");
+    const backToTopBtn = document.querySelector("[data-button='back-to-top']");
+    const pageHeader = document.querySelector("body > header");
+
+    if (!btnContainer || !backToTopBtn || !pageHeader) return;
+
+    backToTopBtn.addEventListener("click", () => {
+      document.body.scrollTop = 0;
+      document.documentElement.scrollTop = 0;
+    });
+
+    const observer = new IntersectionObserver(([entry]) => {
+      const isVisible = !entry.isIntersecting;
+      if (entry) {
+        btnContainer.classList.toggle("opacity-100", isVisible);
+        btnContainer.classList.toggle("translate-y-0", isVisible);
+        btnContainer.classList.toggle("opacity-0", !isVisible);
+        btnContainer.classList.toggle("translate-y-14", !isVisible);
+      }
+    });
+    observer.observe(pageHeader);
+  }
+  backToTop();
+</script> <ul class="mt-4 mb-8 flex flex-wrap gap-4 sm:my-8"> <li> <a href="/tags/networking/" class="border-border flex items-center gap-1 rounded-full border transition-colors hover:border-accent hover:text-accent focus-visible:text-accent focus-visible:no-underline px-3 py-1.5 text-sm" data-astro-transition-scope="astro-36ssibgs-1"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="text-accent opacity-80 size-3.5" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 9h14M5 15h14M11 4 7 20M17 4l-4 16" /></svg> networking </a> </li><li> <a href="/tags/cs168/" class="border-border flex items-center gap-1 rounded-full border transition-colors hover:border-accent hover:text-accent focus-visible:text-accent focus-visible:no-underline px-3 py-1.5 text-sm" data-astro-transition-scope="astro-36ssibgs-2"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="text-accent opacity-80 size-3.5" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 9h14M5 15h14M11 4 7 20M17 4l-4 16" /></svg> cs168 </a> </li><li> <a href="/tags/course-notes/" class="border-border flex items-center gap-1 rounded-full border transition-colors hover:border-accent hover:text-accent focus-visible:text-accent focus-visible:no-underline px-3 py-1.5 text-sm" data-astro-transition-scope="astro-36ssibgs-3"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="text-accent opacity-80 size-3.5" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 9h14M5 15h14M11 4 7 20M17 4l-4 16" /></svg> course-notes </a> </li><li> <a href="/tags/applications/" class="border-border flex items-center gap-1 rounded-full border transition-colors hover:border-accent hover:text-accent focus-visible:text-accent focus-visible:no-underline px-3 py-1.5 text-sm" data-astro-transition-scope="astro-36ssibgs-4"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="text-accent opacity-80 size-3.5" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 9h14M5 15h14M11 4 7 20M17 4l-4 16" /></svg> applications </a> </li> </ul>  <hr class="my-8 border-dashed"> <div data-pagefind-ignore class="my-8 grid grid-cols-1 gap-4 sm:grid-cols-2">  <a href="/posts/cs168-applications-02-http/" class="soft-panel hover:border-accent/70 hover:text-accent flex w-full justify-end gap-3 p-4 text-end transition sm:col-start-2"> <div> <span class="mono-label">下一篇</span> <div class="mt-1 text-sm leading-6">HTTP</div> </div> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block flex-none rtl:rotate-180" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 12h14M13 18l6-6M13 6l6 6" /></svg> </a> </div> </main> <footer class="app-layout mt-auto"> <div class="border-border text-muted-foreground flex flex-col items-start justify-between gap-6 border-t py-9 text-sm sm:flex-row sm:items-end"> <div> <p class="text-foreground font-semibold">随便做做</p> <p class="mt-1">先记下来，再慢慢改对。</p> </div> <div class="flex items-center gap-5"> <div class="flex flex-wrap items-center gap-1"> <a href="https://github.com/howIdobetter" title="GitHub" class="group inline-flex items-center gap-1 hover:text-accent p-2 hover:rotate-6 sm:p-1">  <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block size-6 scale-125 fill-transparent stroke-current stroke-2 opacity-90 group-hover:fill-transparent sm:scale-110" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" /><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21" /></svg> <span class="sr-only">GitHub</span>  </a> </div> <span class="whitespace-nowrap">© 2026 一剑留名ing</span> </div> </div> </footer>   <script type="module">const a="theme",n="light",r="dark";function i(){const e=localStorage.getItem(a);return e||(window.matchMedia("(prefers-color-scheme: dark)").matches?r:n)}let o=window.__theme?.value??i();function s(){localStorage.setItem(a,o),m()}function m(){const e=document.firstElementChild;e?.setAttribute("data-theme",o),e?.classList.toggle("dark",o===r);const t=document.querySelector("#theme-btn"),c=o===n?t?.dataset.labelDark:t?.dataset.labelLight;c&&(t?.setAttribute("aria-label",c),t?.setAttribute("title",c));const l=window.getComputedStyle(document.body).backgroundColor;document.querySelector("meta[name='theme-color']")?.setAttribute("content",l)}function d(){m(),document.querySelector("#theme-btn")?.addEventListener("click",()=>{o=o===n?r:n,s()})}d();document.addEventListener("astro:after-swap",d);document.addEventListener("astro:before-swap",e=>{const t=document.querySelector("meta[name='theme-color']")?.getAttribute("content");t&&e.newDocument.querySelector("meta[name='theme-color']")?.setAttribute("content",t)});window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change",({matches:e})=>{o=e?r:n,s()});</script> </body> </html> <script data-astro-rerun>
+  function addHeadingLinks() {
+    const isZh = document.documentElement.lang === "zh-CN";
+    const headings = Array.from(
+      document.querySelectorAll("h2, h3, h4, h5, h6")
+    );
+    for (const heading of headings) {
+      heading.classList.add("group");
+      const link = document.createElement("a");
+      link.className =
+        "heading-link ms-2 no-underline opacity-75 md:opacity-0 md:group-hover:opacity-100 md:focus:opacity-100";
+      link.href = "#" + heading.id;
+      link.setAttribute(
+        "aria-label",
+        isZh
+          ? `链接到本节：${heading.textContent}`
+          : `Link to section: ${heading.textContent}`
+      );
+
+      const span = document.createElement("span");
+      span.ariaHidden = "true";
+      span.innerText = "#";
+      link.appendChild(span);
+      heading.appendChild(link);
+    }
+  }
+  addHeadingLinks();
+
+  function attachCopyButtons() {
+    const isZh = document.documentElement.lang === "zh-CN";
+    const copyButtonLabel = isZh ? "复制" : "Copy";
+    const copiedButtonLabel = isZh ? "已复制" : "Copied";
+    const codeBlocks = Array.from(document.querySelectorAll("pre"));
+
+    for (const codeBlock of codeBlocks) {
+      const wrapper = document.createElement("div");
+      wrapper.style.position = "relative";
+
+      const computedStyle = getComputedStyle(codeBlock);
+      const hasFileNameOffset =
+        computedStyle.getPropertyValue("--file-name-offset").trim() !== "";
+
+      const topClass = hasFileNameOffset
+        ? "top-(--file-name-offset)"
+        : "-top-3";
+
+      const copyButton = document.createElement("button");
+      copyButton.className = `copy-code absolute end-3 ${topClass} rounded bg-muted border border-muted px-2 py-1 text-xs leading-4 text-foreground font-medium`;
+      copyButton.innerHTML = copyButtonLabel;
+      copyButton.setAttribute("aria-label", copyButtonLabel);
+      copyButton.setAttribute("aria-live", "polite");
+      codeBlock.setAttribute("tabindex", "0");
+      codeBlock.appendChild(copyButton);
+
+      codeBlock?.parentNode?.insertBefore(wrapper, codeBlock);
+      wrapper.appendChild(codeBlock);
+
+      copyButton.addEventListener("click", async () => {
+        await copyCode(codeBlock, copyButton);
+      });
+    }
+
+    async function copyCode(block, button) {
+      const code = block.querySelector("code");
+      const text = code?.innerText;
+
+      await navigator.clipboard.writeText(text ?? "");
+
+      button.innerText = copiedButtonLabel;
+      button.setAttribute("aria-label", copiedButtonLabel);
+
+      setTimeout(() => {
+        button.innerText = copyButtonLabel;
+        button.setAttribute("aria-label", copyButtonLabel);
+      }, 700);
+    }
+  }
+  attachCopyButtons();
+
+  /** Accessible image lightbox for article images. */
+  function initLightbox() {
+    const article = document.getElementById("article");
+    if (!article) return;
+
+    const prefersReducedMotion = () =>
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    let overlay = null;
+    let lastFocused = null;
+
+    // Defer attribute mutations so they don't push the LCP timestamp.
+    // Event listeners below use delegation and don't need the attributes to exist yet.
+    requestAnimationFrame(() => {
+      const images = Array.from(article.querySelectorAll("img"));
+      for (const image of images) {
+        if (image.closest("a")) continue;
+        image.setAttribute("role", "button");
+        image.setAttribute("tabindex", "0");
+        image.setAttribute("aria-haspopup", "dialog");
+        image.setAttribute(
+          "aria-label",
+          image.alt ? `Zoom image: ${image.alt}` : "Zoom image"
+        );
+      }
+    });
+
+    function open(src, alt, trigger) {
+      if (overlay) return;
+      lastFocused = trigger ?? document.activeElement;
+
+      overlay = document.createElement("div");
+      overlay.setAttribute("role", "dialog");
+      overlay.setAttribute("aria-modal", "true");
+      overlay.setAttribute(
+        "aria-label",
+        alt ? `Image preview: ${alt}` : "Image preview"
+      );
+      overlay.className =
+        "fixed inset-0 z-50 flex cursor-zoom-out items-center justify-center bg-black/70 backdrop-blur-sm opacity-0 transition-opacity duration-200 motion-reduce:transition-none";
+
+      const closeButton = document.createElement("button");
+      closeButton.type = "button";
+      closeButton.setAttribute("aria-label", "Close image preview");
+      closeButton.className =
+        "absolute end-4 top-4 rounded p-2 text-3xl leading-none text-white";
+      closeButton.innerHTML = "&#10005;";
+      closeButton.addEventListener("click", close);
+
+      const image = document.createElement("img");
+      image.src = src;
+      image.alt = "";
+      image.className =
+        "max-h-[90dvh] max-w-[90dvw] cursor-default object-contain";
+
+      overlay.append(closeButton, image);
+      overlay.addEventListener("click", e => {
+        if (e.target === overlay && currentScale <= 1) close();
+      });
+
+      let currentScale = 1;
+      let translateX = 0;
+      let translateY = 0;
+      let initialDist = 0;
+      let initialScale = 1;
+      let panStartX = 0;
+      let panStartY = 0;
+      let panStartTranslateX = 0;
+      let panStartTranslateY = 0;
+      let lastTapTime = 0;
+
+      function applyTransform() {
+        image.style.transform = `scale(${currentScale}) translate(${translateX}px, ${translateY}px)`;
+      }
+
+      function resetTransform() {
+        currentScale = 1;
+        translateX = 0;
+        translateY = 0;
+        image.style.transform = "";
+      }
+
+      overlay.addEventListener(
+        "touchstart",
+        e => {
+          const t = e.touches;
+          if (t.length === 2) {
+            initialDist = Math.hypot(
+              t[1].clientX - t[0].clientX,
+              t[1].clientY - t[0].clientY
+            );
+            initialScale = currentScale;
+          } else if (t.length === 1) {
+            const now = Date.now();
+            if (now - lastTapTime < 300) {
+              e.preventDefault();
+              if (currentScale > 1) {
+                resetTransform();
+              } else {
+                currentScale = 2;
+                translateX = 0;
+                translateY = 0;
+                applyTransform();
+              }
+              lastTapTime = 0;
+              panStartX = t[0].clientX;
+              panStartY = t[0].clientY;
+              panStartTranslateX = translateX;
+              panStartTranslateY = translateY;
+            } else {
+              lastTapTime = now;
+              if (currentScale > 1) {
+                panStartX = t[0].clientX;
+                panStartY = t[0].clientY;
+                panStartTranslateX = translateX;
+                panStartTranslateY = translateY;
+              }
+            }
+          }
+        },
+        { passive: false }
+      );
+
+      overlay.addEventListener(
+        "touchmove",
+        e => {
+          const t = e.touches;
+          if (t.length === 2) {
+            e.preventDefault();
+            const dist = Math.hypot(
+              t[1].clientX - t[0].clientX,
+              t[1].clientY - t[0].clientY
+            );
+            currentScale = Math.min(
+              4,
+              Math.max(1, initialScale * (dist / initialDist))
+            );
+            applyTransform();
+          } else if (t.length === 1) {
+            if (currentScale > 1) {
+              e.preventDefault();
+              translateX =
+                panStartTranslateX + (t[0].clientX - panStartX) / currentScale;
+              translateY =
+                panStartTranslateY + (t[0].clientY - panStartY) / currentScale;
+              const maxX = Math.max(
+                0,
+                (image.clientWidth - overlay.clientWidth / currentScale) / 2
+              );
+              const maxY = Math.max(
+                0,
+                (image.clientHeight - overlay.clientHeight / currentScale) / 2
+              );
+              translateX = Math.min(maxX, Math.max(-maxX, translateX));
+              translateY = Math.min(maxY, Math.max(-maxY, translateY));
+              applyTransform();
+            } else {
+              e.preventDefault();
+            }
+          }
+        },
+        { passive: false }
+      );
+
+      overlay.addEventListener("touchend", e => {
+        if (e.touches.length === 0 && currentScale <= 1.05) {
+          resetTransform();
+        }
+      });
+
+      overlay.addEventListener("touchcancel", e => {
+        if (e.touches.length === 0 && currentScale <= 1.05) {
+          resetTransform();
+        }
+      });
+
+      document.body.appendChild(overlay);
+      document.body.style.overflow = "hidden";
+      document.addEventListener("keydown", onKeyDown);
+      window.__closeLightbox = close;
+
+      requestAnimationFrame(() => overlay?.classList.add("opacity-100"));
+      closeButton.focus();
+    }
+
+    function close() {
+      if (!overlay) return;
+      const el = overlay;
+      overlay = null;
+      window.__closeLightbox = null;
+
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = "";
+      lastFocused?.focus();
+      lastFocused = null;
+
+      if (prefersReducedMotion()) {
+        el.remove();
+        return;
+      }
+      const remove = () => el.remove();
+      el.addEventListener("transitionend", remove, { once: true });
+      setTimeout(remove, 250); // fallback in case transitionend never fires
+      el.classList.remove("opacity-100");
+    }
+
+    function onKeyDown(e) {
+      if (e.key === "Escape") {
+        close();
+      } else if (e.key === "Tab") {
+        trapFocus(e);
+      }
+    }
+
+    // Keep keyboard focus inside the open dialog.
+    function trapFocus(e) {
+      if (!overlay) return;
+      const focusables = overlay.querySelectorAll(
+        'a[href], button, [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+
+    function triggerFromEvent(e) {
+      const image = e.target.closest("img");
+      if (!image || !article.contains(image) || image.closest("a")) return null;
+      return image;
+    }
+
+    function activate(image) {
+      open(image.currentSrc || image.src, image.alt, image);
+    }
+
+    article.addEventListener("click", e => {
+      const image = triggerFromEvent(e);
+      if (!image) return;
+      e.preventDefault();
+      activate(image);
+    });
+
+    article.addEventListener("keydown", e => {
+      if (e.key !== "Enter" && e.key !== " " && e.key !== "Spacebar") return;
+      const image = triggerFromEvent(e);
+      if (!image) return;
+      e.preventDefault();
+      activate(image);
+    });
+  }
+  initLightbox();
+
+  if (!window.__lightboxSwapBound) {
+    window.__lightboxSwapBound = true;
+    document.addEventListener("astro:before-swap", () =>
+      window.__closeLightbox?.()
+    );
+  }
+
+  document.addEventListener("astro:after-swap", () =>
+    window.scrollTo({ left: 0, top: 0, behavior: "instant" })
+  );
+</script>

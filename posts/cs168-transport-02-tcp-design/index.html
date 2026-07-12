@@ -1,0 +1,694 @@
+<!DOCTYPE html><html dir="ltr" lang="zh-CN" class="overflow-y-scroll scroll-smooth"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="canonical" href="https://howidobetter.github.io/posts/cs168-transport-02-tcp-design/"><meta name="generator" content="Astro v6.4.2"><!-- Primary meta --><title>TCP 设计 | 随便做做</title><meta name="title" content="TCP 设计 | 随便做做"><meta name="description" content="从单分组可靠交付出发，讲解 TCP 的窗口算法、流量与拥塞控制、确认机制和快速重传。"><meta name="author" content="一剑留名ing"><link rel="sitemap" href="/sitemap-index.xml"><!-- Open Graph --><meta property="og:type" content="article"><meta property="og:site_name" content="随便做做"><meta property="og:title" content="TCP 设计 | 随便做做"><meta property="og:description" content="从单分组可靠交付出发，讲解 TCP 的窗口算法、流量与拥塞控制、确认机制和快速重传。"><meta property="og:url" content="https://howidobetter.github.io/posts/cs168-transport-02-tcp-design/"><meta property="og:image" content="https://howidobetter.github.io/default-og.png"><!-- Twitter / X --><meta property="twitter:card" content="summary_large_image"><meta property="twitter:url" content="https://howidobetter.github.io/posts/cs168-transport-02-tcp-design/"><meta property="twitter:title" content="TCP 设计 | 随便做做"><meta property="twitter:description" content="从单分组可靠交付出发，讲解 TCP 的窗口算法、流量与拥塞控制、确认机制和快速重传。"><meta property="twitter:image" content="https://howidobetter.github.io/default-og.png"><!-- RSS autodiscovery --><link rel="alternate" type="application/rss+xml" title="随便做做" href="https://howidobetter.github.io/rss.xml"><!-- Filled at runtime by theme.ts to match the current background colour --><meta name="theme-color" content=""><!-- Extra head content injected by child layouts (e.g. JSON-LD, article meta) --><meta property="article:published_time" content="2026-07-12T00:00:00.000Z"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"TCP 设计 | 随便做做","description":"从单分组可靠交付出发，讲解 TCP 的窗口算法、流量与拥塞控制、确认机制和快速重传。","url":"https://howidobetter.github.io/posts/cs168-transport-02-tcp-design/","image":"https://howidobetter.github.io/default-og.png","datePublished":"2026-07-12T00:00:00.000Z","author":[{"@type":"Person","name":"一剑留名ing","url":"https://github.com/howIdobetter"}]}</script> <!--
+      Inline FOUC-prevention script: sets data-theme on <html> before
+      the browser paints. Runs synchronously, no defer/async.
+    --><script>
+      (function () {
+        const stored = localStorage.getItem("theme");
+        const prefersDark = window.matchMedia(
+          "(prefers-color-scheme: dark)"
+        ).matches;
+        const theme = stored ?? (prefersDark ? "dark" : "light");
+        const root = document.firstElementChild;
+        root?.setAttribute("data-theme", theme);
+        root?.classList.toggle("dark", theme === "dark");
+        // Expose value so theme.ts can skip re-detection.
+        window.__theme = { value: theme };
+      })();
+    </script><meta name="astro-view-transitions-enabled" content="true"><meta name="astro-view-transitions-fallback" content="animate"><script type="module" src="/_astro/ClientRouter.astro_astro_type_script_index_0_lang.CAqDO0tx.js"></script><link rel="stylesheet" href="/_astro/Footer.W6Wz50NF.css">
+<style>@keyframes astroFadeInOut{0%{opacity:1}to{opacity:0}}@keyframes astroFadeIn{0%{opacity:0;mix-blend-mode:plus-lighter}to{opacity:1;mix-blend-mode:plus-lighter}}@keyframes astroFadeOut{0%{opacity:1;mix-blend-mode:plus-lighter}to{opacity:0;mix-blend-mode:plus-lighter}}@keyframes astroSlideFromRight{0%{transform:translate(100%)}}@keyframes astroSlideFromLeft{0%{transform:translate(-100%)}}@keyframes astroSlideToRight{to{transform:translate(100%)}}@keyframes astroSlideToLeft{to{transform:translate(-100%)}}@media(prefers-reduced-motion){::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}[data-astro-transition-scope]{animation:none!important}}
+</style><style>[data-astro-transition-scope="astro-36ssibgs-1"] { view-transition-name: networking; }@layer astro { ::view-transition-old(networking) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(networking) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(networking) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(networking) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-1"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-1"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-1"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-1"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style><style>[data-astro-transition-scope="astro-36ssibgs-2"] { view-transition-name: cs168; }@layer astro { ::view-transition-old(cs168) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(cs168) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(cs168) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(cs168) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style><style>[data-astro-transition-scope="astro-36ssibgs-3"] { view-transition-name: course-notes; }@layer astro { ::view-transition-old(course-notes) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(course-notes) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(course-notes) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(course-notes) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style><style>[data-astro-transition-scope="astro-36ssibgs-4"] { view-transition-name: transport; }@layer astro { ::view-transition-old(transport) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(transport) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(transport) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(transport) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style></head> <body class="bg-background font-app text-foreground selection:bg-accent/75 selection:text-accent-foreground flex min-h-svh flex-col">    <a id="skip-to-content" href="#main-content" class="bg-background text-accent absolute inset-s-4 -top-full z-50 border px-3 py-2 transition-[top] focus:top-3"> 跳到正文 </a> <header class="border-border bg-background/90 relative z-30 border-b backdrop-blur"> <div class="app-layout relative flex min-h-18 w-full items-baseline justify-between sm:items-center"> <a href="/" class="absolute inline-flex items-baseline gap-3 py-1 text-lg leading-8 font-semibold whitespace-nowrap sm:static sm:my-auto sm:text-xl sm:leading-none"> <span>随便做做</span> <span class="text-muted-foreground hidden font-mono text-[0.68rem] font-normal sm:inline">
+howIdobetter
+</span> </a> <nav id="nav-menu" class="flex w-full flex-col items-center sm:ms-2 sm:flex-row sm:justify-end sm:py-0"> <button id="menu-btn" class="focus-outline self-end p-3 sm:hidden" aria-label="打开菜单" aria-expanded="false" aria-controls="menu-items" data-label-open="打开菜单" data-label-close="关闭菜单"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="hidden" viewBox="0 0 24 24" id="close-icon"><path stroke="none" d="M0 0h24v24H0z" /><path d="M18 6 6 18M6 6l12 12" /></svg> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="icon icon-tabler icons-tabler-outline icon-tabler-menu-deep" viewBox="0 0 24 24" id="menu-icon"><path stroke="none" d="M0 0h24v24H0z" /><path d="M4 6h16M7 12h13M10 18h10" /></svg> </button> <ul id="menu-items" class="border-border [&>li>a]:hover:text-accent mt-3 hidden w-full grid-cols-2 place-content-center gap-1 border-t py-3 sm:mt-0 sm:flex sm:w-auto sm:items-center sm:gap-x-1 sm:border-0 sm:py-0 [&>li>a]:block [&>li>a]:px-4 [&>li>a]:py-3 [&>li>a]:text-center [&>li>a]:font-medium [&>li>a]:transition-colors sm:[&>li>a]:px-3 sm:[&>li>a]:py-2"> <li class="col-span-2"> <a href="/posts/" class="active-nav"> 文章 </a> </li> <li class="col-span-2"> <a href="/tags/"> 标签 </a> </li> <li class="col-span-2"> <a href="/about/"> 关于 </a> </li> <li class="col-span-2"> <a href="/archives/" title="归档" aria-label="归档" class="group inline-flex items-center gap-1 hover:text-accent focus-outline flex size-full justify-center p-3 sm:relative sm:size-10 sm:p-0">  <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="hidden sm:absolute sm:top-1/2 sm:left-1/2 sm:block sm:size-6 sm:-translate-x-1/2 sm:-translate-y-1/2" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v0a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8M10 12h4" /></svg> <span class="sm:sr-only">归档</span>  </a> </li> <li class="col-span-1 flex items-center justify-center"> <a href="/search/" title="搜索" aria-label="搜索" class="group inline-flex items-center gap-1 hover:text-accent focus-outline relative size-11 sm:size-10">  <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="absolute top-1/2 left-1/2 size-6 -translate-x-1/2 -translate-y-1/2" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M3 10a7 7 0 1 0 14 0 7 7 0 1 0-14 0M21 21l-6-6" /></svg> <span class="sr-only">搜索</span>  </a> </li> <li class="col-span-1 flex items-center justify-center"> <div class="border-border flex overflow-hidden rounded-full border text-xs font-semibold" aria-label="Language"> <a href="/posts/cs168-transport-02-tcp-design/" title="中文" aria-current="true" class="px-2 py-1 transition-colors bg-accent text-accent-foreground"> 中 </a><a href="/en/posts/cs168-transport-02-tcp-design/" title="English" class="px-2 py-1 transition-colors hover:text-accent"> EN </a> </div> </li> <li class="col-span-1 flex items-center justify-center"> <button id="theme-btn" class="focus-outline hover:[&>svg]:stroke-accent relative size-12 rounded-full p-4 transition-colors sm:size-10" title="切换主题" aria-label="auto" aria-live="polite" data-label-light="切换为浅色主题" data-label-dark="切换为深色主题"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="absolute top-[50%] left-[50%] translate-[-50%] scale-100 rotate-0 transition-[transform,opacity] dark:scale-0 dark:-rotate-90" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M12 3h.393a7.5 7.5 0 0 0 7.92 12.446A9 9 0 1 1 12 2.992z" /></svg> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="absolute top-[50%] left-[50%] translate-[-50%] scale-0 rotate-90 transition-[transform,opacity] dark:scale-100 dark:rotate-0" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M14.828 14.828a4 4 0 1 0-5.656-5.656 4 4 0 0 0 5.656 5.656M6.343 17.657l-1.414 1.414M6.343 6.343 4.929 4.929M17.657 6.343l1.414-1.414M17.657 17.657l1.414 1.414M4 12H2M12 4V2M20 12h2M12 20v2" /></svg> </button> </li> </ul> </nav> </div> </header> <script type="module">function c(){const e=document.querySelector("#menu-btn"),t=document.querySelector("#menu-items"),n=document.querySelector("#menu-icon"),s=document.querySelector("#close-icon");if(!e||!t||!n||!s)return;const a=e.dataset.labelOpen??"Open menu",l=e.dataset.labelClose??"Close menu";e.addEventListener("click",()=>{const o=e.getAttribute("aria-expanded")==="true";e.setAttribute("aria-expanded",o?"false":"true"),e.setAttribute("aria-label",o?a:l),t.classList.toggle("hidden"),t.classList.toggle("grid"),n.classList.toggle("hidden"),s.classList.toggle("hidden")})}c();document.addEventListener("astro:after-swap",c);</script> <div class="reading-progress" aria-hidden="true"> <div class="reading-progress-bar"></div> </div> <div class="app-layout flex items-center justify-start"><a id="back-button" href="/" class="group inline-flex items-center gap-1 hover:text-accent focus-outline hover:text-foreground/75 -ms-2 mt-8 mb-2"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block size-6 rtl:rotate-180" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="m15 6-6 6 6 6" /></svg><span>返回</span> </a></div><script type="module">function o(){const t=document.querySelector("#back-button"),e=sessionStorage.getItem("backUrl");e&&t&&(t.href=e)}document.addEventListener("astro:page-load",o);o();</script> <main id="main-content" class="app-layout pb-8" data-pagefind-body> <header class="border-border max-w-readable border-b pt-8 pb-8 sm:pt-12"> <h1 style="view-transition-name:tcp-u008bbeu008ba1" class="text-foreground text-3xl leading-tight font-semibold text-balance sm:text-5xl"> TCP 设计 </h1> <p class="text-muted-foreground mt-4 text-lg leading-8 text-pretty"> 从单分组可靠交付出发，讲解 TCP 的窗口算法、流量与拥塞控制、确认机制和快速重传。 </p> <div class="mt-5 flex flex-wrap items-center gap-3"> <div class="text-muted-foreground flex items-center gap-x-2 font-mono"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block size-5 min-w-5" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" /><path d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM16 3v4M8 3v4M4 11h16M7 14h.013M10.01 14h.005M13.01 14h.005M16.015 14h.005M13.015 17h.005M7.01 17h.005M10.01 17h.005" /></svg>  <time class="text-sm sm:text-base" datetime="2026-07-12T00:00:00.000Z"> 2026年7月12日 </time> </div> <a href="https://github.com/howIdobetter/My-Blog/edit/main/src/content/posts/cs168-transport-02-tcp-design.md" target="_blank" rel="noopener noreferrer" class="hover:text-accent text-muted-foreground flex justify-baseline gap-1.5 max-sm:hidden"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M7 7H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-1" /><path d="M20.385 6.585a2.1 2.1 0 0 0-2.97-2.97L9 12v3h3zM16 5l3 3" /></svg><span>编辑文章</span></a> </div> </header> <aside class="border-border mt-8 border-y"> <details class="group py-4 sm:hidden"> <summary class="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4"> <span> <span class="mono-label block"> CS168 · 传输 </span> <span class="text-accent mt-1 block text-sm font-semibold"> 2 / 9 </span> </span> <span aria-hidden="true" class="text-muted-foreground text-xl transition-transform group-open:rotate-45">
++
+</span> </summary> <ol class="border-border mt-3 border-t pt-2"> <li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-transport-01-principles/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 01 </span> <span>传输层原理</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-transport-02-tcp-design/" aria-current="page" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm text-accent font-semibold"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 02 </span> <span>TCP 设计</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-transport-03-tcp-implementation/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 03 </span> <span>TCP 实现</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-transport-04-cc-principles/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 04 </span> <span>拥塞控制原理</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-transport-05-cc-design/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 05 </span> <span>拥塞控制设计</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-transport-06-cc-implementation/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 06 </span> <span>拥塞控制实现</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-transport-07-throughput-model/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 07 </span> <span>TCP 吞吐量模型</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-transport-08-cc-issues/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 08 </span> <span>拥塞控制的问题</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-transport-09-router-assisted-cc/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 09 </span> <span>路由器辅助的拥塞控制</span> </a> </li> </ol> </details> <div class="hidden py-5 sm:block"> <div class="flex items-baseline justify-between gap-4"> <p class="mono-label">CS168 · 传输</p> <p class="text-accent text-sm font-semibold"> 2 / 9 </p> </div> <ol class="border-border mt-4 grid border-t sm:grid-cols-3 lg:grid-cols-6"> <li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-transport-01-principles/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 01 </span> <span class="mt-1 block"> 传输层原理 </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-transport-02-tcp-design/" aria-current="page" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors bg-muted/60 text-accent font-semibold"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 02 </span> <span class="mt-1 block"> TCP 设计 </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-transport-03-tcp-implementation/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 03 </span> <span class="mt-1 block"> TCP 实现 </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-transport-04-cc-principles/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 04 </span> <span class="mt-1 block"> 拥塞控制原理 </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-transport-05-cc-design/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 05 </span> <span class="mt-1 block"> 拥塞控制设计 </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-transport-06-cc-implementation/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 06 </span> <span class="mt-1 block"> 拥塞控制实现 </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-transport-07-throughput-model/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 07 </span> <span class="mt-1 block"> TCP 吞吐量模型 </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-transport-08-cc-issues/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 08 </span> <span class="mt-1 block"> 拥塞控制的问题 </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-transport-09-router-assisted-cc/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 09 </span> <span class="mt-1 block"> 路由器辅助的拥塞控制 </span> </a> </li> </ol> </div> </aside> <article id="article" class="mt-8 w-full app-prose max-w-readable prose-pre:bg-(--shiki-light-bg) dark:prose-pre:bg-(--shiki-dark-bg)"> <aside class="border-border bg-muted/35 mb-8 border-s-2 px-5 py-4 text-sm leading-6"> <p class="m-0">
+本文译自  <a href="https://textbook.cs168.io/transport/tcp-design.html">TCP Design</a> 
+，依照 <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh-hans"> CC BY-SA 4.0 </a> 
+许可发布
+
+。<span> 中文翻译；为适应中文阅读习惯调整了部分术语表达，未改变原意。</span> </p> </aside> <h2 id="tcp-设计">TCP 设计</h2>
+<h2 id="可靠交付单个分组">可靠交付单个分组</h2>
+<p>一个分组从发送方传到接收方所需的时间称为<strong>单向时延（one-way delay）</strong>。分组从发送方传到接收方所需的时间，再加上应答分组从接收方返回发送方所需的时间，称为<strong>往返时间（round-trip time，RTT）</strong>。</p>
+<img width="800px" src="/image/cs168-textbook/transport/3-008-tcpdemo1.png">
+<p>我们先设计一个可靠发送单个分组的简化协议，以此建立直觉。</p>
+<p>发送方尝试发送一个分组。发送方如何知道该分组是否已被成功接收？</p>
+<img width="800px" src="/image/cs168-textbook/transport/3-009-tcpdemo2.png">
+<p>接收方可以发送一条**确认（acknowledgment，ack）**消息，证实已经收到该分组。</p>
+<p>如果分组被丢弃，会发生什么？</p>
+<p>如果分组被丢弃，我们可以重发它。但我们怎么知道何时应当重发？</p>
+<img width="600px" src="/image/cs168-textbook/transport/3-010-tcpdemo3.png">
+<p>发送方可以维护一个定时器。定时器到期时，我们可以重发分组。</p>
+<p>发送方收到 ack 后，可以取消定时器，不再需要重发分组。</p>
+<p>如果 ack 被丢弃，会发生什么？</p>
+<img width="600px" src="/image/cs168-textbook/transport/3-011-tcpdemo4.png">
+<p>协议无需修改，仍然有效。发送方将发生超时（没有收到 ack），并反复重发分组，直到 ack 成功送达。在这种情况下，目的端收到了同一分组的两个副本，但这没有问题。目的端可以识别重复分组并将其丢弃。</p>
+<p>定时器应当如何设置？如果时间过长，分组的发送可能耗时超过必要限度；如果时间过短，原本不需要重发的分组可能会被重发。定时器设置不当会影响我们的效率目标。</p>
+<p>合理的定时器时长是往返时间。发送方预期会在此时收到 ack，因此如果届时 ack 仍未到达，就应重发分组。</p>
+<p>实践中，估计 RTT 可能很困难。RTT 会随分组在网络中经过的路径而变化；即便沿着特定路径，路径上的负载和拥塞也会影响 RTT。</p>
+<p>估计 RTT 的一种方法，是测量发送分组与收到该分组 ack 之间的时间。我们可以从每个已发送分组得到一次 RTT 估计测量值，再应用某种算法（例如指数移动平均）把这些测量值合并为一个 RTT 估计。算法还必须考虑消息重发造成的影响（测量值的方差）。</p>
+<p>实践中，运维人员通常宁可把定时器设得更长。如果定时器太短而不断发生超时，连接的表现很可能会很差（不断重发分组）。</p>
+<p>如果比特损坏，会发生什么？</p>
+<img width="600px" src="/image/cs168-textbook/transport/3-012-tcpdemo5.png">
+<p>我们可以在传输层首部中加入校验和（不同于 IP 层校验和）。接收方发现损坏的分组时，可以采取两种做法：接收方可以明确地发回<strong>否定确认（negative acknowledgement，nack）</strong>，要求发送方重发分组。</p>
+<p>或者，接收方可以丢弃损坏的分组，什么也不做（既不发送 ack，也不发送 nack）。随后发送方将超时并重发分组。</p>
+<img width="600px" src="/image/cs168-textbook/transport/3-013-tcpdemo6.png">
+<p>两种方法（发送 nack 或等待超时）都可行，不过 TCP 采用后一种方法（等待超时），不实现 nack。</p>
+<p>如果分组发生延迟，会怎么样？</p>
+<img width="500px" src="/image/cs168-textbook/transport/3-014-tcpdemo7.png">
+<p>无需修改。如果延迟很长，发送方可能在 ack 到达前超时。发送方会重发分组（因此接收方可能收到两个重复副本），发送方也可能收到两个 ack，但这没有问题。</p>
+<p>如果发送方发送了一个分组，但它在网络中被复制，接收方收到了两个副本，会怎么样？</p>
+<img width="500px" src="/image/cs168-textbook/transport/3-015-tcpdemo8.png">
+<p>无需修改。接收方会发送两个 ack，但发送方和接收方都能安全地处理重复项。</p>
+<p>注意：从这个简化协议可以看出，接收方有时会收到分组的两个副本。如果某条特定链路实现了可靠性协议，链路的接收端可能会收到两个副本。通常，重复副本会被丢弃，只有一个分组会被转发到目的端。但是，如果路由器恰好在两个副本先后到达之间崩溃并重启，它可能会把两个副本都转发到目的端。</p>
+<p>总而言之，单分组可靠性协议如下：</p>
+<p>如果你是发送方：发送分组并设置定时器。如果定时器响起前没有 ack 到达，就重发分组并重置定时器。ack 到达后停止发送并取消定时器。</p>
+<p>如果你是接收方：如果收到未损坏的分组，就发送 ack。（如果多次收到该分组，你可能会发送多个 ack。）</p>
+<p>这个例子中的核心思想也适用于后续协议：校验和（用于检测损坏）、确认、分组重发和超时。</p>
+<p>请注意，该协议保证至少一次交付，因为可能存在重复项。</p>
+<h2 id="可靠交付多个分组">可靠交付多个分组</h2>
+<p>如何把这一协议扩展到多个分组？</p>
+<img width="500px" src="/image/cs168-textbook/transport/3-016-tcpdemo9.png">
+<p>我们可以对每个分组遵循相同的传输规则（定时器到期时重发）。为了区分各个分组，可以为每个分组附加唯一的<strong>序列号（sequence number）</strong>。每个 ack 都对应一个特定分组。如果分组乱序到达，序列号还可以帮助我们重新排序。</p>
+<p>发送方何时发送各个分组？最简单的方法是**停等（stop and wait）**协议：发送方等待分组 i 得到确认后，才发送分组 i+1。该协议能正确提供可靠性，但速度很慢。每个分组的发送至少需要一个 RTT（如果分组丢失或损坏，则需要更久）。</p>
+<img width="600px" src="/image/cs168-textbook/transport/3-017-tcpdemo10.png">
+<p>在规模较小、不太关注效率的场景中，该协议也许可用，但对于互联网而言太慢了。怎样才能加快速度？</p>
+<img width="600px" src="/image/cs168-textbook/transport/3-018-tcpdemo11.png">
+<p>我们可以并行发送分组。更具体地说，在等待 ack 到达期间继续发送更多分组。如果一个分组已经发出，但对应的 ack 尚未收到，我们称该分组<strong>在途（in flight）</strong>。</p>
+<p>最简单的方法是立刻发送所有分组，但这可能压垮网络（例如，连接到你计算机的链路带宽可能有限）。</p>
+<h2 id="基于窗口的算法">基于窗口的算法</h2>
+<p>一次发送一个分组太慢，而一次发送所有分组又会压垮网络。为此，我们设置限制 W，规定任意时刻最多只能有 W 个在途分组。这就是**基于窗口的协议（window-based protocols）**背后的关键思想，其中 W 是窗口大小。</p>
+<p>如果 W 是在途分组数的上限，发送方最初可以发送 W 个分组。每当一个 ack 到达，就发送队列中的下一个分组。</p>
+<img width="500px" src="/image/cs168-textbook/transport/3-019-window1.png">
+<p>应当如何选择 W？</p>
+<p>我们希望充分利用可用的网络容量（“填满管道”）。如果 W 太小，就无法用满所有可用带宽。</p>
+<p>但我们不希望链路过载，因为其他人也可能使用该链路（拥塞控制）。我们同样不希望接收方过载，因为它需要接收并处理发送方发出的所有分组（流量控制）。</p>
+<h2 id="窗口大小填满管道">窗口大小：填满管道</h2>
+<p>我们只关注第一个 RTT，即从发送第一个分组到第一个 ack 到达的这段时间。假设这段时间为 5 秒（并非现实数值，仅为举例）。再假设出站链路允许发送方每秒发送 10 个分组（同样并非现实数值）。那么在第一个 RTT 内，发送方总共应能发送 50 个分组。因此，50 是合理的窗口大小，使发送方始终在发送分组而不会空闲。</p>
+<p>如果把 W 设为小于 50，发送方将在第一个 ack 到达之前就发完全部初始分组。随后，发送方只能空闲等待 ack 到达，从而浪费一部分网络带宽。更一般地说，我们希望发送方在整个 RTT 内都持续发送分组。</p>
+<img width="600px" src="/image/cs168-textbook/transport/3-020-window2.png">
+<p>本例中 W 为 4。但发送 4 个分组后，发送方在等待第一个 ack 到达期间处于空闲状态，浪费了带宽。</p>
+<img width="600px" src="/image/cs168-textbook/transport/3-021-window3.png">
+<p>本例增大了 W，使发送方持续发送分组。第一个 ack 到达时，发送方恰好将要达到 W 个在途分组的上限；随着更多 ack 到达，发送方可以立即继续发送分组。</p>
+<p>通向目的端的路径可能包含多条容量不同的链路。令 B 为路径上的最小（瓶颈）链路带宽。为避免链路过载，我们发送分组的速率不应高于 B；同时也不希望以低于 B 的速率发送分组（也就是说，我们希望始终使用速率 B）。</p>
+<p>再假设 R 是发送方与接收方之间的往返时间。将 R 与 B 相乘，可以得到 RTT 内能够发送的分组总数。（每秒可发送 B 个分组，共发送 R 秒。）这就给出了以分组数计量的窗口大小。</p>
+<p>现实中，B 的单位是比特每秒，而非分组每秒。R 乘以 B 得到 RTT 内能够发送的比特数。（每秒 B 比特，共发送 R 秒。）这给出了以字节计量的窗口大小。总的来说，可以写成：</p>
+<p>W times packet size = R times B</p>
+<p>等式左边给出一个窗口期间发送的字节数（W 个分组乘以每个分组的字节数），右边给出 RTT 内能够发送的字节数。</p>
+<p>举一个具体例子，可以令 RTT = 1 秒，B = 8 Mbit/秒。此时 R 乘以 B 等于 8 Mbit，也就是 1 MB，即 1,000,000 字节。</p>
+<p>如果分组大小为 100 字节，那么应取 W = 10,000 个分组，这样才能充分利用带宽，在 RTT 内发送 1,000,000 字节。</p>
+<img width="900px" src="/image/cs168-textbook/transport/3-022-window4.png">
+<img width="900px" src="/image/cs168-textbook/transport/3-023-window5.png">
+<p>我们也可以用链路本身来表示窗口大小。图中展示了一条特定链路的出站和入站方向。当发送方以最大容量把分组推入链路时，第一个 ack 会在第 6 个分组刚发送完时到达。因此，窗口大小应为 6。</p>
+<p>请注意，窗口大小不是 3。发送分组 6 时，有 3 个分组正在传输，但另有 3 个分组的 ack 尚未到达，因此总共有 6 个在途分组。</p>
+<p>如果把窗口大小设为 3，那么在分组 1、2、3 的 ack 处于在途状态时，出站管道将得不到使用。</p>
+<img width="900px" src="/image/cs168-textbook/transport/3-024-window6.png">
+<p>请注意，ack 没有填满整个入站管道，因为除了确认收到分组之外，这些分组不包含任何实际数据。</p>
+<h2 id="窗口大小流量控制">窗口大小：流量控制</h2>
+<p>考虑接收方操作系统中的传输层协议。接收方可能乱序收到分组，但字节流抽象要求按顺序交付分组。这意味着传输层实现必须通过**缓冲（buffering）**保存乱序分组（将其留在内存中），直到轮到它们被交付。</p>
+<p>例如，假设接收方已经收到并处理了分组 1 和 2，随后又看到了分组 4 和 5。传输层实现还不能把 4 和 5 交给应用。相反，我们必须等待分组 3 到达；在此期间，还必须把分组 4 和 5 保存在传输层实现的内存中。</p>
+<img width="900px" src="/image/cs168-textbook/transport/3-025-buffer1.png">
+<p>然而，内存并非无限，用于存储乱序分组的接收缓冲区大小是有限的。接收方必须把每个乱序分组都存放在内存中，直到中间缺失的分组到达。如果连接中存在大量分组丢失和乱序，接收方可能耗尽内存。</p>
+<p><strong>流量控制（flow control）<strong>确保接收方的缓冲区不会耗尽内存。为此，接收方会告诉发送方缓冲区还剩多少空间。接收缓冲区的剩余空间称为</strong>通告窗口（advertised window）</strong>。接收方在确认中表示：“我已经收到这些分组，还有 X 字节空间可用于保存分组。”</p>
+<img width="900px" src="/image/cs168-textbook/transport/3-026-buffer2.png">
+<p>发送方得知通告窗口后，会相应调整自己的窗口。具体而言，在途分组数不能超过接收方的通告窗口。如果接收方说“我的缓冲区还能容纳 5 个分组”，发送方就必须把窗口设为至多 5 个分组（即使带宽可能允许更多分组处于在途状态）。</p>
+<h2 id="窗口大小拥塞控制">窗口大小：拥塞控制</h2>
+<p>回想一下，为了尽可能充分利用带宽，发送方会设置窗口大小以完全消耗瓶颈链路的带宽。例如，如果瓶颈链路带宽为 1 Gbps，我们会把窗口设为使发送方在整个 RTT 内持续以 1 Gbps 发送数据（没有空闲）。</p>
+<p>实践中，这条 1 Gbps 链路不太可能只供一条连接使用。其他连接也可能在使用这条链路的容量。发送方不应占用链路的全部带宽，而应只占用属于自己的带宽份额。</p>
+<img width="600px" src="/image/cs168-textbook/transport/3-027-cc.png">
+<p>但是，每条连接应分得多少带宽？</p>
+<p>假设有两条连接，分别使用 400 MBps 和 250 MBps。如果另一条连接随后也尝试使用同一链路，那么发送方的份额也许是剩余的 350 MBps。但也可以认为当前带宽分配并不公平，因此也许所有连接都应调整为使用 333 MBps。</p>
+<p>确定并计算每条连接能够使用的确切带宽量，正是拥塞控制的目标。拥塞控制算法本身就是一个完整主题（将在下一节介绍）。现在，我们先把拥塞控制抽象掉，只需认为发送方在传输层中实现了拥塞控制算法，其任务是动态计算该连接在瓶颈链路中属于发送方的份额。</p>
+<p>算法运行的结果是发送方的拥塞窗口（cwnd）。目前只需知道，该算法会输出这个数值；它表示一种能够在不过载链路、并与其他连接公平共享带宽的同时实现最高性能的带宽。</p>
+<p>至此，我们已经知道如何设置窗口，以实现先前提出的三个目标。为了充分利用网络容量，我们会根据 RTT 和瓶颈链路带宽设置窗口大小。</p>
+<p>为了避免接收方过载，我们会根据接收方的通告窗口限制窗口大小。为了避免链路过载，我们会根据发送方的拥塞窗口（发送方运行拥塞控制算法得到的某个数值）限制窗口大小。</p>
+<p>为了同时满足三个目标，我们将窗口大小设为三个数值中的最小值。实践中请注意，拥塞窗口（第三个目标）总是小于或等于充分利用带宽所需的窗口大小（第一个目标）。如果没有拥塞，我们将充分使用瓶颈链路的全部带宽，因此两个数值相等。多数情况下，拥塞会迫使我们只能使用瓶颈带宽的一部分，所以第三个数值小于第一个。拥塞窗口所表示的带宽不可能超过瓶颈带宽。</p>
+<p>此外，实践中很难发现瓶颈带宽。发送方必须以某种方式遍历网络拓扑，并获知每条链路的带宽。由于第一个数值难以获知，而且它总是大于或等于第三个数值，因此可以忽略第一个数值，把窗口大小设为后两个数值的最小值。也就是说，窗口大小是发送方拥塞窗口与接收方通告窗口中的较小者。</p>
+<h2 id="更智能的确认机制">更智能的确认机制</h2>
+<p>到目前为止，每个 ack 分组都对应单个分组。我们能否做得比逐个确认分组更好？逐个确认分组存在哪些问题？</p>
+<img width="600px" src="/image/cs168-textbook/transport/3-028-ack1.png">
+<p>本例中，尽管接收方成功收到了全部 4 个分组，其中一个 ack 仍被丢弃。这将迫使发送方重发分组 2，尽管这次重发并无必要。</p>
+<p>我们不必为特定分组发送确认，而是可以在每次发送确认时列出已经收到的所有分组。这称为<strong>全信息确认（full information ack）</strong>。</p>
+<img width="600px" src="/image/cs168-textbook/transport/3-029-ack2.png">
+<p>本例中的 ack 现在依次表示：“我收到了 1”“我收到了 1 和 2”“我收到了 1、2、3”以及“我收到了 1、2、3、4”。</p>
+<p>即使第二个 ack 被丢弃，第三和第四个 ack 仍能帮助发送方确认分组 2 已经收到，因此无需再重发分组 2。</p>
+<p>随着发送的分组增多，列出全部已接收分组的清单会变得很长。全信息确认可以简写为：“编号不超过 12 的所有分组我都收到了。此外，我还收到了 14 和 15。”形式化地说，我们给出最高累积确认（所有小于或等于该编号的分组均已收到），再附上其他已收到分组的列表。</p>
+<p>即使采用这种简写，全信息确认仍可能很长。例如，如果所有偶数编号的分组都被丢弃，那么最高累积确认始终为 1（因为 2 被丢弃了，我们只能说编号不超过 1 的所有分组均已收到）。其余已收到的分组必须写成 [1, 3, 5, 7, 9, …] 这样的列表，而该列表可能变得很长。</p>
+<img width="600px" src="/image/cs168-textbook/transport/3-030-ack3.png">
+<p>逐个确认（每次 ack 丢失都会迫使重发）与全信息确认（ack 可能变得很长）之间的一种折中是<strong>累积确认（cumulative acks）</strong>：只提供最高累积确认，丢弃额外列表。形式化地说，ack 编码的是这样一个最高序列号：此前的所有分组都已收到。</p>
+<img width="900px" src="/image/cs168-textbook/transport/3-031-ack4.png">
+<p>本例中，偶数编号的分组均被丢弃，所以每个累积确认都会表示：“编号不超过 1 的所有分组我都收到了。”即使已经收到 3 和 5，累积确认也不会编码这项信息，因为它只确认从 1 开始连续收到的分组。</p>
+<p>累积确认不再存在扩展性问题（始终只发送一个数字，而非一列数字）。然而，它可能更加含糊，如上面的情况所示。发送方看到三个确认都表示“编号不超过 1 的所有分组我都收到了”，由此可以推断已经收到 3 个分组（分组 1 和另外两个分组），却无法判断另外两个究竟是什么分组。</p>
+<h2 id="提前检测丢失">提前检测丢失</h2>
+<p>我们能否做得比等待超时更好，利用收到的其他信息更早检测丢失、更快重发分组？例如，在逐个确认模型中，如果收到分组 1、3、4、5、6 的 ack，我们可能推断分组 2 已丢失，并在分组 2 的定时器到期前就重发它。</p>
+<p>更形式化地说，我们可以设定一个值 K（与窗口无关），并规定：如果缺失分组之后的 K 个分组都得到确认，就把该分组视为丢失（即使定时器尚未到期）。例如，若 K=3，我们正在等待分组 5 的 ack，却收到了 6、7、8 的 ack，就可以认为分组 5 已丢失。</p>
+<img width="900px" src="/image/cs168-textbook/transport/3-032-fast-retransmit1.png">
+<p>实践中，通过后续 ack 检测丢失要比等待超时快得多。如果超时时间根据 RTT 计算，可能达到数秒量级。另一方面，现代带宽可以让 ack 每隔几微秒就到达一次。</p>
+<p>这种丢失检测策略会随 ack 发送策略而有所不同。上述例子假设我们发送的是逐个确认，那么另外两种确认模型又如何？</p>
+<p>如果使用全信息确认，策略十分相似，而且 ack 会更清楚地显示缺失的分组。</p>
+<img width="900px" src="/image/cs168-textbook/transport/3-033-fast-retransmit2.png">
+<p>如果分组 5 丢失，ack 可能依次表示“不超过 4”“不超过 4，另有 6”“不超过 4，另有 6、7”“不超过 4，另有 6、7、8”。此时若 K=3，则分组 5 之后已有 K 个分组得到确认，因此可以宣布分组 5 已丢失。</p>
+<p>如果使用累积确认，这种策略可能更加含糊。如果分组 5 丢失，ack 可能依次表示“不超过 4”（确认 4）、“不超过 4”（确认 6）、“不超过 4”（确认 7）、“不超过 4”（确认 8）。由于连续分组之间存在缺口，发送方看到的是<strong>重复确认（duplicate acks）</strong>。如果 K=3，那么在收到 3 个重复分组（对应缺口之后又有 3 个分组得到确认）、累计共 4 个重复确认后，就可以宣布分组 5 已丢失。</p>
+<img width="900px" src="/image/cs168-textbook/transport/3-034-fast-retransmit3.png">
+<p>使用逐个确认和全信息确认时，我们能够清楚看出需要重发哪个分组：有一个分组缺少 ack，同时后续 K 个 ack 已经到达。然而，使用累积确认时，决定重发哪个分组更为含糊，尤其是在多个分组丢失的情况下。</p>
+<p>例如，考虑窗口大小 W=6、K=3 的发送方。分组 1 和 2 已得到确认，分组 3–8 正处于在途状态。假设分组 3 和 5 被丢弃。我们先用逐个确认来梳理这个例子。</p>
+<p>4 到达，接收方发送对 4 的 ack。发送方现在可以发送 9。</p>
+<p>6 到达，接收方发送对 6 的 ack。发送方现在可以发送 10。</p>
+<p>7 到达，接收方发送对 7 的 ack。发送方现在可以发送 11。</p>
+<p>此时，发送方注意到分组 3 之后已有 K=3 个分组（即 4、6、7）得到确认。发送方可以宣布 3 已丢失，并重发 3。</p>
+<p>请注意，尽管发送方响应对 7 的 ack 时既重发了 3 又发送了 11，但计入这次重发后，在途分组总数仍为 6，所以没有违反窗口限制。这是因为重发 3 时，它原本就是在途分组之一。</p>
+<p>8 到达，接收方发送对 8 的 ack。发送方现在可以发送 12。</p>
+<p>同时，发送方注意到分组 5 之后已有 K=3 个分组（即 6、7、8）得到确认，因此也可以重发 5。</p>
+<p>9 到达，接收方发送对 9 的 ack。发送方现在可以发送 13。</p>
+<p>现在，我们用累积确认重新分析这个例子。</p>
+<p>4 到达，接收方发送一个对 4 的 ack，其内容是“确认不超过 2 的所有分组”。此时，发送方知道必定有一个分组到达了，却不知道它是 4。尽管如此，发送方仍可接着发送 9。请注意，这并未违反窗口限制：虽然发送方看似有 7 个未确认分组，但重复的“确认不超过 2 的所有分组”确实确认了其中一个，因此实际只有 6 个在途分组。</p>
+<p>6 到达，接收方发送一个对 6 的 ack，其内容仍为“确认不超过 2 的所有分组”。发送方再次推断另一个分组已经到达，可以接着发送 10。</p>
+<p>7 到达，接收方发送一个对 7 的 ack，其内容仍为“确认不超过 2 的所有分组”。发送方推断另一个分组已经到达，可以发送 10。</p>
+<p>此时，发送方注意到“确认不超过 2 的所有分组”已经重复到达 3 次（不包括最初对 2 的确认）。下一个未确认分组是 3，因此发送方会重发 3。</p>
+<p>这时情况开始变得含糊。8、9、10 到达接收方时，发送方还会收到三份“确认不超过 2 的所有分组”。（我们假设接收方尚未收到 3，因为它是在 9 和 10 之后重发的。）</p>
+<p>由于又有三个 ack 到达，发送方现在可以发送 12、13、14；但接下来应重发哪个分组？发送方应该重发 3、4、5，还是其他分组？</p>
+<p>这个例子说明，累积确认并不总能准确指出已经收到哪些分组。不过，ack 的数量（可能包括重复 ack）可以用来判断已经收到多少个分组（尽管不知道具体收到哪些），从而允许我们按照窗口大小继续发送。然而，当收到过多重复 ack、无法判断该重发哪个分组时，就会产生歧义。</p> </article> <hr class="my-8 border-dashed"> <a href="https://github.com/howIdobetter/My-Blog/edit/main/src/content/posts/cs168-transport-02-tcp-design.md" target="_blank" rel="noopener noreferrer" class="hover:text-accent text-muted-foreground flex justify-baseline gap-1.5 sm:hidden"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M7 7H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-1" /><path d="M20.385 6.585a2.1 2.1 0 0 0-2.97-2.97L9 12v3h3zM16 5l3 3" /></svg><span>编辑文章</span></a> <div id="btt-btn-container" class="fixed inset-e-4 bottom-8 z-50 md:sticky md:inset-e-auto md:float-end md:me-1 translate-y-14 opacity-0 transition duration-500"> <button data-button="back-to-top" aria-label="回到顶部" class="group bg-background relative px-2 py-1 size-14 rounded-full shadow-xl md:h-8 md:w-fit md:rounded-md md:shadow-none md:focus-visible:rounded-none md:bg-background/35 md:bg-clip-padding md:backdrop-blur-lg"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block rotate-90 md:hidden" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 12h14M5 12l6 6M5 12l6-6" /></svg> <span class="group-hover:text-accent sr-only text-sm md:not-sr-only"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block size-4" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" /><path d="M12 5v14M16 9l-4-4M8 9l4-4" /></svg> 回到顶部 </span> </button> </div> <script data-astro-rerun>
+  function backToTop() {
+    const btnContainer = document.querySelector("#btt-btn-container");
+    const backToTopBtn = document.querySelector("[data-button='back-to-top']");
+    const pageHeader = document.querySelector("body > header");
+
+    if (!btnContainer || !backToTopBtn || !pageHeader) return;
+
+    backToTopBtn.addEventListener("click", () => {
+      document.body.scrollTop = 0;
+      document.documentElement.scrollTop = 0;
+    });
+
+    const observer = new IntersectionObserver(([entry]) => {
+      const isVisible = !entry.isIntersecting;
+      if (entry) {
+        btnContainer.classList.toggle("opacity-100", isVisible);
+        btnContainer.classList.toggle("translate-y-0", isVisible);
+        btnContainer.classList.toggle("opacity-0", !isVisible);
+        btnContainer.classList.toggle("translate-y-14", !isVisible);
+      }
+    });
+    observer.observe(pageHeader);
+  }
+  backToTop();
+</script> <ul class="mt-4 mb-8 flex flex-wrap gap-4 sm:my-8"> <li> <a href="/tags/networking/" class="border-border flex items-center gap-1 rounded-full border transition-colors hover:border-accent hover:text-accent focus-visible:text-accent focus-visible:no-underline px-3 py-1.5 text-sm" data-astro-transition-scope="astro-36ssibgs-1"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="text-accent opacity-80 size-3.5" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 9h14M5 15h14M11 4 7 20M17 4l-4 16" /></svg> networking </a> </li><li> <a href="/tags/cs168/" class="border-border flex items-center gap-1 rounded-full border transition-colors hover:border-accent hover:text-accent focus-visible:text-accent focus-visible:no-underline px-3 py-1.5 text-sm" data-astro-transition-scope="astro-36ssibgs-2"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="text-accent opacity-80 size-3.5" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 9h14M5 15h14M11 4 7 20M17 4l-4 16" /></svg> cs168 </a> </li><li> <a href="/tags/course-notes/" class="border-border flex items-center gap-1 rounded-full border transition-colors hover:border-accent hover:text-accent focus-visible:text-accent focus-visible:no-underline px-3 py-1.5 text-sm" data-astro-transition-scope="astro-36ssibgs-3"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="text-accent opacity-80 size-3.5" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 9h14M5 15h14M11 4 7 20M17 4l-4 16" /></svg> course-notes </a> </li><li> <a href="/tags/transport/" class="border-border flex items-center gap-1 rounded-full border transition-colors hover:border-accent hover:text-accent focus-visible:text-accent focus-visible:no-underline px-3 py-1.5 text-sm" data-astro-transition-scope="astro-36ssibgs-4"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="text-accent opacity-80 size-3.5" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 9h14M5 15h14M11 4 7 20M17 4l-4 16" /></svg> transport </a> </li> </ul>  <hr class="my-8 border-dashed"> <div data-pagefind-ignore class="my-8 grid grid-cols-1 gap-4 sm:grid-cols-2"> <a href="/posts/cs168-transport-01-principles/" class="soft-panel hover:border-accent/70 hover:text-accent flex w-full gap-3 p-4 transition"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block flex-none rtl:rotate-180" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 12h14M5 12l6 6M5 12l6-6" /></svg> <div> <span class="mono-label">上一篇</span> <div class="mt-1 text-sm leading-6">传输层原理</div> </div> </a> <a href="/posts/cs168-transport-03-tcp-implementation/" class="soft-panel hover:border-accent/70 hover:text-accent flex w-full justify-end gap-3 p-4 text-end transition sm:col-start-2"> <div> <span class="mono-label">下一篇</span> <div class="mt-1 text-sm leading-6">TCP 实现</div> </div> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block flex-none rtl:rotate-180" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 12h14M13 18l6-6M13 6l6 6" /></svg> </a> </div> </main> <footer class="app-layout mt-auto"> <div class="border-border text-muted-foreground flex flex-col items-start justify-between gap-6 border-t py-9 text-sm sm:flex-row sm:items-end"> <div> <p class="text-foreground font-semibold">随便做做</p> <p class="mt-1">先记下来，再慢慢改对。</p> </div> <div class="flex items-center gap-5"> <div class="flex flex-wrap items-center gap-1"> <a href="https://github.com/howIdobetter" title="GitHub" class="group inline-flex items-center gap-1 hover:text-accent p-2 hover:rotate-6 sm:p-1">  <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block size-6 scale-125 fill-transparent stroke-current stroke-2 opacity-90 group-hover:fill-transparent sm:scale-110" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" /><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21" /></svg> <span class="sr-only">GitHub</span>  </a> </div> <span class="whitespace-nowrap">© 2026 一剑留名ing</span> </div> </div> </footer>   <script type="module">const a="theme",n="light",r="dark";function i(){const e=localStorage.getItem(a);return e||(window.matchMedia("(prefers-color-scheme: dark)").matches?r:n)}let o=window.__theme?.value??i();function s(){localStorage.setItem(a,o),m()}function m(){const e=document.firstElementChild;e?.setAttribute("data-theme",o),e?.classList.toggle("dark",o===r);const t=document.querySelector("#theme-btn"),c=o===n?t?.dataset.labelDark:t?.dataset.labelLight;c&&(t?.setAttribute("aria-label",c),t?.setAttribute("title",c));const l=window.getComputedStyle(document.body).backgroundColor;document.querySelector("meta[name='theme-color']")?.setAttribute("content",l)}function d(){m(),document.querySelector("#theme-btn")?.addEventListener("click",()=>{o=o===n?r:n,s()})}d();document.addEventListener("astro:after-swap",d);document.addEventListener("astro:before-swap",e=>{const t=document.querySelector("meta[name='theme-color']")?.getAttribute("content");t&&e.newDocument.querySelector("meta[name='theme-color']")?.setAttribute("content",t)});window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change",({matches:e})=>{o=e?r:n,s()});</script> </body> </html> <script data-astro-rerun>
+  function addHeadingLinks() {
+    const isZh = document.documentElement.lang === "zh-CN";
+    const headings = Array.from(
+      document.querySelectorAll("h2, h3, h4, h5, h6")
+    );
+    for (const heading of headings) {
+      heading.classList.add("group");
+      const link = document.createElement("a");
+      link.className =
+        "heading-link ms-2 no-underline opacity-75 md:opacity-0 md:group-hover:opacity-100 md:focus:opacity-100";
+      link.href = "#" + heading.id;
+      link.setAttribute(
+        "aria-label",
+        isZh
+          ? `链接到本节：${heading.textContent}`
+          : `Link to section: ${heading.textContent}`
+      );
+
+      const span = document.createElement("span");
+      span.ariaHidden = "true";
+      span.innerText = "#";
+      link.appendChild(span);
+      heading.appendChild(link);
+    }
+  }
+  addHeadingLinks();
+
+  function attachCopyButtons() {
+    const isZh = document.documentElement.lang === "zh-CN";
+    const copyButtonLabel = isZh ? "复制" : "Copy";
+    const copiedButtonLabel = isZh ? "已复制" : "Copied";
+    const codeBlocks = Array.from(document.querySelectorAll("pre"));
+
+    for (const codeBlock of codeBlocks) {
+      const wrapper = document.createElement("div");
+      wrapper.style.position = "relative";
+
+      const computedStyle = getComputedStyle(codeBlock);
+      const hasFileNameOffset =
+        computedStyle.getPropertyValue("--file-name-offset").trim() !== "";
+
+      const topClass = hasFileNameOffset
+        ? "top-(--file-name-offset)"
+        : "-top-3";
+
+      const copyButton = document.createElement("button");
+      copyButton.className = `copy-code absolute end-3 ${topClass} rounded bg-muted border border-muted px-2 py-1 text-xs leading-4 text-foreground font-medium`;
+      copyButton.innerHTML = copyButtonLabel;
+      copyButton.setAttribute("aria-label", copyButtonLabel);
+      copyButton.setAttribute("aria-live", "polite");
+      codeBlock.setAttribute("tabindex", "0");
+      codeBlock.appendChild(copyButton);
+
+      codeBlock?.parentNode?.insertBefore(wrapper, codeBlock);
+      wrapper.appendChild(codeBlock);
+
+      copyButton.addEventListener("click", async () => {
+        await copyCode(codeBlock, copyButton);
+      });
+    }
+
+    async function copyCode(block, button) {
+      const code = block.querySelector("code");
+      const text = code?.innerText;
+
+      await navigator.clipboard.writeText(text ?? "");
+
+      button.innerText = copiedButtonLabel;
+      button.setAttribute("aria-label", copiedButtonLabel);
+
+      setTimeout(() => {
+        button.innerText = copyButtonLabel;
+        button.setAttribute("aria-label", copyButtonLabel);
+      }, 700);
+    }
+  }
+  attachCopyButtons();
+
+  /** Accessible image lightbox for article images. */
+  function initLightbox() {
+    const article = document.getElementById("article");
+    if (!article) return;
+
+    const prefersReducedMotion = () =>
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    let overlay = null;
+    let lastFocused = null;
+
+    // Defer attribute mutations so they don't push the LCP timestamp.
+    // Event listeners below use delegation and don't need the attributes to exist yet.
+    requestAnimationFrame(() => {
+      const images = Array.from(article.querySelectorAll("img"));
+      for (const image of images) {
+        if (image.closest("a")) continue;
+        image.setAttribute("role", "button");
+        image.setAttribute("tabindex", "0");
+        image.setAttribute("aria-haspopup", "dialog");
+        image.setAttribute(
+          "aria-label",
+          image.alt ? `Zoom image: ${image.alt}` : "Zoom image"
+        );
+      }
+    });
+
+    function open(src, alt, trigger) {
+      if (overlay) return;
+      lastFocused = trigger ?? document.activeElement;
+
+      overlay = document.createElement("div");
+      overlay.setAttribute("role", "dialog");
+      overlay.setAttribute("aria-modal", "true");
+      overlay.setAttribute(
+        "aria-label",
+        alt ? `Image preview: ${alt}` : "Image preview"
+      );
+      overlay.className =
+        "fixed inset-0 z-50 flex cursor-zoom-out items-center justify-center bg-black/70 backdrop-blur-sm opacity-0 transition-opacity duration-200 motion-reduce:transition-none";
+
+      const closeButton = document.createElement("button");
+      closeButton.type = "button";
+      closeButton.setAttribute("aria-label", "Close image preview");
+      closeButton.className =
+        "absolute end-4 top-4 rounded p-2 text-3xl leading-none text-white";
+      closeButton.innerHTML = "&#10005;";
+      closeButton.addEventListener("click", close);
+
+      const image = document.createElement("img");
+      image.src = src;
+      image.alt = "";
+      image.className =
+        "max-h-[90dvh] max-w-[90dvw] cursor-default object-contain";
+
+      overlay.append(closeButton, image);
+      overlay.addEventListener("click", e => {
+        if (e.target === overlay && currentScale <= 1) close();
+      });
+
+      let currentScale = 1;
+      let translateX = 0;
+      let translateY = 0;
+      let initialDist = 0;
+      let initialScale = 1;
+      let panStartX = 0;
+      let panStartY = 0;
+      let panStartTranslateX = 0;
+      let panStartTranslateY = 0;
+      let lastTapTime = 0;
+
+      function applyTransform() {
+        image.style.transform = `scale(${currentScale}) translate(${translateX}px, ${translateY}px)`;
+      }
+
+      function resetTransform() {
+        currentScale = 1;
+        translateX = 0;
+        translateY = 0;
+        image.style.transform = "";
+      }
+
+      overlay.addEventListener(
+        "touchstart",
+        e => {
+          const t = e.touches;
+          if (t.length === 2) {
+            initialDist = Math.hypot(
+              t[1].clientX - t[0].clientX,
+              t[1].clientY - t[0].clientY
+            );
+            initialScale = currentScale;
+          } else if (t.length === 1) {
+            const now = Date.now();
+            if (now - lastTapTime < 300) {
+              e.preventDefault();
+              if (currentScale > 1) {
+                resetTransform();
+              } else {
+                currentScale = 2;
+                translateX = 0;
+                translateY = 0;
+                applyTransform();
+              }
+              lastTapTime = 0;
+              panStartX = t[0].clientX;
+              panStartY = t[0].clientY;
+              panStartTranslateX = translateX;
+              panStartTranslateY = translateY;
+            } else {
+              lastTapTime = now;
+              if (currentScale > 1) {
+                panStartX = t[0].clientX;
+                panStartY = t[0].clientY;
+                panStartTranslateX = translateX;
+                panStartTranslateY = translateY;
+              }
+            }
+          }
+        },
+        { passive: false }
+      );
+
+      overlay.addEventListener(
+        "touchmove",
+        e => {
+          const t = e.touches;
+          if (t.length === 2) {
+            e.preventDefault();
+            const dist = Math.hypot(
+              t[1].clientX - t[0].clientX,
+              t[1].clientY - t[0].clientY
+            );
+            currentScale = Math.min(
+              4,
+              Math.max(1, initialScale * (dist / initialDist))
+            );
+            applyTransform();
+          } else if (t.length === 1) {
+            if (currentScale > 1) {
+              e.preventDefault();
+              translateX =
+                panStartTranslateX + (t[0].clientX - panStartX) / currentScale;
+              translateY =
+                panStartTranslateY + (t[0].clientY - panStartY) / currentScale;
+              const maxX = Math.max(
+                0,
+                (image.clientWidth - overlay.clientWidth / currentScale) / 2
+              );
+              const maxY = Math.max(
+                0,
+                (image.clientHeight - overlay.clientHeight / currentScale) / 2
+              );
+              translateX = Math.min(maxX, Math.max(-maxX, translateX));
+              translateY = Math.min(maxY, Math.max(-maxY, translateY));
+              applyTransform();
+            } else {
+              e.preventDefault();
+            }
+          }
+        },
+        { passive: false }
+      );
+
+      overlay.addEventListener("touchend", e => {
+        if (e.touches.length === 0 && currentScale <= 1.05) {
+          resetTransform();
+        }
+      });
+
+      overlay.addEventListener("touchcancel", e => {
+        if (e.touches.length === 0 && currentScale <= 1.05) {
+          resetTransform();
+        }
+      });
+
+      document.body.appendChild(overlay);
+      document.body.style.overflow = "hidden";
+      document.addEventListener("keydown", onKeyDown);
+      window.__closeLightbox = close;
+
+      requestAnimationFrame(() => overlay?.classList.add("opacity-100"));
+      closeButton.focus();
+    }
+
+    function close() {
+      if (!overlay) return;
+      const el = overlay;
+      overlay = null;
+      window.__closeLightbox = null;
+
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = "";
+      lastFocused?.focus();
+      lastFocused = null;
+
+      if (prefersReducedMotion()) {
+        el.remove();
+        return;
+      }
+      const remove = () => el.remove();
+      el.addEventListener("transitionend", remove, { once: true });
+      setTimeout(remove, 250); // fallback in case transitionend never fires
+      el.classList.remove("opacity-100");
+    }
+
+    function onKeyDown(e) {
+      if (e.key === "Escape") {
+        close();
+      } else if (e.key === "Tab") {
+        trapFocus(e);
+      }
+    }
+
+    // Keep keyboard focus inside the open dialog.
+    function trapFocus(e) {
+      if (!overlay) return;
+      const focusables = overlay.querySelectorAll(
+        'a[href], button, [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+
+    function triggerFromEvent(e) {
+      const image = e.target.closest("img");
+      if (!image || !article.contains(image) || image.closest("a")) return null;
+      return image;
+    }
+
+    function activate(image) {
+      open(image.currentSrc || image.src, image.alt, image);
+    }
+
+    article.addEventListener("click", e => {
+      const image = triggerFromEvent(e);
+      if (!image) return;
+      e.preventDefault();
+      activate(image);
+    });
+
+    article.addEventListener("keydown", e => {
+      if (e.key !== "Enter" && e.key !== " " && e.key !== "Spacebar") return;
+      const image = triggerFromEvent(e);
+      if (!image) return;
+      e.preventDefault();
+      activate(image);
+    });
+  }
+  initLightbox();
+
+  if (!window.__lightboxSwapBound) {
+    window.__lightboxSwapBound = true;
+    document.addEventListener("astro:before-swap", () =>
+      window.__closeLightbox?.()
+    );
+  }
+
+  document.addEventListener("astro:after-swap", () =>
+    window.scrollTo({ left: 0, top: 0, behavior: "instant" })
+  );
+</script>

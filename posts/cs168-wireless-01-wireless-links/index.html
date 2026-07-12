@@ -1,0 +1,750 @@
+<!DOCTYPE html><html dir="ltr" lang="zh-CN" class="overflow-y-scroll scroll-smooth"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="canonical" href="https://howidobetter.github.io/posts/cs168-wireless-01-wireless-links/"><meta name="generator" content="Astro v6.4.2"><!-- Primary meta --><title>CS168 无线网络 1：无线链路 | 随便做做</title><meta name="title" content="CS168 无线网络 1：无线链路 | 随便做做"><meta name="description" content="从无线信号、调制、SINR 与路径损耗出发，理解无线介质中的碰撞检测，以及 MACA/MACAW 的设计。"><meta name="author" content="一剑留名ing"><link rel="sitemap" href="/sitemap-index.xml"><!-- Open Graph --><meta property="og:type" content="article"><meta property="og:site_name" content="随便做做"><meta property="og:title" content="CS168 无线网络 1：无线链路 | 随便做做"><meta property="og:description" content="从无线信号、调制、SINR 与路径损耗出发，理解无线介质中的碰撞检测，以及 MACA/MACAW 的设计。"><meta property="og:url" content="https://howidobetter.github.io/posts/cs168-wireless-01-wireless-links/"><meta property="og:image" content="https://howidobetter.github.io/default-og.png"><!-- Twitter / X --><meta property="twitter:card" content="summary_large_image"><meta property="twitter:url" content="https://howidobetter.github.io/posts/cs168-wireless-01-wireless-links/"><meta property="twitter:title" content="CS168 无线网络 1：无线链路 | 随便做做"><meta property="twitter:description" content="从无线信号、调制、SINR 与路径损耗出发，理解无线介质中的碰撞检测，以及 MACA/MACAW 的设计。"><meta property="twitter:image" content="https://howidobetter.github.io/default-og.png"><!-- RSS autodiscovery --><link rel="alternate" type="application/rss+xml" title="随便做做" href="https://howidobetter.github.io/rss.xml"><!-- Filled at runtime by theme.ts to match the current background colour --><meta name="theme-color" content=""><!-- Extra head content injected by child layouts (e.g. JSON-LD, article meta) --><meta property="article:published_time" content="2026-07-12T00:00:00.000Z"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"CS168 无线网络 1：无线链路 | 随便做做","description":"从无线信号、调制、SINR 与路径损耗出发，理解无线介质中的碰撞检测，以及 MACA/MACAW 的设计。","url":"https://howidobetter.github.io/posts/cs168-wireless-01-wireless-links/","image":"https://howidobetter.github.io/default-og.png","datePublished":"2026-07-12T00:00:00.000Z","author":[{"@type":"Person","name":"一剑留名ing","url":"https://github.com/howIdobetter"}]}</script> <!--
+      Inline FOUC-prevention script: sets data-theme on <html> before
+      the browser paints. Runs synchronously, no defer/async.
+    --><script>
+      (function () {
+        const stored = localStorage.getItem("theme");
+        const prefersDark = window.matchMedia(
+          "(prefers-color-scheme: dark)"
+        ).matches;
+        const theme = stored ?? (prefersDark ? "dark" : "light");
+        const root = document.firstElementChild;
+        root?.setAttribute("data-theme", theme);
+        root?.classList.toggle("dark", theme === "dark");
+        // Expose value so theme.ts can skip re-detection.
+        window.__theme = { value: theme };
+      })();
+    </script><meta name="astro-view-transitions-enabled" content="true"><meta name="astro-view-transitions-fallback" content="animate"><script type="module" src="/_astro/ClientRouter.astro_astro_type_script_index_0_lang.CAqDO0tx.js"></script><link rel="stylesheet" href="/_astro/Footer.W6Wz50NF.css">
+<style>@keyframes astroFadeInOut{0%{opacity:1}to{opacity:0}}@keyframes astroFadeIn{0%{opacity:0;mix-blend-mode:plus-lighter}to{opacity:1;mix-blend-mode:plus-lighter}}@keyframes astroFadeOut{0%{opacity:1;mix-blend-mode:plus-lighter}to{opacity:0;mix-blend-mode:plus-lighter}}@keyframes astroSlideFromRight{0%{transform:translate(100%)}}@keyframes astroSlideFromLeft{0%{transform:translate(-100%)}}@keyframes astroSlideToRight{to{transform:translate(100%)}}@keyframes astroSlideToLeft{to{transform:translate(-100%)}}@media(prefers-reduced-motion){::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}[data-astro-transition-scope]{animation:none!important}}
+</style><style>[data-astro-transition-scope="astro-36ssibgs-1"] { view-transition-name: networking; }@layer astro { ::view-transition-old(networking) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(networking) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(networking) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(networking) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-1"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-1"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-1"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-1"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style><style>[data-astro-transition-scope="astro-36ssibgs-2"] { view-transition-name: cs168; }@layer astro { ::view-transition-old(cs168) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(cs168) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(cs168) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(cs168) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style><style>[data-astro-transition-scope="astro-36ssibgs-3"] { view-transition-name: course-notes; }@layer astro { ::view-transition-old(course-notes) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(course-notes) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(course-notes) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(course-notes) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style><style>[data-astro-transition-scope="astro-36ssibgs-4"] { view-transition-name: wireless; }@layer astro { ::view-transition-old(wireless) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(wireless) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(wireless) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(wireless) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style></head> <body class="bg-background font-app text-foreground selection:bg-accent/75 selection:text-accent-foreground flex min-h-svh flex-col">    <a id="skip-to-content" href="#main-content" class="bg-background text-accent absolute inset-s-4 -top-full z-50 border px-3 py-2 transition-[top] focus:top-3"> 跳到正文 </a> <header class="border-border bg-background/90 relative z-30 border-b backdrop-blur"> <div class="app-layout relative flex min-h-18 w-full items-baseline justify-between sm:items-center"> <a href="/" class="absolute inline-flex items-baseline gap-3 py-1 text-lg leading-8 font-semibold whitespace-nowrap sm:static sm:my-auto sm:text-xl sm:leading-none"> <span>随便做做</span> <span class="text-muted-foreground hidden font-mono text-[0.68rem] font-normal sm:inline">
+howIdobetter
+</span> </a> <nav id="nav-menu" class="flex w-full flex-col items-center sm:ms-2 sm:flex-row sm:justify-end sm:py-0"> <button id="menu-btn" class="focus-outline self-end p-3 sm:hidden" aria-label="打开菜单" aria-expanded="false" aria-controls="menu-items" data-label-open="打开菜单" data-label-close="关闭菜单"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="hidden" viewBox="0 0 24 24" id="close-icon"><path stroke="none" d="M0 0h24v24H0z" /><path d="M18 6 6 18M6 6l12 12" /></svg> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="icon icon-tabler icons-tabler-outline icon-tabler-menu-deep" viewBox="0 0 24 24" id="menu-icon"><path stroke="none" d="M0 0h24v24H0z" /><path d="M4 6h16M7 12h13M10 18h10" /></svg> </button> <ul id="menu-items" class="border-border [&>li>a]:hover:text-accent mt-3 hidden w-full grid-cols-2 place-content-center gap-1 border-t py-3 sm:mt-0 sm:flex sm:w-auto sm:items-center sm:gap-x-1 sm:border-0 sm:py-0 [&>li>a]:block [&>li>a]:px-4 [&>li>a]:py-3 [&>li>a]:text-center [&>li>a]:font-medium [&>li>a]:transition-colors sm:[&>li>a]:px-3 sm:[&>li>a]:py-2"> <li class="col-span-2"> <a href="/posts/" class="active-nav"> 文章 </a> </li> <li class="col-span-2"> <a href="/tags/"> 标签 </a> </li> <li class="col-span-2"> <a href="/about/"> 关于 </a> </li> <li class="col-span-2"> <a href="/archives/" title="归档" aria-label="归档" class="group inline-flex items-center gap-1 hover:text-accent focus-outline flex size-full justify-center p-3 sm:relative sm:size-10 sm:p-0">  <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="hidden sm:absolute sm:top-1/2 sm:left-1/2 sm:block sm:size-6 sm:-translate-x-1/2 sm:-translate-y-1/2" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v0a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8M10 12h4" /></svg> <span class="sm:sr-only">归档</span>  </a> </li> <li class="col-span-1 flex items-center justify-center"> <a href="/search/" title="搜索" aria-label="搜索" class="group inline-flex items-center gap-1 hover:text-accent focus-outline relative size-11 sm:size-10">  <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="absolute top-1/2 left-1/2 size-6 -translate-x-1/2 -translate-y-1/2" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M3 10a7 7 0 1 0 14 0 7 7 0 1 0-14 0M21 21l-6-6" /></svg> <span class="sr-only">搜索</span>  </a> </li> <li class="col-span-1 flex items-center justify-center"> <div class="border-border flex overflow-hidden rounded-full border text-xs font-semibold" aria-label="Language"> <a href="/posts/cs168-wireless-01-wireless-links/" title="中文" aria-current="true" class="px-2 py-1 transition-colors bg-accent text-accent-foreground"> 中 </a><a href="/en/posts/cs168-wireless-01-wireless-links/" title="English" class="px-2 py-1 transition-colors hover:text-accent"> EN </a> </div> </li> <li class="col-span-1 flex items-center justify-center"> <button id="theme-btn" class="focus-outline hover:[&>svg]:stroke-accent relative size-12 rounded-full p-4 transition-colors sm:size-10" title="切换主题" aria-label="auto" aria-live="polite" data-label-light="切换为浅色主题" data-label-dark="切换为深色主题"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="absolute top-[50%] left-[50%] translate-[-50%] scale-100 rotate-0 transition-[transform,opacity] dark:scale-0 dark:-rotate-90" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M12 3h.393a7.5 7.5 0 0 0 7.92 12.446A9 9 0 1 1 12 2.992z" /></svg> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="absolute top-[50%] left-[50%] translate-[-50%] scale-0 rotate-90 transition-[transform,opacity] dark:scale-100 dark:rotate-0" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M14.828 14.828a4 4 0 1 0-5.656-5.656 4 4 0 0 0 5.656 5.656M6.343 17.657l-1.414 1.414M6.343 6.343 4.929 4.929M17.657 6.343l1.414-1.414M17.657 17.657l1.414 1.414M4 12H2M12 4V2M20 12h2M12 20v2" /></svg> </button> </li> </ul> </nav> </div> </header> <script type="module">function c(){const e=document.querySelector("#menu-btn"),t=document.querySelector("#menu-items"),n=document.querySelector("#menu-icon"),s=document.querySelector("#close-icon");if(!e||!t||!n||!s)return;const a=e.dataset.labelOpen??"Open menu",l=e.dataset.labelClose??"Close menu";e.addEventListener("click",()=>{const o=e.getAttribute("aria-expanded")==="true";e.setAttribute("aria-expanded",o?"false":"true"),e.setAttribute("aria-label",o?a:l),t.classList.toggle("hidden"),t.classList.toggle("grid"),n.classList.toggle("hidden"),s.classList.toggle("hidden")})}c();document.addEventListener("astro:after-swap",c);</script> <div class="reading-progress" aria-hidden="true"> <div class="reading-progress-bar"></div> </div> <div class="app-layout flex items-center justify-start"><a id="back-button" href="/" class="group inline-flex items-center gap-1 hover:text-accent focus-outline hover:text-foreground/75 -ms-2 mt-8 mb-2"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block size-6 rtl:rotate-180" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="m15 6-6 6 6 6" /></svg><span>返回</span> </a></div><script type="module">function o(){const t=document.querySelector("#back-button"),e=sessionStorage.getItem("backUrl");e&&t&&(t.href=e)}document.addEventListener("astro:page-load",o);o();</script> <main id="main-content" class="app-layout pb-8" data-pagefind-body> <header class="border-border max-w-readable border-b pt-8 pb-8 sm:pt-12"> <h1 style="view-transition-name:cs-168-u0065e0u007ebfu007f51u007edc-1-u00ff1au0065e0u007ebfu0094feu008def" class="text-foreground text-3xl leading-tight font-semibold text-balance sm:text-5xl"> CS168 无线网络 1：无线链路 </h1> <p class="text-muted-foreground mt-4 text-lg leading-8 text-pretty"> 从无线信号、调制、SINR 与路径损耗出发，理解无线介质中的碰撞检测，以及 MACA/MACAW 的设计。 </p> <div class="mt-5 flex flex-wrap items-center gap-3"> <div class="text-muted-foreground flex items-center gap-x-2 font-mono"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block size-5 min-w-5" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" /><path d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM16 3v4M8 3v4M4 11h16M7 14h.013M10.01 14h.005M13.01 14h.005M16.015 14h.005M13.015 17h.005M7.01 17h.005M10.01 17h.005" /></svg>  <time class="text-sm sm:text-base" datetime="2026-07-12T00:00:00.000Z"> 2026年7月12日 </time> </div> <a href="https://github.com/howIdobetter/My-Blog/edit/main/src/content/posts/cs168-wireless-01-wireless-links.md" target="_blank" rel="noopener noreferrer" class="hover:text-accent text-muted-foreground flex justify-baseline gap-1.5 max-sm:hidden"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M7 7H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-1" /><path d="M20.385 6.585a2.1 2.1 0 0 0-2.97-2.97L9 12v3h3zM16 5l3 3" /></svg><span>编辑文章</span></a> </div> </header> <aside class="border-border mt-8 border-y"> <details class="group py-4 sm:hidden"> <summary class="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4"> <span> <span class="mono-label block"> CS168 · 无线网络 </span> <span class="text-accent mt-1 block text-sm font-semibold"> 1 / 2 </span> </span> <span aria-hidden="true" class="text-muted-foreground text-xl transition-transform group-open:rotate-45">
++
+</span> </summary> <ol class="border-border mt-3 border-t pt-2"> <li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-wireless-01-wireless-links/" aria-current="page" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm text-accent font-semibold"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 01 </span> <span>CS168 无线网络 1：无线链路</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/posts/cs168-wireless-02-cellular/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 02 </span> <span>CS168 无线网络 2：蜂窝网络</span> </a> </li> </ol> </details> <div class="hidden py-5 sm:block"> <div class="flex items-baseline justify-between gap-4"> <p class="mono-label">CS168 · 无线网络</p> <p class="text-accent text-sm font-semibold"> 1 / 2 </p> </div> <ol class="border-border mt-4 grid border-t sm:grid-cols-3 lg:grid-cols-6"> <li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-wireless-01-wireless-links/" aria-current="page" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors bg-muted/60 text-accent font-semibold"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 01 </span> <span class="mt-1 block"> CS168 无线网络 1：无线链路 </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/cs168-wireless-02-cellular/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
+CS168 02 </span> <span class="mt-1 block"> CS168 无线网络 2：蜂窝网络 </span> </a> </li> </ol> </div> </aside> <article id="article" class="mt-8 w-full app-prose max-w-readable prose-pre:bg-(--shiki-light-bg) dark:prose-pre:bg-(--shiki-dark-bg)"> <aside class="border-border bg-muted/35 mb-8 border-s-2 px-5 py-4 text-sm leading-6"> <p class="m-0">
+本文译自  <a href="https://textbook.cs168.io/wireless/wireless-links.html">Wireless Links — CS 168 Textbook</a> 
+，依照 <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh-hans"> CC BY-SA 4.0 </a> 
+许可发布
+
+。<span> 中文完整翻译；对术语和排版作了适配。原文作者为 Peyrin Kao，课程内容基于 Sylvia Ratnasamy、Rob Shakir 等人的讲授。</span> </p> </aside> <h2 id="无线链路">无线链路</h2>
+<h2 id="无线技术简介">无线技术简介</h2>
+<p>无线通信技术其实早于互联网。19 世纪 80 年代，贝尔与泰恩特的光电话尝试用光束无线传送数据；19 世纪 90 年代，马可尼的无线电报尝试用无线电波传送数据。同一时期，玻色还开展了毫米波实验；如今，毫米波又重新成为活跃的研究方向。</p>
+<p>从直觉上，你也许会把无线通信想成不可见的粒子沿一条虚构链路从 A 点飞到 B 点，但这种想象并不准确。无线通信更像池塘里的涟漪：发送数据会产生向外扩散、随距离减弱的波纹；其他发送者产生的波纹会与它发生相长或相消干涉；波纹还会被船只、池岸等物体反射或折射。</p>
+<img width="500px" src="/image/cs168-textbook/wireless/8-001-wireless-intro.png">
+<p>本节讨论有线与无线通信的四个关键差异。它们主要影响第 1 层（物理层）和第 2 层（链路层），也有少数例外稍后会看到，尤其是为了性能而打破端到端原则、在第 2 层实现可靠性。</p>
+<p>差异 1：无线从根本上说是共享介质，有线不是。</p>
+<p>差异 2：无线信号随距离增大而显著减弱，有线信号通常不会。</p>
+<p>差异 3：无线环境可能迅速变化，有线环境通常不会。</p>
+<p>差异 4：无线系统更难检测分组碰撞。</p>
+<h2 id="差异无线是共享介质">差异：无线是共享介质</h2>
+<p>差异 1：无线从根本上说是共享介质，有线不是。</p>
+<p>有线链路默认是私有的点到点链路。一根线直观上连接两个设备；要把一根线接到多个设备、做成多点总线，需要额外工作。外部信号也很难干扰线上的信号，例如可以在线缆外加屏蔽层。在线缆中，我们用电信号编码数据，例如高电压表示 1，低电压表示 0。</p>
+<p>无线链路的性质恰好相反。它默认是共享的：一个信号发出后会朝各个方向辐射。要在两台主机之间建立私有的点到点无线链路反而需要额外工作，而且很难把信号与外部干扰隔离。无线传输不靠线缆中的电信号，而是用无线电波编码比特。</p>
+<h2 id="在无线链路上编码数据">在无线链路上编码数据</h2>
+<p>如何在第 1 层把数据编码进电磁波？我们可以把 1 和 0 的序列直接画成波形，但得到的信号很可能频率很低，而低频信号较弱、不易传输。</p>
+<img width="500px" src="/image/cs168-textbook/wireless/8-002-modulation1.png">
+<p>因此必须用**调制（modulation）**传输数据。先取一个频率恒定的载波，例如正弦波。载波本身不携带信息，但频率高，容易传输。再把数据信号（也叫调制信号）叠加到载波上。最终波形既保持高频、易于传输，又包含要发送的数据；接收方则要从调制后的波形中重新提取 1 和 0。</p>
+<p>把数据信号调制到载波上有多种方法。调幅（AM）根据输入改变载波振幅：用较高的正弦波表示 1，较低的正弦波表示 0。调频（FM）根据输入改变载波频率：用较密、频率较高的正弦波表示 1，用较疏、频率较低的正弦波表示 0。还存在更复杂的方案，例如调相，或同时调节振幅与相位。</p>
+<img width="900px" src="/image/cs168-textbook/wireless/8-003-modulation2.png">
+<h2 id="噪声与干扰">噪声与干扰</h2>
+<p>无线是共享介质，因此必须处理会破坏接收信号的噪声与干扰。即使附近没有任何人发送数据，噪声也始终存在——就像周围没人说话时仍有自然环境声。这种环境背景噪声叫作<strong>噪声底（noise floor）</strong>。相比之下，干扰是其他发送设备主动发出的、与本信号相互干涉的信号。</p>
+<p>**SINR（Signal to Interference and Noise Ratio，信号与干扰加噪声比）**用于衡量接收端无线连接的质量。顾名思义，它等于信号功率除以干扰功率与噪声功率之和。</p>
+<p>$$\text{SINR} = \frac{P_\text{signal}}{P_\text{interference} + P_\text{noise}}$$</p>
+<p>SINR 是两个数的比值，因此没有量纲。它也可以用分贝（dB）表示，即以对数方式表达比值。0 dB 对应比值 1；SINR 每增加 10 dB，底层比值就变为原来的 10 倍，例如信号增强十倍，或噪声与干扰减弱十倍。</p>
+<img width="400px" src="/image/cs168-textbook/wireless/8-004-decibels.png">
+<p>$$\text{SINR}<em>\text{dB} = 10 \cdot \log</em>{10}\left(\frac{P_\text{signal}}{P_\text{interference} + P_\text{noise}}\right)$$</p>
+<p>这个式子说明，噪声越大，发送信号所需的功率就越高。也可以利用编码增益，例如纠错码：即便弱信号混入噪声和干扰，也通过足够的冗余让接收方重新提取信号。</p>
+<p>香农容量给出了在给定噪声与干扰的信道上，单位时间可发送数据量的理论上限。它不仅适用于无线链路，也适用于线缆等其他链路。</p>
+<p>$$C = B \cdot \log_2(1 + \text{SINR})$$</p>
+<p>其中，$$B$$ 是信道带宽，$$\text{SINR}$$ 是信号与干扰加噪声比，$$C$$ 是该信道单位时间可传输的数据量上限，单位为 bit/s。这里的带宽指接收方能够识别的最高频率与最低频率之差。</p>
+<p>该式说明，带宽越大，单位时间能发送的数据越多；SINR 越高，即信号更强或噪声更少，单位时间同样能发送更多数据。如果链路需要达到某个目标容量，例如 1 Mbps，就能把链路的物理特性代入式子，判断它是否达标。</p>
+<p>以传统电话系统为例。它的带宽是 3 kHz，即电话可识别 300 Hz 到 3300 Hz 的频率；SINR 约为 20 dB，对应比值 100（0 dB = 1 倍、10 dB = 10 倍、20 dB = 100 倍、30 dB = 1000 倍）。代入可得 $$C = 4000 \cdot \log_2(1 + 100) \approx 20000$$，即电话系统大约能传输 20 kbps。</p>
+<h2 id="差异衰减">差异：衰减</h2>
+<p>无线信号会随距离增长而显著变弱。有线信号也会轻微衰减，但幅度小得多。因此无线系统设计必须考虑信号衰减，而有线系统通常不把它当作主要问题。</p>
+<p>这带来一个根本权衡：我们希望链路准确、快速、覆盖范围大，以获得更高性能；同时又想节省能源（例如笔记本电量），少占用价格昂贵的频谱。遗憾的是，更好的信号需要更高功率或更宽频带。</p>
+<h2 id="自由空间模型">自由空间模型</h2>
+<p>模拟信号衰减的一种简单方法是<strong>自由空间模型</strong>，也叫视距模型。它假设发送方和接收方处在完全空旷的环境中，信号向各方向辐射，没有任何障碍，甚至不考虑地面。</p>
+<p>在这个模型中，信号功率与收发双方距离的平方成反比，这来自平方反比定律：</p>
+<p>$$P_r \propto \frac{P_t}{d^2}$$</p>
+<p>其中，$$P_r$$ 是接收端功率，$$P_t$$ 是发送端功率，$$d$$ 是收发距离。距离加倍时，接收信号只有原来的 $$1/4$$；距离变为十倍时，信号只有原来的 $$1/100$$。</p>
+<img width="200px" src="/image/cs168-textbook/wireless/8-005-freespace1.png">
+<p>平方反比定律适用，是因为信号向各个方向辐射。任一时刻，信号都扩展到发送方周围的一个球面，而球体会继续变大。半径为 $$r$$ 的球面面积是 $$4\pi r^2$$，所以信号传播时会摊在一个按距离平方增长的面积上。例如距离加倍，球面面积变为四倍，信号摊开的面积也变为四倍，强度便只剩 $$1/4$$。</p>
+<img width="300px" src="/image/cs168-textbook/wireless/8-006-freespace2.png">
+<p>除距离外，还要考虑收发双方的天线。由此得到衡量跨距离信号强度的 Friis 方程：</p>
+<p>$$
+\begin{align*}
+P_r &#x26;= P_t \cdot G_t \cdot G_r \cdot \left(\frac{\lambda^2}{4\pi}\right) \left(\frac{1}{4\pi d^2}\right) \
+&#x26;= P_t \cdot G_t \cdot G_r \cdot \left(\frac{\lambda}{4\pi d}\right)^2 \
+\end{align*}
+$$</p>
+<p>其中 $$P_r$$ 和 $$P_t$$ 仍分别为接收端与发送端功率；$$G_t$$ 是发送天线增益，$$G_r$$ 是接收天线增益；$$\lambda$$ 是波长，在式中用于表示天线面积；$$d$$ 是天线间距离。</p>
+<p>计算接收信号强度时，从发送功率 $$P_t$$ 开始，再乘两端天线增益 $$G_t$$ 与 $$G_r$$。直观地说，增益越高，天线发送或接收信号的能力越强。</p>
+<p>前面已经看到，距离通过平方反比定律影响信号强度，这解释了 $$\frac{1}{4\pi d^2}$$ 项。</p>
+<p>最后，$$\frac{\lambda^2}{4\pi}$$ 与接收天线的孔径（可理解为面积）有关。把光照到纸上，纸越大，接到的光越多。天线有效孔径可算作 $$\frac{\lambda^2}{4\pi}$$，这里不作证明。方程中的 $$(4\pi)^2$$ 实际来自两个 $$4\pi$$：一个来自平方反比定律，另一个来自有效孔径公式。</p>
+<p>还可以把 Friis 方程两边同时除以 $$P_t$$：</p>
+<p>$$\frac{P_r}{P_t} = G_t \cdot G_r \cdot \left(\frac{\lambda}{4\pi d}\right)^2$$</p>
+<p>这个形式说明，接收端的相对信号强度——例如为发送端的一半或 $$1/100$$——取决于天线增益、距离平方的倒数和天线有效孔径。</p>
+<p>对两边取对数，还能用分贝表示功率与增益：</p>
+<p>$$P_r^\text{dB} = P_t^\text{dB} + G_t^\text{dB} + G_r^\text{dB} + 20 \log_{10} \left(\frac{\lambda}{4\pi d}\right)$$</p>
+<p>自由空间模型适合衡量接收端理想信号强度；现实中，地面等物理障碍会让信号达不到这个理想值。</p>
+<h2 id="链路预算">链路预算</h2>
+<p>信号随距离变弱时，如何判断链路是否真的可用，也就是接收方能否检测到可辨识的信号？可以计算<strong>链路预算（link budget）</strong>，把沿途所有增益和损耗纳入考虑。</p>
+<p>$$P_r^\text{dB} = P_t^\text{dB} + \sum \text{gains} - \sum \text{losses}$$</p>
+<p>其中 $$P_r$$ 是接收端信号功率，$$P_t$$ 是发送端信号功率。所有增益，例如更高的天线增益，都会增加预算；所有损耗，例如长距离产生的路径损耗，都会消耗预算。</p>
+<p>把增益相加、损耗相减，就得到接收端信号强度。再与接收灵敏度——接收方提取有效信息所需的最低信号强度——比较。总预算为正，链路可行；为负，链路不可行。</p>
+<p>链路预算用对数尺度的分贝计算，因此可以用加减代替乘除。例如功率增至 1000 倍表示为增加 30 dB，功率损失到 1% 表示为减少 20 dB。</p>
+<img width="900px" src="/image/cs168-textbook/wireless/8-007-link-budget.png">
+<p>图中例子里，发送端信号功率为 10 dB。信号经过一根线缆、一个避雷器（无需了解细节）和另一根线缆，依次损失 0.44 dB、0.1 dB、2.21 dB；再由天线广播，增加 25 dB；穿过 10 千米空间，损失 120 dB；被接收天线接收，增加 25 dB；最后又经过若干线缆，依次损失 0.44 dB、0.1 dB、2.21 dB。把所有增益和损失相加减，接收端信号强度为 -65.5 dB。</p>
+<p>接收灵敏度为 -80 dB，意味着接收方能识别高于 -80 dB 的信号。-65.5 dB 高于 -80 dB，所以链路预算为正，链路应能工作。</p>
+<p>**链路余量（link margin）**是接收信号强度与接收灵敏度的差。若收到 30 dB 信号，而灵敏度允许检测 10 dB 以上的信号，余量就是 20 dB。前例中的链路余量为 14.5 dB。</p>
+<p>链路余量反映链路质量。余量为负，链路无法工作；余量越高，信号越可靠，也越能抵抗干扰等问题。</p>
+<h2 id="差异环境会变化">差异：环境会变化</h2>
+<p>无线环境可能快速变化：设备会移动，环境会改变，例如障碍物移到设备之间，其他通信也可能突然开始干扰。</p>
+<p>自由空间模型把设备距离 $$d$$ 设为常量，但设备移动时怎么办？模型还假设没有障碍和干扰信号；存在这些因素时，模型又会怎样变化？</p>
+<p>若天线保持不变，自由空间模型会得到一条信号强度随距离平滑下降的曲线。考虑不断变化的环境后，距离与信号强度的曲线就会起伏不定。</p>
+<img width="900px" src="/image/cs168-textbook/wireless/8-008-obstacle1.png">
+<p>这条曲线其实是三条小曲线之和。每条表示一种环境特性如何随距离影响信号强度。有些特性随距离缓慢变化，另一些则快速且不规则地变化。</p>
+<img width="900px" src="/image/cs168-textbook/wireless/8-009-obstacle2.png">
+<p>第一种是自由空间路径损耗。前面已经看到，它遵循平方反比定律，使信号强度随距离缓慢、稳定地降低。</p>
+<p>第二种是<strong>阴影效应（shadowing）</strong>。收发双方之间的物理障碍挡住信号时，信号必须经折射或反射绕过障碍，到达接收方时会更弱。</p>
+<p>由于障碍物位置不同，距离增加时信号既可能减弱，也可能增强。例如走到一栋建筑物前时信号会大幅减弱；走过建筑后，信号可能又变强。</p>
+<p>第三种是<strong>多径衰落（multipath fading）</strong>。波在物体上反射或折射，会使同一信号的错位副本抵达接收方。若信号沿长度不同的路径到达，它们可能相位不同，进而相互干涉。</p>
+<p>多径衰落会引起非常细微的信号强度变化：距离只改变一点，信号就可能增强或减弱。</p>
+<p>综合考虑这三种特性时，要把三条曲线相加。若收发双方静止，信号强度对应曲线上的一个点；若设备移动，信号强度就在曲线上移动；若环境变化、障碍物出现或消失，曲线本身也会改变。</p>
+<h2 id="近似路径损耗">近似路径损耗</h2>
+<p>路径损耗包含自由空间损耗、阴影效应和多径衰落，因此很难近似。障碍物让信号走多条路径、不同相位的信号在接收端相互干涉时，问题尤其困难。</p>
+<p>一个较简单的近似模型是<strong>双射线模型（two-ray model）</strong>。它假设信号只走两条路径：一条是发送方直达接收方的视距路径，另一条是经地面反射后到达接收方的路径。仍然是一个信号从发送端向外辐射，只是部分波直接抵达，部分波经地面反射抵达。</p>
+<img width="900px" src="/image/cs168-textbook/wireless/8-010-obstacle3.png">
+<p>当收发双方距离足够远时，两条路径的波可能相差 180 度。它们会相消并互相抵消，使接收信号显著减弱。此时信号强度不再与 $$1/d^2$$ 成正比，而与 $$1/d^4$$ 成正比，也就是随距离增长下降得更快。</p>
+<p>自由空间模型不考虑任何障碍，连地面也没有，因此得到 $$1/d^2$$。双射线模型把地面计入后，信号强度变成与 $$1/d^4$$ 成正比。</p>
+<img width="900px" src="/image/cs168-textbook/wireless/8-011-obstacle4.png">
+<p>如果除地面外还有障碍，双射线模型就不够了。在复杂环境中可以建立通用的射线追踪模型，考虑信号的反射、散射和衍射。这类模型需要环境的具体信息，例如障碍物位置，通常用计算机仿真构建。在这些模型里，与无阻挡的视距信号相比，信号的反射副本通常占主导。</p>
+<img width="900px" src="/image/cs168-textbook/wireless/8-012-obstacle5.png">
+<p>由这些模型可得到一个把距离和信号强度关联起来的简化路径损耗模型：</p>
+<p>$$P_r = P_t K d^\gamma$$</p>
+<p>其中 $$P_r$$、$$P_t$$ 分别是接收端与发送端信号功率，$$d$$ 是距离。$$K$$ 和 $$\gamma$$ 是依据环境与模型通过实验确定的常量。例如障碍物很多且位置不利时，$$K$$ 可能非常小，使接收信号很弱。</p>
+<p>实际中，$$\gamma$$ 在 2 到 8 之间。最好时信号强度与 $$1/d^2$$ 成正比，接近自由空间模型；最差时与 $$1/d^8$$ 成正比，距离稍增信号就会迅速减弱。</p>
+<h2 id="差异检测碰撞">差异：检测碰撞</h2>
+<p>有线碰撞通常容易检测；点到点链路甚至不会发生碰撞。一般只要监听线缆即可发现碰撞。传播延迟可能带来问题，但最终只需检测线上的单个信号。</p>
+<p>无线碰撞更难检测，因为它多了空间维度：波可能在一个地方相撞，却不在另一个地方相撞。</p>
+<img width="500px" src="/image/cs168-textbook/wireless/8-013-collision1.png">
+<p>无线系统更难设计碰撞检测与避免机制，但共享介质上的多个设备仍必须借此发送。多路访问有许多办法，包括固定分配频率，或协调各方发送时机；最佳方案取决于环境。比如在荒无人烟的地方，也许可以任由碰撞发生，发生后再处理。本节重点讨论 CSMA（载波侦听多路访问）：先监听信号，别人说话时不发送。</p>
+<p>为简化讨论，本节忽略障碍，假定信号向各方向辐射，在某个距离内保持全强度，超过后完全检测不到。例子中的设备排成直线，因此只考虑信号向左右传播；现实中信号会向三维空间辐射。</p>
+<h2 id="csma-的问题">CSMA 的问题</h2>
+<p>无线电设备通过检测能量是否超过阈值来判断别人是否正在发送；超过阈值，就认为有人在传输。</p>
+<p>当两对设备彼此相隔很远时，这种策略工作良好。</p>
+<img width="800px" src="/image/cs168-textbook/wireless/8-014-collision2.png">
+<p>A 与 B 通信，C 与 D 通信。A 没检测到信号，于是开始向 B 发送；A 的信号会向所有方向传播，并非只朝 B。稍后 C 也没有检测到信号，因为它超出 A 的范围，所以可开始向 D 发送。</p>
+<p>两对设备都在彼此通信范围内时，这种策略同样有效。</p>
+<img width="600px" src="/image/cs168-textbook/wireless/8-015-collision3.png">
+<p>A 与 B 通信，C 与 D 通信。A 检测到空闲后向 B 发送。稍后 C 检测到 A 的信号，因此等 A 结束后才向 D 发送。</p>
+<p>但这种策略有时会出问题。</p>
+<img width="700px" src="/image/cs168-textbook/wireless/8-016-collision4.png">
+<p>假设 A 和 C 都想与 B 通信。A 检测到空闲并向 B 发送；稍后 C 也检测到空闲，因为它在 A 的范围之外，于是也向 B 发送，最终在 B 处碰撞。</p>
+<p>这叫<strong>隐藏终端问题（hidden terminal problem）</strong>。两个发送方 A、C 不在彼此范围内，无法侦听到对方正在发送。</p>
+<p>CSMA 还有另一种问题：</p>
+<img width="600px" src="/image/cs168-textbook/wireless/8-017-collision5.png">
+<p>假设 B 要向 A 发送，C 要向 D 发送。B 先侦听到空闲并向 A 发送。B 的信号向各方向传播，也会到达 C。C 想向 D 发送，却检测到 B 的信号而保持沉默。</p>
+<p>仔细看会发现，B 和 C 其实可以同时发送。B、C 之间的空间虽然会出现碰撞，但接收方 A、D 都不会感知到碰撞。</p>
+<p>这叫<strong>暴露终端问题（exposed terminal problem）</strong>。两次传输本可同时进行，却因 C 错误地认为会碰撞而阻止了其中一次。</p>
+<h2 id="用-maca-避免碰撞">用 MACA 避免碰撞</h2>
+<p>不使用 CSMA 时，**MACA（Multiple Access with Collision Avoidance，多路访问碰撞避免）**可帮助解决隐藏终端问题。</p>
+<p>CSMA 的关键问题在于发送方检测的是发送端碰撞，真正重要的却是接收端是否碰撞。MACA 因此让接收方宣布自己是否检测到碰撞。</p>
+<p>假设 A 要向 B 发送数据。一次成功传输分三步：</p>
+<img width="900px" src="/image/cs168-textbook/wireless/8-018-maca1.png">
+<ol>
+<li>
+<p>A 发送包含数据长度的 **RTS（Request To Send，请求发送）**分组，意思是：“我想向 B 发送 k 比特。”</p>
+</li>
+<li>
+<p>B 发送带数据长度的 **CTS（Clear To Send，允许发送）**分组。它告诉 A 可以安全发送，确认接收端没有碰撞；同时警告 B 范围内的所有设备：“我是 B，将接收 k 比特，这段时间请勿发送。”</p>
+</li>
+<li>
+<p>A 发送数据，B 接收数据。CTS 的警告让接收方范围内的其他设备在此期间保持安静。</p>
+</li>
+</ol>
+<p>这个协议解决了隐藏终端问题。原问题中 A、C 都侦听到空闲后发送，导致 B 处碰撞；现在 A 发出 RTS 后，B 会发送 CTS，警告其范围内包括 C 在内的所有设备保持安静。</p>
+<img width="700px" src="/image/cs168-textbook/wireless/8-019-maca2.png">
+<p>听到 RTS 说明你在发送方范围内，而发送方接下来要监听 CTS。因此你必须保持一个时隙的安静，避免自己的数据淹没发送方处的 CTS；也就是让发送方能收到 CTS。</p>
+<p>若 RTS 后又听到 CTS，说明你也在接收方范围内，因此整个数据传输期间都须安静；若没听到 CTS，说明你在接收方范围之外，可以自行发送数据。</p>
+<p>在某些假设下，这也能解决暴露终端问题。原问题中 B 向 A 发送，C 向 D 发送；CSMA 会让检测到 B 信号的 C 沉默，尽管它本可安全发送。现在 B 发送 RTS 后，C 先推迟一个时隙，以免淹没 B 处的 CTS；随后 C 没听到 CTS，说明它不在接收方 A 的范围内，可以安全地向 D 发送。</p>
+<img width="900px" src="/image/cs168-textbook/wireless/8-020-maca3.png">
+<p>要使其成立，还假定 C 能听见 D 的 CTS。C 虽然是发送方，也必须先收到 CTS 才能发送；可 C 同时听到 B 的数据，因此可能听不见启动发送所需的 CTS。这正是关键：CSMA 的发送方只负责发送，而 MACA 的发送方必须先接收 CTS；在暴露终端场景中，该 CTS 可能被淹没。</p>
+<img width="900px" src="/image/cs168-textbook/wireless/8-021-maca4.png">
+<p>发出 RTS 却没听到相应 CTS，说明不能发送：接收端发生了碰撞，可能正在接收数据，也可能同时收到两个请求。此时采用与 CSMA/CD 类似的二进制指数退避，下一次发送 RTS 前等待最多两倍时间。</p>
+<p>MACA 中每个设备维护一个 CW（Contention Window，竞争窗口），表示碰撞后重新请求前应等待多久。检测到碰撞（没有 CTS）后，在 0 到 CW 间随机选一个值并等待。最小值为 2 个时隙，最大值为 64 个时隙；一个时隙等于发送一个 RTS 所需的时间。RTS/CTS 成功后把窗口重置为 2；RTS 失败（没有 CTS）后把窗口加倍，但不超过 64。</p>
+<h2 id="macaw-特性用-ack-提供可靠性">MACAW 特性：用 ACK 提供可靠性</h2>
+<p>**MACAW（Multiple Access Collision Avoidance for Wireless，无线多路访问碰撞避免）**对 MACA 作了若干改进。</p>
+<p>第一项改进是增加确认以提供可靠性。发送方仍先发 RTS，接收方发 CTS，发送方再发数据；现在末尾多了一步，由接收方发送 ACK。</p>
+<img width="300px" src="/image/cs168-textbook/wireless/8-022-macaw-acks.png">
+<p>若数据丢失，就不会有 ACK，发送方必须从新的 RTS 开始重试。若数据正确送达但 ACK 丢失，发送方同样发新 RTS；不过接收方此时可以直接回复 ACK，而不是 CTS。</p>
+<p>为什么要增加 ACK？端到端原则说，为保证正确性，可靠性必须在端主机实现。但这里在网络内部、单条链路上实现可靠性，只是为了改善性能。即便链路不提供可靠性，TCP 仍能保证正确性，可一次丢包会让 TCP 显著减速，例如拥塞窗口减半；链路层可靠性则能更高效地从丢包中恢复。</p>
+<h2 id="macaw-特性更公平的退避">MACAW 特性：更公平的退避</h2>
+<p>两个发生碰撞的主机都要发送数据时，MACA 并不公平：赢家往往继续赢，输家往往继续输。</p>
+<p>例如 A、B 的窗口都为 2，同时尝试预约信道。假设 A 赢、B 输，A 的窗口仍为 2，B 的窗口则加倍为 4。A 很可能更早再次预约信道并继续获胜；等 B 重试时，A 也许已经再次占据信道，于是 B 的窗口又加倍为 8。这个模式不断重复：A 很快地反复抢到信道，B 则不断失败，等待越来越久后再尝试、再失败。</p>
+<img width="800px" src="/image/cs168-textbook/wireless/8-023-maca-unfair.png">
+<p>为解决它，不再让设备各自拥有 CW，而是让所有人共享同一个 CW。分组首部加入 CW 字段；收到分组后，就把自己的 CW 设为其中的值。所有人的 CW 相同，重试机制便不偏袒任何设备：每个人都在 0 到 CW 间随机取值并等待。（这里略作简化；当所有设备都在彼此范围内时，该说法成立。）</p>
+<p>MACAW 还让 CW 更新规则更温和。最小值仍为 2，最大值仍为 64。RTS 失败（没有 CTS）时把 CW 乘以 1.5，而非加倍，并限制不超过 64；一次 RTS/CTS/DATA/ACK 成功后，把 CW 减 1，而非直接重置到 2。若 RTS/CTS 成功但 ACK 失败，CW 不变。这种方法有时称为<strong>乘性增加、线性减少（MILD）</strong>。</p>
+<h2 id="macaw-特性用-ds-处理暴露终端">MACAW 特性：用 DS 处理暴露终端</h2>
+<p>回到暴露终端例子：B 要与 A 通信。B 发 RTS，A 发 CTS，B 开始传数据。C 没听到 CTS，说明它不在接收方范围内，理论上能安全发送。可是 C 要发送就必须听到 CTS；它同时听到 B 的数据，D 发来的 CTS 可能与 B 的数据碰撞，C 因而听不到。</p>
+<p>MACAW 的结论是：在暴露终端场景中，B 到 A 与 C 到 D 实际无法同时传输。没错，这里承认失败；MACAW 和 CSMA 都不能解决暴露终端问题。</p>
+<p>这意味着只要位于另一个发送方的范围内，我们就无法发送，即使不在另一个接收方的范围内。原因仍是：另一个发送方的数据会让我们听不见启动自身发送所需的 CTS。</p>
+<p>为此，在数据前增加一个 **DS（Data Sending，数据发送）**分组。发送方借它警告所有人：“我将发送 k 比特数据，这段时间请保持安静。”</p>
+<img width="900px" src="/image/cs168-textbook/wireless/8-024-ds1.png">
+<p>协议现在有五步：</p>
+<ol>
+<li>
+<p>发送方发 RTS，请求发送 k 比特数据。</p>
+</li>
+<li>
+<p>接收方发 CTS，通知其范围内所有设备：“请安静，我要接收 k 比特。”</p>
+</li>
+<li>
+<p>发送方发 DS，通知其范围内所有设备：“请安静，我要发送 k 比特。”（别人不能发送，因为我的数据会淹没其传输所需接收的 CTS。）</p>
+</li>
+<li>
+<p>发送方发送数据。</p>
+</li>
+<li>
+<p>接收方发送 ACK。</p>
+</li>
+</ol>
+<p>RTS 与 DS 并不重复。RTS 是可能不获批准的请求，例如可能收不到 CTS；DS 则确认请求已获批准，并要求发送方范围内的所有人保持安静。</p>
+<h2 id="macaw-特性用-ds-同步">MACAW 特性：用 DS 同步</h2>
+<p>DS 还有第二个重要用途。再看暴露终端，并记住 MACAW 已承认两次传输只能分开进行。</p>
+<p>假设没有 DS。B 发 RTS，A 发 CTS，B 开始传数据。C 听到 RTS，为避免干扰 B 而推迟一个时隙，却没听到 CTS。此后 C 注定会发送无效 RTS，也永远收不到 CTS，因为它被 B 的数据淹没。C 会持续随机重试，却完全不知道 B 何时停止发送。</p>
+<p>相反，B 确切知道自己何时结束，这让它在下一轮竞争中占据巨大优势：数据发完后立刻再次请求，很可能再次获胜。C 不知道 B 何时结束，只能猜测重试时机；它很可能在 B 仍发送时请求，因此请求失败。</p>
+<img width="900px" src="/image/cs168-textbook/wireless/8-025-ds2.png">
+<p>这种不同步造成不公平：赢家知道下一轮竞争恰好在自己结束发送时开始，因而容易再次获胜；输家不知道何时开始，因而容易再次失败。竞争时段通常只占很小一段时间，绝大部分时间都用于发送数据。赢家准确知道这段时间，输家不知道，所以赢家会持续获胜。</p>
+<p>DS 通过让发送方告知大家下一轮竞争时间解决该问题。B 用 DS 表示自己开始发送 k 比特；C 不仅知道不要发无效 RTS，也知道 B 何时结束，于是更公平地参与下一轮竞争。</p>
+<img width="900px" src="/image/cs168-textbook/wireless/8-026-ds3.png">
+<h2 id="macaw-特性用-rrts-同步">MACAW 特性：用 RRTS 同步</h2>
+<p>还有一种场景必须依靠同步保证公平。假设 A 要向 B 发送，D 要向 C 发送。</p>
+<p>A 向 B 发送：A 发 RTS，B 发 CTS，A 发 DS 和数据。C 听到 CTS，数据发送期间必须保持安静。此时 D 无从得知情况，只会发送 RTS；因为 C 正保持安静，D 收不到 CTS。D 会在随机时间不断重试且持续失败，因为不知道 A 何时停止。</p>
+<p>而 A 明确知道何时结束，因此下一轮又有巨大优势：它可立即重发请求并获胜。D 不知道何时重发，只有碰巧在 A 结束后、再次请求前立刻发出请求才可能获胜。</p>
+<img width="900px" src="/image/cs168-textbook/wireless/8-027-rrts1.png">
+<p>DS 在这里帮不上忙，因为发送方 A、D 不在彼此范围内。A 会用 DS 宣布发送时间，但 D 听不到，仍注定处于劣势。</p>
+<p>解决办法是让接收方代表发送方参与竞争。D 不知道何时重发，但 C 知道，因此让 C 来请求。</p>
+<p>D 发 RTS 时，C 得知 D 想通信，但必须等到下一轮竞争才能回应。C 知道下一轮何时开始，因为它能听到 B 的 ACK。下一轮开始时，C 发送一种新分组 <strong>RRTS（Request-for-RTS，请求对方发送 RTS）</strong>，立即通知 D 新一轮已经开始，使 D 能马上发 RTS，更公平地参与竞争。</p>
+<img width="900px" src="/image/cs168-textbook/wireless/8-028-rrts2.png">
+<p>听到 RRTS，表示你范围内的某人正准备请求，因此应保持两个时隙的安静，让它们完成 RTS/CTS 交换。</p>
+<p>在例子中，C 发出 RRTS 后，B 听见并安静两个时隙，使 D 能发 RTS、C 能发 CTS。CTS 再通知 B 保持安静，使 D 到 C 的传输得以进行。</p>
+<p>更一般地说，如果你听到 RTS 却因为别人要求你保持安静而不能响应，就应在可以响应时发送 RRTS。</p> </article> <hr class="my-8 border-dashed"> <a href="https://github.com/howIdobetter/My-Blog/edit/main/src/content/posts/cs168-wireless-01-wireless-links.md" target="_blank" rel="noopener noreferrer" class="hover:text-accent text-muted-foreground flex justify-baseline gap-1.5 sm:hidden"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M7 7H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-1" /><path d="M20.385 6.585a2.1 2.1 0 0 0-2.97-2.97L9 12v3h3zM16 5l3 3" /></svg><span>编辑文章</span></a> <div id="btt-btn-container" class="fixed inset-e-4 bottom-8 z-50 md:sticky md:inset-e-auto md:float-end md:me-1 translate-y-14 opacity-0 transition duration-500"> <button data-button="back-to-top" aria-label="回到顶部" class="group bg-background relative px-2 py-1 size-14 rounded-full shadow-xl md:h-8 md:w-fit md:rounded-md md:shadow-none md:focus-visible:rounded-none md:bg-background/35 md:bg-clip-padding md:backdrop-blur-lg"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block rotate-90 md:hidden" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 12h14M5 12l6 6M5 12l6-6" /></svg> <span class="group-hover:text-accent sr-only text-sm md:not-sr-only"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block size-4" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" /><path d="M12 5v14M16 9l-4-4M8 9l4-4" /></svg> 回到顶部 </span> </button> </div> <script data-astro-rerun>
+  function backToTop() {
+    const btnContainer = document.querySelector("#btt-btn-container");
+    const backToTopBtn = document.querySelector("[data-button='back-to-top']");
+    const pageHeader = document.querySelector("body > header");
+
+    if (!btnContainer || !backToTopBtn || !pageHeader) return;
+
+    backToTopBtn.addEventListener("click", () => {
+      document.body.scrollTop = 0;
+      document.documentElement.scrollTop = 0;
+    });
+
+    const observer = new IntersectionObserver(([entry]) => {
+      const isVisible = !entry.isIntersecting;
+      if (entry) {
+        btnContainer.classList.toggle("opacity-100", isVisible);
+        btnContainer.classList.toggle("translate-y-0", isVisible);
+        btnContainer.classList.toggle("opacity-0", !isVisible);
+        btnContainer.classList.toggle("translate-y-14", !isVisible);
+      }
+    });
+    observer.observe(pageHeader);
+  }
+  backToTop();
+</script> <ul class="mt-4 mb-8 flex flex-wrap gap-4 sm:my-8"> <li> <a href="/tags/networking/" class="border-border flex items-center gap-1 rounded-full border transition-colors hover:border-accent hover:text-accent focus-visible:text-accent focus-visible:no-underline px-3 py-1.5 text-sm" data-astro-transition-scope="astro-36ssibgs-1"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="text-accent opacity-80 size-3.5" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 9h14M5 15h14M11 4 7 20M17 4l-4 16" /></svg> networking </a> </li><li> <a href="/tags/cs168/" class="border-border flex items-center gap-1 rounded-full border transition-colors hover:border-accent hover:text-accent focus-visible:text-accent focus-visible:no-underline px-3 py-1.5 text-sm" data-astro-transition-scope="astro-36ssibgs-2"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="text-accent opacity-80 size-3.5" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 9h14M5 15h14M11 4 7 20M17 4l-4 16" /></svg> cs168 </a> </li><li> <a href="/tags/course-notes/" class="border-border flex items-center gap-1 rounded-full border transition-colors hover:border-accent hover:text-accent focus-visible:text-accent focus-visible:no-underline px-3 py-1.5 text-sm" data-astro-transition-scope="astro-36ssibgs-3"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="text-accent opacity-80 size-3.5" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 9h14M5 15h14M11 4 7 20M17 4l-4 16" /></svg> course-notes </a> </li><li> <a href="/tags/wireless/" class="border-border flex items-center gap-1 rounded-full border transition-colors hover:border-accent hover:text-accent focus-visible:text-accent focus-visible:no-underline px-3 py-1.5 text-sm" data-astro-transition-scope="astro-36ssibgs-4"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="text-accent opacity-80 size-3.5" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 9h14M5 15h14M11 4 7 20M17 4l-4 16" /></svg> wireless </a> </li> </ul>  <hr class="my-8 border-dashed"> <div data-pagefind-ignore class="my-8 grid grid-cols-1 gap-4 sm:grid-cols-2"> <a href="/posts/cs168-transport-09-router-assisted-cc/" class="soft-panel hover:border-accent/70 hover:text-accent flex w-full gap-3 p-4 transition"> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block flex-none rtl:rotate-180" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 12h14M5 12l6 6M5 12l6-6" /></svg> <div> <span class="mono-label">上一篇</span> <div class="mt-1 text-sm leading-6">路由器辅助的拥塞控制</div> </div> </a> <a href="/posts/cs168-wireless-02-cellular/" class="soft-panel hover:border-accent/70 hover:text-accent flex w-full justify-end gap-3 p-4 text-end transition sm:col-start-2"> <div> <span class="mono-label">下一篇</span> <div class="mt-1 text-sm leading-6">CS168 无线网络 2：蜂窝网络</div> </div> <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block flex-none rtl:rotate-180" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" /><path d="M5 12h14M13 18l6-6M13 6l6 6" /></svg> </a> </div> </main> <footer class="app-layout mt-auto"> <div class="border-border text-muted-foreground flex flex-col items-start justify-between gap-6 border-t py-9 text-sm sm:flex-row sm:items-end"> <div> <p class="text-foreground font-semibold">随便做做</p> <p class="mt-1">先记下来，再慢慢改对。</p> </div> <div class="flex items-center gap-5"> <div class="flex flex-wrap items-center gap-1"> <a href="https://github.com/howIdobetter" title="GitHub" class="group inline-flex items-center gap-1 hover:text-accent p-2 hover:rotate-6 sm:p-1">  <svg width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="inline-block size-6 scale-125 fill-transparent stroke-current stroke-2 opacity-90 group-hover:fill-transparent sm:scale-110" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" /><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21" /></svg> <span class="sr-only">GitHub</span>  </a> </div> <span class="whitespace-nowrap">© 2026 一剑留名ing</span> </div> </div> </footer>   <script type="module">const a="theme",n="light",r="dark";function i(){const e=localStorage.getItem(a);return e||(window.matchMedia("(prefers-color-scheme: dark)").matches?r:n)}let o=window.__theme?.value??i();function s(){localStorage.setItem(a,o),m()}function m(){const e=document.firstElementChild;e?.setAttribute("data-theme",o),e?.classList.toggle("dark",o===r);const t=document.querySelector("#theme-btn"),c=o===n?t?.dataset.labelDark:t?.dataset.labelLight;c&&(t?.setAttribute("aria-label",c),t?.setAttribute("title",c));const l=window.getComputedStyle(document.body).backgroundColor;document.querySelector("meta[name='theme-color']")?.setAttribute("content",l)}function d(){m(),document.querySelector("#theme-btn")?.addEventListener("click",()=>{o=o===n?r:n,s()})}d();document.addEventListener("astro:after-swap",d);document.addEventListener("astro:before-swap",e=>{const t=document.querySelector("meta[name='theme-color']")?.getAttribute("content");t&&e.newDocument.querySelector("meta[name='theme-color']")?.setAttribute("content",t)});window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change",({matches:e})=>{o=e?r:n,s()});</script> </body> </html> <script data-astro-rerun>
+  function addHeadingLinks() {
+    const isZh = document.documentElement.lang === "zh-CN";
+    const headings = Array.from(
+      document.querySelectorAll("h2, h3, h4, h5, h6")
+    );
+    for (const heading of headings) {
+      heading.classList.add("group");
+      const link = document.createElement("a");
+      link.className =
+        "heading-link ms-2 no-underline opacity-75 md:opacity-0 md:group-hover:opacity-100 md:focus:opacity-100";
+      link.href = "#" + heading.id;
+      link.setAttribute(
+        "aria-label",
+        isZh
+          ? `链接到本节：${heading.textContent}`
+          : `Link to section: ${heading.textContent}`
+      );
+
+      const span = document.createElement("span");
+      span.ariaHidden = "true";
+      span.innerText = "#";
+      link.appendChild(span);
+      heading.appendChild(link);
+    }
+  }
+  addHeadingLinks();
+
+  function attachCopyButtons() {
+    const isZh = document.documentElement.lang === "zh-CN";
+    const copyButtonLabel = isZh ? "复制" : "Copy";
+    const copiedButtonLabel = isZh ? "已复制" : "Copied";
+    const codeBlocks = Array.from(document.querySelectorAll("pre"));
+
+    for (const codeBlock of codeBlocks) {
+      const wrapper = document.createElement("div");
+      wrapper.style.position = "relative";
+
+      const computedStyle = getComputedStyle(codeBlock);
+      const hasFileNameOffset =
+        computedStyle.getPropertyValue("--file-name-offset").trim() !== "";
+
+      const topClass = hasFileNameOffset
+        ? "top-(--file-name-offset)"
+        : "-top-3";
+
+      const copyButton = document.createElement("button");
+      copyButton.className = `copy-code absolute end-3 ${topClass} rounded bg-muted border border-muted px-2 py-1 text-xs leading-4 text-foreground font-medium`;
+      copyButton.innerHTML = copyButtonLabel;
+      copyButton.setAttribute("aria-label", copyButtonLabel);
+      copyButton.setAttribute("aria-live", "polite");
+      codeBlock.setAttribute("tabindex", "0");
+      codeBlock.appendChild(copyButton);
+
+      codeBlock?.parentNode?.insertBefore(wrapper, codeBlock);
+      wrapper.appendChild(codeBlock);
+
+      copyButton.addEventListener("click", async () => {
+        await copyCode(codeBlock, copyButton);
+      });
+    }
+
+    async function copyCode(block, button) {
+      const code = block.querySelector("code");
+      const text = code?.innerText;
+
+      await navigator.clipboard.writeText(text ?? "");
+
+      button.innerText = copiedButtonLabel;
+      button.setAttribute("aria-label", copiedButtonLabel);
+
+      setTimeout(() => {
+        button.innerText = copyButtonLabel;
+        button.setAttribute("aria-label", copyButtonLabel);
+      }, 700);
+    }
+  }
+  attachCopyButtons();
+
+  /** Accessible image lightbox for article images. */
+  function initLightbox() {
+    const article = document.getElementById("article");
+    if (!article) return;
+
+    const prefersReducedMotion = () =>
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    let overlay = null;
+    let lastFocused = null;
+
+    // Defer attribute mutations so they don't push the LCP timestamp.
+    // Event listeners below use delegation and don't need the attributes to exist yet.
+    requestAnimationFrame(() => {
+      const images = Array.from(article.querySelectorAll("img"));
+      for (const image of images) {
+        if (image.closest("a")) continue;
+        image.setAttribute("role", "button");
+        image.setAttribute("tabindex", "0");
+        image.setAttribute("aria-haspopup", "dialog");
+        image.setAttribute(
+          "aria-label",
+          image.alt ? `Zoom image: ${image.alt}` : "Zoom image"
+        );
+      }
+    });
+
+    function open(src, alt, trigger) {
+      if (overlay) return;
+      lastFocused = trigger ?? document.activeElement;
+
+      overlay = document.createElement("div");
+      overlay.setAttribute("role", "dialog");
+      overlay.setAttribute("aria-modal", "true");
+      overlay.setAttribute(
+        "aria-label",
+        alt ? `Image preview: ${alt}` : "Image preview"
+      );
+      overlay.className =
+        "fixed inset-0 z-50 flex cursor-zoom-out items-center justify-center bg-black/70 backdrop-blur-sm opacity-0 transition-opacity duration-200 motion-reduce:transition-none";
+
+      const closeButton = document.createElement("button");
+      closeButton.type = "button";
+      closeButton.setAttribute("aria-label", "Close image preview");
+      closeButton.className =
+        "absolute end-4 top-4 rounded p-2 text-3xl leading-none text-white";
+      closeButton.innerHTML = "&#10005;";
+      closeButton.addEventListener("click", close);
+
+      const image = document.createElement("img");
+      image.src = src;
+      image.alt = "";
+      image.className =
+        "max-h-[90dvh] max-w-[90dvw] cursor-default object-contain";
+
+      overlay.append(closeButton, image);
+      overlay.addEventListener("click", e => {
+        if (e.target === overlay && currentScale <= 1) close();
+      });
+
+      let currentScale = 1;
+      let translateX = 0;
+      let translateY = 0;
+      let initialDist = 0;
+      let initialScale = 1;
+      let panStartX = 0;
+      let panStartY = 0;
+      let panStartTranslateX = 0;
+      let panStartTranslateY = 0;
+      let lastTapTime = 0;
+
+      function applyTransform() {
+        image.style.transform = `scale(${currentScale}) translate(${translateX}px, ${translateY}px)`;
+      }
+
+      function resetTransform() {
+        currentScale = 1;
+        translateX = 0;
+        translateY = 0;
+        image.style.transform = "";
+      }
+
+      overlay.addEventListener(
+        "touchstart",
+        e => {
+          const t = e.touches;
+          if (t.length === 2) {
+            initialDist = Math.hypot(
+              t[1].clientX - t[0].clientX,
+              t[1].clientY - t[0].clientY
+            );
+            initialScale = currentScale;
+          } else if (t.length === 1) {
+            const now = Date.now();
+            if (now - lastTapTime < 300) {
+              e.preventDefault();
+              if (currentScale > 1) {
+                resetTransform();
+              } else {
+                currentScale = 2;
+                translateX = 0;
+                translateY = 0;
+                applyTransform();
+              }
+              lastTapTime = 0;
+              panStartX = t[0].clientX;
+              panStartY = t[0].clientY;
+              panStartTranslateX = translateX;
+              panStartTranslateY = translateY;
+            } else {
+              lastTapTime = now;
+              if (currentScale > 1) {
+                panStartX = t[0].clientX;
+                panStartY = t[0].clientY;
+                panStartTranslateX = translateX;
+                panStartTranslateY = translateY;
+              }
+            }
+          }
+        },
+        { passive: false }
+      );
+
+      overlay.addEventListener(
+        "touchmove",
+        e => {
+          const t = e.touches;
+          if (t.length === 2) {
+            e.preventDefault();
+            const dist = Math.hypot(
+              t[1].clientX - t[0].clientX,
+              t[1].clientY - t[0].clientY
+            );
+            currentScale = Math.min(
+              4,
+              Math.max(1, initialScale * (dist / initialDist))
+            );
+            applyTransform();
+          } else if (t.length === 1) {
+            if (currentScale > 1) {
+              e.preventDefault();
+              translateX =
+                panStartTranslateX + (t[0].clientX - panStartX) / currentScale;
+              translateY =
+                panStartTranslateY + (t[0].clientY - panStartY) / currentScale;
+              const maxX = Math.max(
+                0,
+                (image.clientWidth - overlay.clientWidth / currentScale) / 2
+              );
+              const maxY = Math.max(
+                0,
+                (image.clientHeight - overlay.clientHeight / currentScale) / 2
+              );
+              translateX = Math.min(maxX, Math.max(-maxX, translateX));
+              translateY = Math.min(maxY, Math.max(-maxY, translateY));
+              applyTransform();
+            } else {
+              e.preventDefault();
+            }
+          }
+        },
+        { passive: false }
+      );
+
+      overlay.addEventListener("touchend", e => {
+        if (e.touches.length === 0 && currentScale <= 1.05) {
+          resetTransform();
+        }
+      });
+
+      overlay.addEventListener("touchcancel", e => {
+        if (e.touches.length === 0 && currentScale <= 1.05) {
+          resetTransform();
+        }
+      });
+
+      document.body.appendChild(overlay);
+      document.body.style.overflow = "hidden";
+      document.addEventListener("keydown", onKeyDown);
+      window.__closeLightbox = close;
+
+      requestAnimationFrame(() => overlay?.classList.add("opacity-100"));
+      closeButton.focus();
+    }
+
+    function close() {
+      if (!overlay) return;
+      const el = overlay;
+      overlay = null;
+      window.__closeLightbox = null;
+
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = "";
+      lastFocused?.focus();
+      lastFocused = null;
+
+      if (prefersReducedMotion()) {
+        el.remove();
+        return;
+      }
+      const remove = () => el.remove();
+      el.addEventListener("transitionend", remove, { once: true });
+      setTimeout(remove, 250); // fallback in case transitionend never fires
+      el.classList.remove("opacity-100");
+    }
+
+    function onKeyDown(e) {
+      if (e.key === "Escape") {
+        close();
+      } else if (e.key === "Tab") {
+        trapFocus(e);
+      }
+    }
+
+    // Keep keyboard focus inside the open dialog.
+    function trapFocus(e) {
+      if (!overlay) return;
+      const focusables = overlay.querySelectorAll(
+        'a[href], button, [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+
+    function triggerFromEvent(e) {
+      const image = e.target.closest("img");
+      if (!image || !article.contains(image) || image.closest("a")) return null;
+      return image;
+    }
+
+    function activate(image) {
+      open(image.currentSrc || image.src, image.alt, image);
+    }
+
+    article.addEventListener("click", e => {
+      const image = triggerFromEvent(e);
+      if (!image) return;
+      e.preventDefault();
+      activate(image);
+    });
+
+    article.addEventListener("keydown", e => {
+      if (e.key !== "Enter" && e.key !== " " && e.key !== "Spacebar") return;
+      const image = triggerFromEvent(e);
+      if (!image) return;
+      e.preventDefault();
+      activate(image);
+    });
+  }
+  initLightbox();
+
+  if (!window.__lightboxSwapBound) {
+    window.__lightboxSwapBound = true;
+    document.addEventListener("astro:before-swap", () =>
+      window.__closeLightbox?.()
+    );
+  }
+
+  document.addEventListener("astro:after-swap", () =>
+    window.scrollTo({ left: 0, top: 0, behavior: "instant" })
+  );
+</script>
