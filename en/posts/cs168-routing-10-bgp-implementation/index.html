@@ -189,11 +189,11 @@ CS168 11 </span> <span class="mt-1 block"> IP 首部 </span> </a> </li> </ol> </
 <p>然而在现实中，AS 包含许多由链路连接的路由器（和主机）。</p>
 <img width="900px" src="/image/cs168-textbook/routing/2-166-combining2.png">
 <p>为了真正实现 BGP，我们需要 AS 内部的所有路由器协同工作，从而表现得像一个节点。</p>
-<p>在一个 AS 内，我们会把所有路由器分为两类。**边界路由器（border router）**至少有一条链路连接到另一个 AS 中的路由器。**内部路由器（interior router）**只与同一 AS 内的其他路由器相连。</p>
+<p>在一个 AS 内，我们会把所有路由器分为两类。<strong>边界路由器（border router）</strong>至少有一条链路连接到另一个 AS 中的路由器。<strong>内部路由器（interior router）</strong>只与同一 AS 内的其他路由器相连。</p>
 <img width="900px" src="/image/cs168-textbook/routing/2-167-borders.png">
 <p>只有边界路由器需要向其他 AS 通告路由。有时，我们把通告 BGP 路由的路由器称为 <strong>BGP 发言者（BGP speaker）</strong>。BGP 发言者需要理解 BGP 协议的语义和语法（如何读取和创建 BGP 通告、收到通告时该做什么，等等）。</p>
 <h2 id="外部与内部-bgp-会话">外部与内部 BGP 会话</h2>
-<p>一个 **BGP 会话（BGP session）**由两台相互交换信息的路由器组成。</p>
+<p>一个 <strong>BGP 会话（BGP session）</strong>由两台相互交换信息的路由器组成。</p>
 <img width="900px" src="/image/cs168-textbook/routing/2-168-bgp1.png">
 <p><strong>外部 BGP（external BGP，eBGP）会话</strong>发生在来自不同 AS 的两台路由器之间。eBGP 会话可用于在不同 AS 之间交换通告，并获知通往其他 AS 的路由。只有边界路由器参与 eBGP 会话（因为 eBGP 要求与另一个 AS 通信）。</p>
 <img width="900px" src="/image/cs168-textbook/routing/2-169-bgp2.png">
@@ -278,7 +278,7 @@ CS168 11 </span> <span class="mt-1 block"> IP 首部 </span> </a> </li> </ol> </
 <p>Update 消息包含一个以 IP 前缀表示的目的地。该消息还包含<strong>路由属性（route attribute）</strong>，可用于编码与该 IP 前缀对应的任何有用信息。路由属性是一组名称—值对，其中名称指明属性类型，值指明该属性的取值。一个与网络无关的属性示例可以是：颜色=红色，形状=三角形。属性名是颜色和形状，它们分别对应红色和三角形这两个值。</p>
 <p>有些属性是 AS 本地的，只在 iBGP 消息中交换。另一些属性是全局的，可以在 eBGP 通告中发送。</p>
 <p>BGP 有许多属性，但我们将重点介绍其中三个重要属性，它们用于编码导入路径时采用的不同平局判定条件。</p>
-<p>**本地优先级（LOCAL PREFERENCE）**属性在特定 AS 内编码 Gao-Rexford 导入规则（最高优先级的平局判定条件）。AS 可以为更偏好的路由（例如来自客户的路由）分配较高的值，为较不偏好的路由（例如来自提供商的路由）分配较低的值。该属性是本地属性，只在 iBGP 消息中携带。该属性不会在 eBGP 通告中发送给其他 AS，因为其他 AS 不需要知道这个 AS 的偏好。</p>
+<p><strong>本地优先级（LOCAL PREFERENCE）</strong>属性在特定 AS 内编码 Gao-Rexford 导入规则（最高优先级的平局判定条件）。AS 可以为更偏好的路由（例如来自客户的路由）分配较高的值，为较不偏好的路由（例如来自提供商的路由）分配较低的值。该属性是本地属性，只在 iBGP 消息中携带。该属性不会在 eBGP 通告中发送给其他 AS，因为其他 AS 不需要知道这个 AS 的偏好。</p>
 <img width="900px" src="/image/cs168-textbook/routing/2-194-attribute1.png">
 <p>举例来说，假设路由器 E 收到来自 AS#7 的 eBGP 通告，并且路由器 A 知道 AS#7 是一个客户。那么，在 iBGP 消息中，路由器 E 可以将本地优先级设置为 3000（较大的数字）。现在，同一 AS 中的其他每台路由器都知道：路由器 E 可以通过 <code>ASPATH</code> 属性中的路径，以 3000 的本地优先级到达它所通告的目的地。</p>
 <p>相比之下，如果路由器 D 收到来自 AS#79 的 eBGP 通告，而该 AS 是一个对等方，那么在 iBGP 消息中，路由器 D 可以设置一个较低的本地优先级值 1000，然后将这条路径（具有较低的本地优先级）分发给 AS 中的其他路由器。</p>

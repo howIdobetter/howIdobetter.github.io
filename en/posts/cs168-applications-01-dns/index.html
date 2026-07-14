@@ -200,7 +200,7 @@ CS168 02 </span> <span class="mt-1 block"> HTTP </span> </a> </li> </ol> </div> 
 <p>DNS 必须能够扩展。互联网上有数量庞大的主机，每秒都会执行海量查询，主机还可能频繁加入或移除。</p>
 <p>DNS 必须具备高可用性、轻量且快速。几乎每个互联网连接都以一次 DNS 查询开始，把主机名转换为 IP 地址。因此 DNS 必须极快，否则每个连接都会被拖慢。此外，它不能存在单点故障，否则一处故障就会让互联网停止工作。</p>
 <h2 id="名称服务器">名称服务器</h2>
-<p>如果能有一台集中式服务器保存每个域到每个 IP 地址的映射，并供所有人查询，那当然很好。遗憾的是，没有任何服务器既大到足以存储互联网上每个域的 IP 地址，又快到足以处理全世界产生的 DNS 请求量。因此，DNS 使用许多**名称服务器（name server）**组成的集合；这些服务器专门负责响应 DNS 请求。</p>
+<p>如果能有一台集中式服务器保存每个域到每个 IP 地址的映射，并供所有人查询，那当然很好。遗憾的是，没有任何服务器既大到足以存储互联网上每个域的 IP 地址，又快到足以处理全世界产生的 DNS 请求量。因此，DNS 使用许多<strong>名称服务器（name server）</strong>组成的集合；这些服务器专门负责响应 DNS 请求。</p>
 <p>每台名称服务器负责一个特定的域区域（zone），因此没有任何一台服务器需要存储互联网上的所有域。例如，负责 <code>.com</code> 区域的名称服务器只需回答以 <code>.com</code> 结尾的域查询，不必存储任何与 <code>wikipedia.org</code> 有关的 DNS 信息。同样，负责 <code>berkeley.edu</code> 区域的名称服务器无需存储任何与 <code>stanford.edu</code> 有关的信息。</p>
 <p>名称服务器虽然用途特殊（响应 DNS 请求），但和互联网上可联系的任何其他服务器一样：每台都有便于人类阅读的域名（例如 <code>a.edu-servers.net</code>）以及便于计算机读取的 IP 地址（例如 <code>192.5.6.30</code>）。注意不要混淆域名和区域。例如，这台名称服务器的域名中含有 <code>.net</code>，但它响应的是 <code>.edu</code> 域的 DNS 请求。</p>
 <h2 id="名称服务器层级">名称服务器层级</h2>
@@ -208,7 +208,7 @@ CS168 02 </span> <span class="mt-1 block"> HTTP </span> </a> </li> </ol> </div> 
 <p>DNS 引入了一个新思路来同时解决这两个问题：查询名称服务器时，它不必总是返回所查询域的 IP 地址，也可以把你引向另一台名称服务器以获取答案。这样，负责 <code>.edu</code> 等大区域的名称服务器就能把查询重定向到负责 <code>berkeley.edu</code> 等较小区域的名称服务器。于是，<code>.edu</code> 区域的名称服务器不必存储 <code>eecs.berkeley.edu</code>、<code>math.berkeley.edu</code> 等信息；它只需存储 <code>berkeley.edu</code> 名称服务器的信息，并将这些请求重定向到一台 <code>berkeley.edu</code> 名称服务器。</p>
 <p>DNS 根据名称服务器负责的区域，把所有名称服务器组织成树状层级：</p>
 <img width="900px" src="/image/cs168-textbook/applications/4-04-basic-tree.png">
-<p>树最顶层的**根服务器（root server）**把所有域都纳入自己的区域（该区域通常写作 <code>.</code>）。树中较低层级的名称服务器负责更小、更具体的区域。</p>
+<p>树最顶层的<strong>根服务器（root server）</strong>把所有域都纳入自己的区域（该区域通常写作 <code>.</code>）。树中较低层级的名称服务器负责更小、更具体的区域。</p>
 <h2 id="dns-查询概念">DNS 查询（概念）</h2>
 <p>DNS 查询总是从根开始。根会把查询引向它的某个子名称服务器；随后你查询该子服务器，它再把你重定向到自己的某个子服务器。这个过程不断重复，直到你查询到一台知道答案的名称服务器，它会返回与你的域对应的 IP 地址。</p>
 <p>为了把你重定向到子名称服务器，父名称服务器必须提供子服务器的区域、便于人类阅读的域名和 IP 地址，以便你联系该子服务器获取更多信息。</p>
@@ -225,7 +225,7 @@ CS168 02 </span> <span class="mt-1 block"> HTTP </span> </a> </li> </ol> </div> 
 <p>得到答案后，我们可以把它存入缓存，这样以后再次需要这条记录时就不必重新询问。</p>
 <h2 id="存根解析器与递归解析器">存根解析器与递归解析器</h2>
 <p>最初，终端主机（例如你的计算机）会自行执行 DNS 查询，逐一联系各名称服务器。</p>
-<p>如今，本地计算机通常把 DNS 查询任务委托给<strong>DNS 递归解析器（DNS Recursive Resolver）</strong>，由它代为查询名称服务器。执行查询时，计算机上的**DNS 存根解析器（DNS Stub Resolver）**向递归解析器发送查询，让后者完成全部工作，再从它那里接收响应。</p>
+<p>如今，本地计算机通常把 DNS 查询任务委托给<strong>DNS 递归解析器（DNS Recursive Resolver）</strong>，由它代为查询名称服务器。执行查询时，计算机上的<strong>DNS 存根解析器（DNS Stub Resolver）</strong>向递归解析器发送查询，让后者完成全部工作，再从它那里接收响应。</p>
 <img width="900px" src="/image/cs168-textbook/applications/4-06-stub-resolver.png">
 <p>我们怎样得知解析器的 IP 地址？第一次连接互联网时，某个服务可以告诉你解析器地址。你也可以手动输入自己希望使用的解析器地址。</p>
 <p>互联网上一些知名解析器包括 Cloudflare 运营的 1.1.1.1 和 Google 运营的 8.8.8.8。它们往往使用容易记忆的 IP 地址，免得我们还要用名称指代它们；否则就得通过 DNS 查询来寻找它们的 IP 地址，而这些服务器存在的目的恰恰是替我们执行 DNS 查询。</p>
@@ -260,10 +260,10 @@ CS168 02 </span> <span class="mt-1 block"> HTTP </span> </a> </li> </ol> </div> 
 <p>接下来的 16 位留给标志。QR 位指明消息是查询（该位为 0）还是响应（该位为 1）。RD 位表示你希望解析器执行递归查询，还是只返回名称服务器给出的内容（即使内容是“我不知道”）。</p>
 <p>理论上可以在标志中指定查询类型，不过 <code>IQUERY</code> 类型已经废弃，<code>STATUS</code> 类型也没有真正定义，所以几乎所有情况都使用 <code>QUERY</code> 类型。</p>
 <p>标志还可以表明查询是否成功（例如查询成功时，回复会设置 <code>NOERROR</code> 标志；查询一个不存在的名称时，回复会设置 <code>NXDOMAIN</code> 标志）。</p>
-<p>下一个字段指定所问问题的数量（实际中始终为 1）。再之后的三个字段用于响应消息，指定消息中所含**资源记录（resource record，RR）**的数量。稍后会深入说明各类 RR。</p>
+<p>下一个字段指定所问问题的数量（实际中始终为 1）。再之后的三个字段用于响应消息，指定消息中所含<strong>资源记录（resource record，RR）</strong>的数量。稍后会深入说明各类 RR。</p>
 <p>消息的其余部分包含 DNS 查询或响应的实际内容。这些内容始终组织为一组 RR，每条 RR 都是带有关联类型的键值对。</p>
 <p>完整地说，DNS 记录的键正式定义为三元组 <code>&#x3C;Name, Class, Type></code>，其中 <code>Name</code> 是实际的键数据，<code>Class</code> 对互联网而言始终是 <code>IN</code>（获取 DNS 自身信息的特殊查询除外），<code>Type</code> 指定记录类型。DNS 记录的值包含 <code>&#x3C;TTL, Value></code>，其中 <code>TTL</code> 是生存时间（记录可缓存多少秒），<code>Value</code> 是实际的值数据。</p>
-<p>DNS 中有三种主要记录。**A 类型记录（A type record）**把域映射到 IPv4 地址，键是域，值是 IP 地址。类似地，<code>AAAA type records</code> 把域映射到 IPv6 地址。**NS 类型记录（NS type record）**把区域映射到域，键是区域，值是域。</p>
+<p>DNS 中有三种主要记录。<strong>A 类型记录（A type record）</strong>把域映射到 IPv4 地址，键是域，值是 IP 地址。类似地，<code>AAAA type records</code> 把域映射到 IPv6 地址。<strong>NS 类型记录（NS type record）</strong>把区域映射到域，键是区域，值是域。</p>
 <p>你有时也会遇到 <code>CNAME</code> 类型记录，用于别名或重定向。其名称和值都是域，该记录表示两个域拥有相同的 IP 地址。</p>
 <p>本节要点：每个 DNS 数据包都有一个 16 位随机 ID 字段、一些元数据和一组资源记录。每条记录属于四个类别之一（问题、答案、权威、附加），并包含类型、键和值。记录类型包括 A 和 NS。</p>
 <h2 id="dns-查询实现">DNS 查询（实现）</h2>
@@ -291,11 +291,11 @@ CS168 02 </span> <span class="mt-1 block"> HTTP </span> </a> </li> </ol> </div> 
 <span class="line"><span>c.edu-servers.net.  172800   IN   A    192.26.92.30</span></span>
 <span class="line"><span>...</span></span></code></pre>
 <p>答案的第一部分显示了头部信息，包括 ID 字段（<code>26114</code>）、返回标志（<code>NOERROR</code>），以及各部分返回的记录数。</p>
-<p>**问题部分（question section）**包含 1 条记录（可查看头部的 <code>QUERY: 1</code> 验证）。它的键是 <code>eecs.berkeley.edu</code>，类型是 <code>A</code>，值为空。这表示我们查询的域（值为空是因为我们不知道对应的 IP 地址）。</p>
-<p>**答案部分（answer section）**为空（头部中为 <code>ANSWER: 0</code>），因为根服务器没有直接回答查询。</p>
-<p>**权威部分（authority section）**包含 13 条记录。第一条以 <code>.edu</code> 为键、<code>NS</code> 为类型、<code>a.edu-servers.net</code> 为值。这是根服务器给出下一批可联系名称服务器的区域和域名。该部分的每条记录都对应一台接下来可能询问的名称服务器。</p>
+<p><strong>问题部分（question section）</strong>包含 1 条记录（可查看头部的 <code>QUERY: 1</code> 验证）。它的键是 <code>eecs.berkeley.edu</code>，类型是 <code>A</code>，值为空。这表示我们查询的域（值为空是因为我们不知道对应的 IP 地址）。</p>
+<p><strong>答案部分（answer section）</strong>为空（头部中为 <code>ANSWER: 0</code>），因为根服务器没有直接回答查询。</p>
+<p><strong>权威部分（authority section）</strong>包含 13 条记录。第一条以 <code>.edu</code> 为键、<code>NS</code> 为类型、<code>a.edu-servers.net</code> 为值。这是根服务器给出下一批可联系名称服务器的区域和域名。该部分的每条记录都对应一台接下来可能询问的名称服务器。</p>
 <p>注意：名称最靠前（按字母或数字顺序）的服务器通常是主服务器（这里为 <code>a.edu-servers.net</code>），其余是镜像。另外，多条记录使用同一名称（<code>.edu</code>）并无问题；这只表示有多台名称服务器都能回答该区域的查询。</p>
-<p>**附加部分（additional section）**包含 27 条记录。第一条以 <code>a.edu-servers.net</code> 为键、<code>A</code> 为类型、<code>192.5.6.30</code> 为值。这是根服务器通过把权威部分中的域映射到 IP 地址，向我们提供下一台名称服务器的 IP 地址。</p>
+<p><strong>附加部分（additional section）</strong>包含 27 条记录。第一条以 <code>a.edu-servers.net</code> 为键、<code>A</code> 为类型、<code>192.5.6.30</code> 为值。这是根服务器通过把权威部分中的域映射到 IP 地址，向我们提供下一台名称服务器的 IP 地址。</p>
 <p>权威部分和附加部分合在一起，提供下一台名称服务器的区域、域名和 IP 地址。为保持 DNS 消息的键值结构，这些信息被分散在两个部分中。</p>
 <p>完整地说：<code>172800</code> 是每条记录的 TTL（生存时间），这里设为 172,800 秒，即 48 小时。<code>IN</code> 是互联网类，基本可以忽略。有时你会看到类型为 <code>AAAA</code> 的记录，对应 IPv6 地址（通常的 <code>A</code> 类型记录对应 IPv4 地址）。</p>
 <p>合理性检查：接下来查询哪台名称服务器？我们怎么知道它位于哪里？要向它查询什么？\footnote{查询 <code>a.edu-servers.net</code>；由于附加部分中的记录，我们知道它的位置。仍像之前一样查询 <code>eecs.berkeley.edu</code> 的 IP 地址。}</p>
@@ -360,7 +360,7 @@ CS168 02 </span> <span class="mt-1 block"> HTTP </span> </a> </li> </ol> </div> 
 <p>如果根服务器不可用，后果会非常严重。缓存为空的人无法发起任何 DNS 请求。随着 TTL 到期，每个人的缓存最终都会清空，互联网也将停止工作。</p>
 <p>为提供冗余，世界各地共有 13 台根服务器。我们可以查询这些公开且众所周知的根服务器 <a href="https://www.iana.org/domains/root/servers">IP 地址</a>。</p>
 <p>考虑到整个互联网都依赖它们，13 这个数字似乎仍然很少。为了提供极高可用性，实际上的根服务器远不止 13 台，但列表只包含 13 个 IP 地址，这是因为采用了名为任播的巧妙技术。</p>
-<p>在**任播（anycast）**技术中，我们部署一台根服务器的许多镜像，并让它们全部使用同一个 IP 地址。联系域 <code>k.root-servers.net</code> 或其对应 IP 地址时，你实际可能正在与它的任意一个镜像通信。</p>
+<p>在<strong>任播（anycast）</strong>技术中，我们部署一台根服务器的许多镜像，并让它们全部使用同一个 IP 地址。联系域 <code>k.root-servers.net</code> 或其对应 IP 地址时，你实际可能正在与它的任意一个镜像通信。</p>
 <p>13 台根服务器中的每一台实际都由一组镜像组成。例如，<code>f.root-servers.net</code> 有 3,000 多个实例。这些镜像可以由不同网络运营商运行（例如 Google 和 Cloudflare 可能协助运营根镜像）。</p>
 <p>实现任播时，每个镜像都会在路由协议中宣告同一个 IP 地址，路由协议的其余部分照常工作。你可能收到许多通往 <code>k.root-servers.net</code> 的路由宣告；接受其中任何一条，最终都会把数据包路由到某个镜像。一处镜像宕机后，其余镜像仍在发送宣告，你可以接受另一条路由来维持可用性。</p>
 <p>任播还意味着即使不断增删镜像，根 IP 也很少改变。因此，根提示文件中根名称服务器记录的 TTL 很长（42 天）。</p>
