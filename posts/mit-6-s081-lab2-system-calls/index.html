@@ -14,7 +14,7 @@
         // Expose value so theme.ts can skip re-detection.
         window.__theme = { value: theme };
       })();
-    </script><meta name="astro-view-transitions-enabled" content="true"><meta name="astro-view-transitions-fallback" content="animate"><script type="module" src="/_astro/ClientRouter.astro_astro_type_script_index_0_lang.CZ1STEZH.js"></script><link rel="stylesheet" href="/_astro/Footer.Cq0nITt3.css">
+    </script><meta name="astro-view-transitions-enabled" content="true"><meta name="astro-view-transitions-fallback" content="animate"><script type="module" src="/_astro/ClientRouter.astro_astro_type_script_index_0_lang.CZ1STEZH.js"></script><link rel="stylesheet" href="/_astro/Footer.DKAlEgKd.css">
 <style>@keyframes astroFadeInOut{0%{opacity:1}to{opacity:0}}@keyframes astroFadeIn{0%{opacity:0;mix-blend-mode:plus-lighter}to{opacity:1;mix-blend-mode:plus-lighter}}@keyframes astroFadeOut{0%{opacity:1;mix-blend-mode:plus-lighter}to{opacity:0;mix-blend-mode:plus-lighter}}@keyframes astroSlideFromRight{0%{transform:translate(100%)}}@keyframes astroSlideFromLeft{0%{transform:translate(-100%)}}@keyframes astroSlideToRight{to{transform:translate(100%)}}@keyframes astroSlideToLeft{to{transform:translate(-100%)}}@media(prefers-reduced-motion){::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}[data-astro-transition-scope]{animation:none!important}}
 .author-signature[data-astro-cid-n5tsuhpg]{width:min(100%,22rem);margin:clamp(3.75rem,8vw,5.75rem) 0 0 auto;color:#000}[data-theme=dark] .author-signature[data-astro-cid-n5tsuhpg]{color:#fff}.author-signature-canvas[data-astro-cid-n5tsuhpg]{position:relative;width:100%;aspect-ratio:1850 / 555}.author-signature-svg[data-astro-cid-n5tsuhpg]{display:block;width:100%;height:100%;overflow:visible}.author-signature-stroke[data-astro-cid-n5tsuhpg]{stroke-dasharray:1;stroke-dashoffset:1}.author-signature-ink[data-astro-cid-n5tsuhpg]{opacity:0}.author-signature-caption[data-astro-cid-n5tsuhpg]{display:flex;align-items:center;justify-content:flex-end;gap:.7rem;margin-top:.35rem;color:var(--muted-foreground);font-family:var(--font-mono-app);font-size:.66rem;font-weight:600;letter-spacing:.16em}.author-signature-caption-line[data-astro-cid-n5tsuhpg]{width:2.75rem;height:1px;background:color-mix(in srgb,var(--foreground) 42%,transparent)}@media(max-width:639px){.author-signature[data-astro-cid-n5tsuhpg]{width:min(82vw,19rem);margin-top:3.75rem}}@media(prefers-reduced-motion:reduce){.author-signature-stroke[data-astro-cid-n5tsuhpg]{stroke-dashoffset:0}.author-signature-ink[data-astro-cid-n5tsuhpg]{opacity:1}}
 </style><style>[data-astro-transition-scope="astro-36ssibgs-1"] { view-transition-name: operating-systems; }@layer astro { ::view-transition-old(operating-systems) { 
@@ -167,13 +167,12 @@ howIdobetter
 +
 </span> </summary> <ol class="border-border mt-3 border-t pt-2"> <li class="border-border border-b last:border-b-0"> <a href="/posts/mit-6-s081-lab2-system-calls/" aria-current="page" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm text-accent font-semibold"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 01 </span> <span>Lab2: System calls</span> </a> </li><li class="border-border border-b last:border-b-0"> <a href="/posts/mit-6-s081-lab3-page-tables/" class="grid min-h-11 grid-cols-[2rem_1fr] items-center gap-2 py-2 text-sm hover:text-accent"> <span class="text-muted-foreground font-mono text-xs tabular-nums"> 02 </span> <span>Lab3: page tables</span> </a> </li> </ol> </details> <div class="hidden py-5 sm:block"> <div class="flex items-baseline justify-between gap-4"> <p class="mono-label">MIT 6.S081 · xv6</p> <p class="text-accent text-sm font-semibold"> 1 / 2 </p> </div> <ol class="border-border mt-4 grid border-t sm:grid-cols-3 lg:grid-cols-6"> <li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/mit-6-s081-lab2-system-calls/" aria-current="page" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors bg-muted/60 text-accent font-semibold"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
 CS168 01 </span> <span class="mt-1 block"> Lab2: System calls </span> </a> </li><li class="border-border border-b sm:border-e last:sm:border-e-0 lg:border-b-0"> <a href="/posts/mit-6-s081-lab3-page-tables/" class="block min-h-full px-3 py-3 text-sm leading-5 transition-colors hover:bg-muted/40 hover:text-accent"> <span class="text-muted-foreground block font-mono text-[0.68rem] tabular-nums">
-CS168 02 </span> <span class="mt-1 block"> Lab3: page tables </span> </a> </li> </ol> </div> </aside> <article id="article" class="mt-8 w-full app-prose max-w-readable prose-pre:bg-(--shiki-light-bg) dark:prose-pre:bg-(--shiki-dark-bg)">  <h2 id="lab2-system-calls">Lab2: System calls</h2>
-<p>为什么不写 lab1 的题解呢，因为 lab1 其实相当于习惯调用函数的使用，并且偏向 user applications 的编写，实际上并没有系统强相关的内容。</p>
+CS168 02 </span> <span class="mt-1 block"> Lab3: page tables </span> </a> </li> </ol> </div> </aside> <article id="article" class="mt-8 w-full app-prose max-w-readable prose-pre:bg-(--shiki-light-bg) dark:prose-pre:bg-(--shiki-dark-bg)">  <p>为什么不写 lab1 的题解呢，因为 lab1 其实相当于习惯调用函数的使用，并且偏向 user applications 的编写，实际上并没有系统强相关的内容。</p>
 <h2 id="system-call-tracing">System call tracing</h2>
 <p>这个有相当一部分难度，但是题目已经将 user application 的代码在 <code>user/trace.c</code> 中给出了，因此能让我们专注于系统调用的 tracing 部分。编写一个系统调用需要更改内核代码，因此需要小心一些，不然很容易出现难以想象的 bug。</p>
 <p>题目只给了 <code>trace.c</code>，因此从 lab1 我们知道需要在 Makefile 中加入 <code>$U/_trace</code>才能将这个 user application 编译进 xv6 中。</p>
 <p>然后我们首先从用户态出发，用户态调用的是 <code>trace</code> 系统调用函数，因此需要在 <code>user/user.h</code> 中加入 <code>int trace(int);</code> 的函数声明。在 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi><mi>s</mi><mi>y</mi><mi>s</mi><mi mathvariant="normal">.</mi><mi>p</mi><mi>l</mi></mrow><annotation encoding="application/x-tex">usys.pl</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">u</span><span class="mord mathnormal" style="margin-right:0.0359em;">sy</span><span class="mord mathnormal">s</span><span class="mord">.</span><span class="mord mathnormal" style="margin-right:0.0197em;">pl</span></span></span></span> 脚本中，这个其实就相当于批量生成命令，我们看</p>
-<pre class="astro-code astro-code-themes min-light night-owl" style="--shiki-light:#24292eff;--shiki-dark:#d6deeb;--shiki-light-bg:#ffffff;--shiki-dark-bg:#011627; overflow-x: auto;--file-name-offset: -0.75rem;" tabindex="0" data-language="perl"><code><span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">sub</span><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic"> entry</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB"> {</span></span>
+<pre class="astro-code astro-code-themes min-light night-owl" style="--shiki-light:#24292eff;--shiki-dark:#d6deeb;--shiki-light-bg:#ffffff;--shiki-dark-bg:#011627; overflow-x: auto;" tabindex="0" data-language="perl"><code><span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">sub</span><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic"> entry</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB"> {</span></span>
 <span class="line"><span style="--shiki-light:#D32F2F;--shiki-light-font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">    my</span><span style="--shiki-light:#24292EFF;--shiki-dark:#C5E478"> $name</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB"> = </span><span style="--shiki-light:#6F42C1;--shiki-dark:#C5E478">shift</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">;</span></span>
 <span class="line"><span style="--shiki-light:#6F42C1;--shiki-dark:#C5E478">    print</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD"> "</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">.global </span><span style="--shiki-light:#22863A;--shiki-dark:#C5E478">$name</span><span style="--shiki-light:#22863A;--shiki-dark:#F78C6C">\n</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">"</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">;</span></span>
 <span class="line"><span style="--shiki-light:#6F42C1;--shiki-dark:#C5E478">    print</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD"> "</span><span style="--shiki-light:#22863A;--shiki-dark:#C5E478">${name}</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">:</span><span style="--shiki-light:#22863A;--shiki-dark:#F78C6C">\n</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">"</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">;</span></span>
@@ -182,19 +181,19 @@ CS168 02 </span> <span class="mt-1 block"> Lab3: page tables </span> </a> </li> 
 <span class="line"><span style="--shiki-light:#6F42C1;--shiki-dark:#C5E478">    print</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD"> "</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D"> ret</span><span style="--shiki-light:#22863A;--shiki-dark:#F78C6C">\n</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">"</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">;</span></span>
 <span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">}</span></span></code></pre>
 <p>加入一个 <code>entry(trace)</code>就会生成：</p>
-<pre class="astro-code astro-code-themes min-light night-owl" style="--shiki-light:#24292eff;--shiki-dark:#d6deeb;--shiki-light-bg:#ffffff;--shiki-dark-bg:#011627; overflow-x: auto;--file-name-offset: -0.75rem;" tabindex="0" data-language="asm"><code><span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">.global trace</span></span>
+<pre class="astro-code astro-code-themes min-light night-owl" style="--shiki-light:#24292eff;--shiki-dark:#d6deeb;--shiki-light-bg:#ffffff;--shiki-dark-bg:#011627; overflow-x: auto;" tabindex="0" data-language="asm"><code><span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">.global trace</span></span>
 <span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">trace</span><span style="--shiki-light:#212121;--shiki-dark:#82AAFF">:</span></span>
 <span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB"> li a7, SYS_trace</span></span>
 <span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB"> ecall</span></span>
 <span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#7FDBCA"> ret</span></span></code></pre>
 <p>从而进入内核态的 <code>syscall</code> 函数中，<code>syscall</code> 函数中会根据 <code>a7</code> 的值来调用对应的系统调用函数，因此我们需要在 <code>kernel/syscall.c</code> 中加入：</p>
-<pre class="astro-code astro-code-themes min-light night-owl" style="--shiki-light:#24292eff;--shiki-dark:#d6deeb;--shiki-light-bg:#ffffff;--shiki-dark-bg:#011627; overflow-x: auto;--file-name-offset: -0.75rem;" tabindex="0" data-language="c"><code><span class="line"><span style="--shiki-light:#D32F2F;--shiki-light-font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">extern</span><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA"> int</span><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic"> sys_trace</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">(</span><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">void</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">);</span></span>
+<pre class="astro-code astro-code-themes min-light night-owl" style="--shiki-light:#24292eff;--shiki-dark:#d6deeb;--shiki-light-bg:#ffffff;--shiki-dark-bg:#011627; overflow-x: auto;" tabindex="0" data-language="c"><code><span class="line"><span style="--shiki-light:#D32F2F;--shiki-light-font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">extern</span><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA"> int</span><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic"> sys_trace</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">(</span><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">void</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">);</span></span>
 <span class="line"></span>
 <span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">[SYS_trace]   sys_trace</span><span style="--shiki-light:#212121;--shiki-dark:#D6DEEB">,</span></span></code></pre>
 <p>此外还需要在 <code>kernel/syscall.h</code> 中加入：</p>
-<pre class="astro-code astro-code-themes min-light night-owl" style="--shiki-light:#24292eff;--shiki-dark:#d6deeb;--shiki-light-bg:#ffffff;--shiki-dark-bg:#011627; overflow-x: auto;--file-name-offset: -0.75rem;" tabindex="0" data-language="c"><code><span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">#</span><span style="--shiki-light:#D32F2F;--shiki-light-font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">define</span><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic"> SYS_trace</span><span style="--shiki-light:#1976D2;--shiki-dark:#F78C6C"> 22</span></span></code></pre>
+<pre class="astro-code astro-code-themes min-light night-owl" style="--shiki-light:#24292eff;--shiki-dark:#d6deeb;--shiki-light-bg:#ffffff;--shiki-dark-bg:#011627; overflow-x: auto;" tabindex="0" data-language="c"><code><span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">#</span><span style="--shiki-light:#D32F2F;--shiki-light-font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">define</span><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic"> SYS_trace</span><span style="--shiki-light:#1976D2;--shiki-dark:#F78C6C"> 22</span></span></code></pre>
 <p>此时基础的系统调用已经完成了，接下来我们需要在 <code>kernel/sysproc.c</code> 中实现 <code>sys_trace</code> 函数。</p>
-<pre class="astro-code astro-code-themes min-light night-owl" style="--shiki-light:#24292eff;--shiki-dark:#d6deeb;--shiki-light-bg:#ffffff;--shiki-dark-bg:#011627; overflow-x: auto;--file-name-offset: -0.75rem;" tabindex="0" data-language="c"><code><span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">uint64</span></span>
+<pre class="astro-code astro-code-themes min-light night-owl" style="--shiki-light:#24292eff;--shiki-dark:#d6deeb;--shiki-light-bg:#ffffff;--shiki-dark-bg:#011627; overflow-x: auto;" tabindex="0" data-language="c"><code><span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">uint64</span></span>
 <span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">sys_trace</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">(</span><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">void</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">)</span></span>
 <span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">{</span></span>
 <span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">  int</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB"> mask;</span></span>
@@ -204,11 +203,11 @@ CS168 02 </span> <span class="mt-1 block"> Lab3: page tables </span> </a> </li> 
 <span class="line"><span style="--shiki-light:#D32F2F;--shiki-light-font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">  return</span><span style="--shiki-light:#1976D2;--shiki-dark:#F78C6C"> 0</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">;</span></span>
 <span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">}</span></span></code></pre>
 <p>然后由于我们需要跟踪所有进程的系统调用，因此我们需要在 <code>proc.h</code> 中加入：</p>
-<pre class="astro-code astro-code-themes min-light night-owl" style="--shiki-light:#24292eff;--shiki-dark:#d6deeb;--shiki-light-bg:#ffffff;--shiki-dark-bg:#011627; overflow-x: auto;--file-name-offset: -0.75rem;" tabindex="0" data-language="c"><code><span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">int</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB"> trace_mask;</span><span style="--shiki-light:#C2C3C5;--shiki-light-font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic"> // trace mask for system call tracing</span></span></code></pre>
+<pre class="astro-code astro-code-themes min-light night-owl" style="--shiki-light:#24292eff;--shiki-dark:#d6deeb;--shiki-light-bg:#ffffff;--shiki-dark-bg:#011627; overflow-x: auto;" tabindex="0" data-language="c"><code><span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">int</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB"> trace_mask;</span><span style="--shiki-light:#C2C3C5;--shiki-light-font-style:inherit;--shiki-dark:#637777;--shiki-dark-font-style:italic"> // trace mask for system call tracing</span></span></code></pre>
 <p>然后在 <code>kernel/proc.c</code> 中的 <code>fork</code> 函数中加入：</p>
-<pre class="astro-code astro-code-themes min-light night-owl" style="--shiki-light:#24292eff;--shiki-dark:#d6deeb;--shiki-light-bg:#ffffff;--shiki-dark-bg:#011627; overflow-x: auto;--file-name-offset: -0.75rem;" tabindex="0" data-language="c"><code><span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">  p</span><span style="--shiki-light:#D32F2F;--shiki-dark:#7FDBCA">-</span><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">></span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">trace_mask </span><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">=</span><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic"> myproc</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">()</span><span style="--shiki-light:#D32F2F;--shiki-dark:#7FDBCA">-</span><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">></span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">trace_mask;</span></span></code></pre>
+<pre class="astro-code astro-code-themes min-light night-owl" style="--shiki-light:#24292eff;--shiki-dark:#d6deeb;--shiki-light-bg:#ffffff;--shiki-dark-bg:#011627; overflow-x: auto;" tabindex="0" data-language="c"><code><span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">  p</span><span style="--shiki-light:#D32F2F;--shiki-dark:#7FDBCA">-</span><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">></span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">trace_mask </span><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">=</span><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic"> myproc</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">()</span><span style="--shiki-light:#D32F2F;--shiki-dark:#7FDBCA">-</span><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">></span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">trace_mask;</span></span></code></pre>
 <p>最后我们需要在 <code>kernel/syscall.c</code> 中的 <code>syscall</code> 函数中加入：</p>
-<pre class="astro-code astro-code-themes min-light night-owl" style="--shiki-light:#24292eff;--shiki-dark:#d6deeb;--shiki-light-bg:#ffffff;--shiki-dark-bg:#011627; overflow-x: auto;--file-name-offset: -0.75rem;" tabindex="0" data-language="c"><code><span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">void</span></span>
+<pre class="astro-code astro-code-themes min-light night-owl" style="--shiki-light:#24292eff;--shiki-dark:#d6deeb;--shiki-light-bg:#ffffff;--shiki-dark-bg:#011627; overflow-x: auto;" tabindex="0" data-language="c"><code><span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">void</span></span>
 <span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">syscall</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">(</span><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">void</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">)</span></span>
 <span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">{</span></span>
 <span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">  int</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB"> num;</span></span>
@@ -226,7 +225,7 @@ CS168 02 </span> <span class="mt-1 block"> Lab3: page tables </span> </a> </li> 
 <span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">  }</span></span>
 <span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">}</span></span></code></pre>
 <p>值得注意的是为了简便，我们在 <code>kernel/syscall.c</code> 中加入了一个 <code>syscall_names</code> 数组来存储系统调用的名字：</p>
-<pre class="astro-code astro-code-themes min-light night-owl" style="--shiki-light:#24292eff;--shiki-dark:#d6deeb;--shiki-light-bg:#ffffff;--shiki-dark-bg:#011627; overflow-x: auto;--file-name-offset: -0.75rem;" tabindex="0" data-language="c"><code><span class="line"><span style="--shiki-light:#D32F2F;--shiki-light-font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">static</span><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA"> char</span><span style="--shiki-light:#D32F2F;--shiki-dark:#7FDBCA">*</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB"> syscall_names</span><span style="--shiki-light:#D32F2F;--shiki-light-font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">[]</span><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA"> =</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB"> {</span></span>
+<pre class="astro-code astro-code-themes min-light night-owl" style="--shiki-light:#24292eff;--shiki-dark:#d6deeb;--shiki-light-bg:#ffffff;--shiki-dark-bg:#011627; overflow-x: auto;" tabindex="0" data-language="c"><code><span class="line"><span style="--shiki-light:#D32F2F;--shiki-light-font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">static</span><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA"> char</span><span style="--shiki-light:#D32F2F;--shiki-dark:#7FDBCA">*</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB"> syscall_names</span><span style="--shiki-light:#D32F2F;--shiki-light-font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">[]</span><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA"> =</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB"> {</span></span>
 <span class="line"><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">  "</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">none</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">"</span><span style="--shiki-light:#212121;--shiki-dark:#D6DEEB">,</span></span>
 <span class="line"><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">  "</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">fork</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">"</span><span style="--shiki-light:#212121;--shiki-dark:#D6DEEB">,</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD"> "</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">exit</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">"</span><span style="--shiki-light:#212121;--shiki-dark:#D6DEEB">,</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD"> "</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">wait</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">"</span><span style="--shiki-light:#212121;--shiki-dark:#D6DEEB">,</span></span>
 <span class="line"><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">  "</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">pipe</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">"</span><span style="--shiki-light:#212121;--shiki-dark:#D6DEEB">,</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD"> "</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">read</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">"</span><span style="--shiki-light:#212121;--shiki-dark:#D6DEEB">,</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD"> "</span><span style="--shiki-light:#22863A;--shiki-dark:#ECC48D">kill</span><span style="--shiki-light:#22863A;--shiki-dark:#D9F5DD">"</span><span style="--shiki-light:#212121;--shiki-dark:#D6DEEB">,</span></span>
@@ -240,7 +239,7 @@ CS168 02 </span> <span class="mt-1 block"> Lab3: page tables </span> </a> </li> 
 <h2 id="sysinfo">Sysinfo</h2>
 <p>我们按照 System call tracing 的思路添加 <code>sysinfo</code> 系统调用，这里不过多赘述了。</p>
 <p>难点主要在于 copyout 函数的使用，<code>sysinfo</code> 需要返回一个 <code>struct sysinfo</code> 的结构体，因此我们需要在 <code>kernel/sysproc.c</code> 中实现 <code>sys_info</code> 函数：</p>
-<pre class="astro-code astro-code-themes min-light night-owl" style="--shiki-light:#24292eff;--shiki-dark:#d6deeb;--shiki-light-bg:#ffffff;--shiki-dark-bg:#011627; overflow-x: auto;--file-name-offset: -0.75rem;" tabindex="0" data-language="c"><code><span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">uint64</span></span>
+<pre class="astro-code astro-code-themes min-light night-owl" style="--shiki-light:#24292eff;--shiki-dark:#d6deeb;--shiki-light-bg:#ffffff;--shiki-dark-bg:#011627; overflow-x: auto;" tabindex="0" data-language="c"><code><span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">uint64</span></span>
 <span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">sys_info</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">(</span><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">void</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">)</span></span>
 <span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">{</span></span>
 <span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">  uint64 addr;</span></span>
@@ -256,7 +255,7 @@ CS168 02 </span> <span class="mt-1 block"> Lab3: page tables </span> </a> </li> 
 <span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">}</span></span></code></pre>
 <p>然后就是 freemem 和 nproc 函数的实现了，freemem 需要遍历内存页表来计算空闲内存页的数量，nproc 需要遍历进程表来计算当前活跃的进程数量。freemem 可以参照 kalloc 寻找空闲页的方式来实验，注意每一页的大小为 PGSIZE，nproc 可以参照 allocproc 寻找空闲进程的方式来实验，注意每个进程的状态为 <code>UNUSED</code> 时表示该进程槽位是空闲的，这里需要寻找的是 非 <code>UNUSED</code> 的进程槽位。</p>
 <p>分别实现为：</p>
-<pre class="astro-code astro-code-themes min-light night-owl" style="--shiki-light:#24292eff;--shiki-dark:#d6deeb;--shiki-light-bg:#ffffff;--shiki-dark-bg:#011627; overflow-x: auto;--file-name-offset: -0.75rem;" tabindex="0" data-language="c"><code><span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">uint64</span></span>
+<pre class="astro-code astro-code-themes min-light night-owl" style="--shiki-light:#24292eff;--shiki-dark:#d6deeb;--shiki-light-bg:#ffffff;--shiki-dark-bg:#011627; overflow-x: auto;" tabindex="0" data-language="c"><code><span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">uint64</span></span>
 <span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">freemem</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">(</span><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">void</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">)</span></span>
 <span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">{</span></span>
 <span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">  struct</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB"> run </span><span style="--shiki-light:#D32F2F;--shiki-dark:#7FDBCA">*</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">r;</span></span>
@@ -272,7 +271,7 @@ CS168 02 </span> <span class="mt-1 block"> Lab3: page tables </span> </a> </li> 
 <span class="line"><span style="--shiki-light:#D32F2F;--shiki-light-font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">  return</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB"> count </span><span style="--shiki-light:#D32F2F;--shiki-dark:#7FDBCA">*</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB"> PGSIZE;</span></span>
 <span class="line"><span style="--shiki-light:#D32F2F;--shiki-light-font-style:inherit;--shiki-dark:#C792EA;--shiki-dark-font-style:italic">  return</span><span style="--shiki-light:#1976D2;--shiki-dark:#F78C6C"> 0</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">;</span></span>
 <span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">}</span></span></code></pre>
-<pre class="astro-code astro-code-themes min-light night-owl" style="--shiki-light:#24292eff;--shiki-dark:#d6deeb;--shiki-light-bg:#ffffff;--shiki-dark-bg:#011627; overflow-x: auto;--file-name-offset: -0.75rem;" tabindex="0" data-language="c"><code><span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">uint64</span></span>
+<pre class="astro-code astro-code-themes min-light night-owl" style="--shiki-light:#24292eff;--shiki-dark:#d6deeb;--shiki-light-bg:#ffffff;--shiki-dark-bg:#011627; overflow-x: auto;" tabindex="0" data-language="c"><code><span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">uint64</span></span>
 <span class="line"><span style="--shiki-light:#6F42C1;--shiki-light-font-style:inherit;--shiki-dark:#82AAFF;--shiki-dark-font-style:italic">nproc</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">(</span><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">void</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">)</span></span>
 <span class="line"><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">{</span></span>
 <span class="line"><span style="--shiki-light:#D32F2F;--shiki-dark:#C792EA">  struct</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB"> proc </span><span style="--shiki-light:#D32F2F;--shiki-dark:#7FDBCA">*</span><span style="--shiki-light:#24292EFF;--shiki-dark:#D6DEEB">p;</span></span>
@@ -342,30 +341,37 @@ CS168 02 </span> <span class="mt-1 block"> Lab3: page tables </span> </a> </li> 
     const isZh = document.documentElement.lang === "zh-CN";
     const copyButtonLabel = isZh ? "复制" : "Copy";
     const copiedButtonLabel = isZh ? "已复制" : "Copied";
-    const codeBlocks = Array.from(document.querySelectorAll("pre"));
+    const codeBlocks = Array.from(
+      document.querySelectorAll("#article pre:not(.code-block-shell pre)")
+    );
 
     for (const codeBlock of codeBlocks) {
       const wrapper = document.createElement("div");
-      wrapper.style.position = "relative";
+      wrapper.className = "code-block-shell";
 
-      const computedStyle = getComputedStyle(codeBlock);
-      const hasFileNameOffset =
-        computedStyle.getPropertyValue("--file-name-offset").trim() !== "";
+      const toolbar = document.createElement("div");
+      toolbar.className = "code-block-toolbar";
 
-      const topClass = hasFileNameOffset
-        ? "top-(--file-name-offset)"
-        : "-top-3";
+      const meta = document.createElement("span");
+      meta.className = "code-block-meta";
+      const filename = codeBlock.querySelector(".code-block-filename");
+      if (filename) {
+        meta.appendChild(filename);
+      } else {
+        meta.textContent = codeBlock.dataset.language ?? "text";
+      }
 
       const copyButton = document.createElement("button");
-      copyButton.className = `copy-code absolute end-3 ${topClass} rounded bg-muted border border-muted px-2 py-1 text-xs leading-4 text-foreground font-medium`;
+      copyButton.type = "button";
+      copyButton.className = "copy-code";
       copyButton.innerHTML = copyButtonLabel;
       copyButton.setAttribute("aria-label", copyButtonLabel);
       copyButton.setAttribute("aria-live", "polite");
       codeBlock.setAttribute("tabindex", "0");
-      codeBlock.appendChild(copyButton);
+      toolbar.append(meta, copyButton);
 
       codeBlock?.parentNode?.insertBefore(wrapper, codeBlock);
-      wrapper.appendChild(codeBlock);
+      wrapper.append(toolbar, codeBlock);
 
       copyButton.addEventListener("click", async () => {
         await copyCode(codeBlock, copyButton);
@@ -388,6 +394,27 @@ CS168 02 </span> <span class="mt-1 block"> Lab3: page tables </span> </a> </li> 
     }
   }
   attachCopyButtons();
+
+  function enhanceMarkdownTables() {
+    const isZh = document.documentElement.lang === "zh-CN";
+    const tables = Array.from(
+      document.querySelectorAll("#article table:not(.table-scroll table)")
+    );
+
+    for (const table of tables) {
+      const wrapper = document.createElement("div");
+      wrapper.className = "table-scroll";
+      wrapper.setAttribute("role", "region");
+      wrapper.setAttribute(
+        "aria-label",
+        isZh ? "可横向滚动的表格" : "Scrollable table"
+      );
+      wrapper.setAttribute("tabindex", "0");
+      table.parentNode?.insertBefore(wrapper, table);
+      wrapper.appendChild(table);
+    }
+  }
+  enhanceMarkdownTables();
 
   /** Accessible image lightbox for article images. */
   function initLightbox() {

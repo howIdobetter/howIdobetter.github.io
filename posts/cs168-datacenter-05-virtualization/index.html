@@ -14,7 +14,7 @@
         // Expose value so theme.ts can skip re-detection.
         window.__theme = { value: theme };
       })();
-    </script><meta name="astro-view-transitions-enabled" content="true"><meta name="astro-view-transitions-fallback" content="animate"><script type="module" src="/_astro/ClientRouter.astro_astro_type_script_index_0_lang.CZ1STEZH.js"></script><link rel="stylesheet" href="/_astro/Footer.Cq0nITt3.css">
+    </script><meta name="astro-view-transitions-enabled" content="true"><meta name="astro-view-transitions-fallback" content="animate"><script type="module" src="/_astro/ClientRouter.astro_astro_type_script_index_0_lang.CZ1STEZH.js"></script><link rel="stylesheet" href="/_astro/Footer.DKAlEgKd.css">
 <style>@keyframes astroFadeInOut{0%{opacity:1}to{opacity:0}}@keyframes astroFadeIn{0%{opacity:0;mix-blend-mode:plus-lighter}to{opacity:1;mix-blend-mode:plus-lighter}}@keyframes astroFadeOut{0%{opacity:1;mix-blend-mode:plus-lighter}to{opacity:0;mix-blend-mode:plus-lighter}}@keyframes astroSlideFromRight{0%{transform:translate(100%)}}@keyframes astroSlideFromLeft{0%{transform:translate(-100%)}}@keyframes astroSlideToRight{to{transform:translate(100%)}}@keyframes astroSlideToLeft{to{transform:translate(-100%)}}@media(prefers-reduced-motion){::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}[data-astro-transition-scope]{animation:none!important}}
 .author-signature[data-astro-cid-n5tsuhpg]{width:min(100%,22rem);margin:clamp(3.75rem,8vw,5.75rem) 0 0 auto;color:#000}[data-theme=dark] .author-signature[data-astro-cid-n5tsuhpg]{color:#fff}.author-signature-canvas[data-astro-cid-n5tsuhpg]{position:relative;width:100%;aspect-ratio:1850 / 555}.author-signature-svg[data-astro-cid-n5tsuhpg]{display:block;width:100%;height:100%;overflow:visible}.author-signature-stroke[data-astro-cid-n5tsuhpg]{stroke-dasharray:1;stroke-dashoffset:1}.author-signature-ink[data-astro-cid-n5tsuhpg]{opacity:0}.author-signature-caption[data-astro-cid-n5tsuhpg]{display:flex;align-items:center;justify-content:flex-end;gap:.7rem;margin-top:.35rem;color:var(--muted-foreground);font-family:var(--font-mono-app);font-size:.66rem;font-weight:600;letter-spacing:.16em}.author-signature-caption-line[data-astro-cid-n5tsuhpg]{width:2.75rem;height:1px;background:color-mix(in srgb,var(--foreground) 42%,transparent)}@media(max-width:639px){.author-signature[data-astro-cid-n5tsuhpg]{width:min(82vw,19rem);margin-top:3.75rem}}@media(prefers-reduced-motion:reduce){.author-signature-stroke[data-astro-cid-n5tsuhpg]{stroke-dashoffset:0}.author-signature-ink[data-astro-cid-n5tsuhpg]{opacity:1}}
 </style><style>[data-astro-transition-scope="astro-36ssibgs-1"] { view-transition-name: networking; }@layer astro { ::view-transition-old(networking) { 
@@ -177,8 +177,7 @@ CS168 07 </span> <span class="mt-1 block"> CS168：主机网络 </span> </a> </l
 ，依照 <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh-hans"> CC BY-SA 4.0 </a> 
 许可发布
 
-。<span> 由英文原文完整翻译为简体中文；技术术语在首次出现时保留英文。</span> </p> </aside> <h2 id="虚拟化和封装">虚拟化和封装</h2>
-<h2 id="物理数据中心限制">物理数据中心限制</h2>
+。<span> 由英文原文完整翻译为简体中文；技术术语在首次出现时保留英文。</span> </p> </aside> <h2 id="物理数据中心限制">物理数据中心限制</h2>
 <p>数据中心以固定且结构化的方式组织。相同的服务器被组织成机架，并且机架以某种固定的拓扑排列。这种方法有一些好处。例如，它为我们提供了一种分配分层地址的自然方法。</p>
 <p>然而，当我们考虑如何在数据中心托管应用程序时，数据中心的固定组织有一些缺点。假设 Google 推出了一项新服务，他们希望将其托管在现有的数据中心中。如果我们将该应用程序直接放置在物理服务器上，则必须有人为该应用程序物理安装一台具有自己的 IP 地址的新服务器。如果服务扩展，可能需要安装更多服务器。如果服务器出现故障，我们就必须等待有人来修复它。这里的关键问题是改变物理基础设施很困难，但我们经常想要添加新主机、扩展现有主机以及快速、频繁地移动主机。</p>
 <p>将应用程序放置在物理服务器上也会带来扩展问题。假设谷歌的新服务非常轻量级，但需要专用服务器（例如出于安全原因）。我们必须将整个物理服务器分配给这个轻量级服务，并且服务器的大部分计算能力都将未被使用。</p>
@@ -331,30 +330,37 @@ CS168 07 </span> <span class="mt-1 block"> CS168：主机网络 </span> </a> </l
     const isZh = document.documentElement.lang === "zh-CN";
     const copyButtonLabel = isZh ? "复制" : "Copy";
     const copiedButtonLabel = isZh ? "已复制" : "Copied";
-    const codeBlocks = Array.from(document.querySelectorAll("pre"));
+    const codeBlocks = Array.from(
+      document.querySelectorAll("#article pre:not(.code-block-shell pre)")
+    );
 
     for (const codeBlock of codeBlocks) {
       const wrapper = document.createElement("div");
-      wrapper.style.position = "relative";
+      wrapper.className = "code-block-shell";
 
-      const computedStyle = getComputedStyle(codeBlock);
-      const hasFileNameOffset =
-        computedStyle.getPropertyValue("--file-name-offset").trim() !== "";
+      const toolbar = document.createElement("div");
+      toolbar.className = "code-block-toolbar";
 
-      const topClass = hasFileNameOffset
-        ? "top-(--file-name-offset)"
-        : "-top-3";
+      const meta = document.createElement("span");
+      meta.className = "code-block-meta";
+      const filename = codeBlock.querySelector(".code-block-filename");
+      if (filename) {
+        meta.appendChild(filename);
+      } else {
+        meta.textContent = codeBlock.dataset.language ?? "text";
+      }
 
       const copyButton = document.createElement("button");
-      copyButton.className = `copy-code absolute end-3 ${topClass} rounded bg-muted border border-muted px-2 py-1 text-xs leading-4 text-foreground font-medium`;
+      copyButton.type = "button";
+      copyButton.className = "copy-code";
       copyButton.innerHTML = copyButtonLabel;
       copyButton.setAttribute("aria-label", copyButtonLabel);
       copyButton.setAttribute("aria-live", "polite");
       codeBlock.setAttribute("tabindex", "0");
-      codeBlock.appendChild(copyButton);
+      toolbar.append(meta, copyButton);
 
       codeBlock?.parentNode?.insertBefore(wrapper, codeBlock);
-      wrapper.appendChild(codeBlock);
+      wrapper.append(toolbar, codeBlock);
 
       copyButton.addEventListener("click", async () => {
         await copyCode(codeBlock, copyButton);
@@ -377,6 +383,27 @@ CS168 07 </span> <span class="mt-1 block"> CS168：主机网络 </span> </a> </l
     }
   }
   attachCopyButtons();
+
+  function enhanceMarkdownTables() {
+    const isZh = document.documentElement.lang === "zh-CN";
+    const tables = Array.from(
+      document.querySelectorAll("#article table:not(.table-scroll table)")
+    );
+
+    for (const table of tables) {
+      const wrapper = document.createElement("div");
+      wrapper.className = "table-scroll";
+      wrapper.setAttribute("role", "region");
+      wrapper.setAttribute(
+        "aria-label",
+        isZh ? "可横向滚动的表格" : "Scrollable table"
+      );
+      wrapper.setAttribute("tabindex", "0");
+      table.parentNode?.insertBefore(wrapper, table);
+      wrapper.appendChild(table);
+    }
+  }
+  enhanceMarkdownTables();
 
   /** Accessible image lightbox for article images. */
   function initLightbox() {

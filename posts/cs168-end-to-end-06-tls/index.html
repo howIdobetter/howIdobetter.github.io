@@ -14,7 +14,7 @@
         // Expose value so theme.ts can skip re-detection.
         window.__theme = { value: theme };
       })();
-    </script><meta name="astro-view-transitions-enabled" content="true"><meta name="astro-view-transitions-fallback" content="animate"><script type="module" src="/_astro/ClientRouter.astro_astro_type_script_index_0_lang.CZ1STEZH.js"></script><link rel="stylesheet" href="/_astro/Footer.Cq0nITt3.css">
+    </script><meta name="astro-view-transitions-enabled" content="true"><meta name="astro-view-transitions-fallback" content="animate"><script type="module" src="/_astro/ClientRouter.astro_astro_type_script_index_0_lang.CZ1STEZH.js"></script><link rel="stylesheet" href="/_astro/Footer.DKAlEgKd.css">
 <style>@keyframes astroFadeInOut{0%{opacity:1}to{opacity:0}}@keyframes astroFadeIn{0%{opacity:0;mix-blend-mode:plus-lighter}to{opacity:1;mix-blend-mode:plus-lighter}}@keyframes astroFadeOut{0%{opacity:1;mix-blend-mode:plus-lighter}to{opacity:0;mix-blend-mode:plus-lighter}}@keyframes astroSlideFromRight{0%{transform:translate(100%)}}@keyframes astroSlideFromLeft{0%{transform:translate(-100%)}}@keyframes astroSlideToRight{to{transform:translate(100%)}}@keyframes astroSlideToLeft{to{transform:translate(-100%)}}@media(prefers-reduced-motion){::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}[data-astro-transition-scope]{animation:none!important}}
 .author-signature[data-astro-cid-n5tsuhpg]{width:min(100%,22rem);margin:clamp(3.75rem,8vw,5.75rem) 0 0 auto;color:#000}[data-theme=dark] .author-signature[data-astro-cid-n5tsuhpg]{color:#fff}.author-signature-canvas[data-astro-cid-n5tsuhpg]{position:relative;width:100%;aspect-ratio:1850 / 555}.author-signature-svg[data-astro-cid-n5tsuhpg]{display:block;width:100%;height:100%;overflow:visible}.author-signature-stroke[data-astro-cid-n5tsuhpg]{stroke-dasharray:1;stroke-dashoffset:1}.author-signature-ink[data-astro-cid-n5tsuhpg]{opacity:0}.author-signature-caption[data-astro-cid-n5tsuhpg]{display:flex;align-items:center;justify-content:flex-end;gap:.7rem;margin-top:.35rem;color:var(--muted-foreground);font-family:var(--font-mono-app);font-size:.66rem;font-weight:600;letter-spacing:.16em}.author-signature-caption-line[data-astro-cid-n5tsuhpg]{width:2.75rem;height:1px;background:color-mix(in srgb,var(--foreground) 42%,transparent)}@media(max-width:639px){.author-signature[data-astro-cid-n5tsuhpg]{width:min(82vw,19rem);margin-top:3.75rem}}@media(prefers-reduced-motion:reduce){.author-signature-stroke[data-astro-cid-n5tsuhpg]{stroke-dashoffset:0}.author-signature-ink[data-astro-cid-n5tsuhpg]{opacity:1}}
 </style><style>[data-astro-transition-scope="astro-36ssibgs-1"] { view-transition-name: networking; }@layer astro { ::view-transition-old(networking) { 
@@ -177,8 +177,7 @@ CS168 07 </span> <span class="mt-1 block"> CS168：端到端连通性 </span> </
 ，依照 <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh-hans"> CC BY-SA 4.0 </a> 
 许可发布
 
-。<span> 由英文原文完整翻译为简体中文；技术术语在首次出现时保留英文。</span> </p> </aside> <h2 id="tls安全字节流">TLS：安全字节流</h2>
-<h2 id="安全字节流">安全字节流</h2>
+。<span> 由英文原文完整翻译为简体中文；技术术语在首次出现时保留英文。</span> </p> </aside> <h2 id="安全字节流">安全字节流</h2>
 <p>TCP 本身对于网络攻击者来说是不安全的。网络上的某人（例如恶意路由器、在线路上嗅探数据包的攻击者）可能会在传输过程中读取甚至修改您的 TCP 数据包。</p>
 <p>此外，使用 TCP，您可能会连接到攻击者而不是真实服务器。假设您要连接到银行网站，并且您对 <code>www.bank.com</code> 进行 DNS 查找。攻击者（例如侵入解析器或路由器的人）更改 DNS 响应，以便将 <code>www.bank.com</code> 映射到攻击者的 IP 地址 6.6.6.6。现在，当您与银行网站建立 TCP 连接时，您正在与攻击者交谈。您最终可能会将您的银行密码发送给攻击者！</p>
 <p>为了解决这些安全问题，我们在 TCP 之上添加了一个新协议<strong>传输层安全性 (TLS)</strong>。</p>
@@ -265,30 +264,37 @@ CS168 07 </span> <span class="mt-1 block"> CS168：端到端连通性 </span> </
     const isZh = document.documentElement.lang === "zh-CN";
     const copyButtonLabel = isZh ? "复制" : "Copy";
     const copiedButtonLabel = isZh ? "已复制" : "Copied";
-    const codeBlocks = Array.from(document.querySelectorAll("pre"));
+    const codeBlocks = Array.from(
+      document.querySelectorAll("#article pre:not(.code-block-shell pre)")
+    );
 
     for (const codeBlock of codeBlocks) {
       const wrapper = document.createElement("div");
-      wrapper.style.position = "relative";
+      wrapper.className = "code-block-shell";
 
-      const computedStyle = getComputedStyle(codeBlock);
-      const hasFileNameOffset =
-        computedStyle.getPropertyValue("--file-name-offset").trim() !== "";
+      const toolbar = document.createElement("div");
+      toolbar.className = "code-block-toolbar";
 
-      const topClass = hasFileNameOffset
-        ? "top-(--file-name-offset)"
-        : "-top-3";
+      const meta = document.createElement("span");
+      meta.className = "code-block-meta";
+      const filename = codeBlock.querySelector(".code-block-filename");
+      if (filename) {
+        meta.appendChild(filename);
+      } else {
+        meta.textContent = codeBlock.dataset.language ?? "text";
+      }
 
       const copyButton = document.createElement("button");
-      copyButton.className = `copy-code absolute end-3 ${topClass} rounded bg-muted border border-muted px-2 py-1 text-xs leading-4 text-foreground font-medium`;
+      copyButton.type = "button";
+      copyButton.className = "copy-code";
       copyButton.innerHTML = copyButtonLabel;
       copyButton.setAttribute("aria-label", copyButtonLabel);
       copyButton.setAttribute("aria-live", "polite");
       codeBlock.setAttribute("tabindex", "0");
-      codeBlock.appendChild(copyButton);
+      toolbar.append(meta, copyButton);
 
       codeBlock?.parentNode?.insertBefore(wrapper, codeBlock);
-      wrapper.appendChild(codeBlock);
+      wrapper.append(toolbar, codeBlock);
 
       copyButton.addEventListener("click", async () => {
         await copyCode(codeBlock, copyButton);
@@ -311,6 +317,27 @@ CS168 07 </span> <span class="mt-1 block"> CS168：端到端连通性 </span> </
     }
   }
   attachCopyButtons();
+
+  function enhanceMarkdownTables() {
+    const isZh = document.documentElement.lang === "zh-CN";
+    const tables = Array.from(
+      document.querySelectorAll("#article table:not(.table-scroll table)")
+    );
+
+    for (const table of tables) {
+      const wrapper = document.createElement("div");
+      wrapper.className = "table-scroll";
+      wrapper.setAttribute("role", "region");
+      wrapper.setAttribute(
+        "aria-label",
+        isZh ? "可横向滚动的表格" : "Scrollable table"
+      );
+      wrapper.setAttribute("tabindex", "0");
+      table.parentNode?.insertBefore(wrapper, table);
+      wrapper.appendChild(table);
+    }
+  }
+  enhanceMarkdownTables();
 
   /** Accessible image lightbox for article images. */
   function initLightbox() {

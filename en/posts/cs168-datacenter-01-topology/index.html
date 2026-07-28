@@ -14,7 +14,7 @@
         // Expose value so theme.ts can skip re-detection.
         window.__theme = { value: theme };
       })();
-    </script><meta name="astro-view-transitions-enabled" content="true"><meta name="astro-view-transitions-fallback" content="animate"><script type="module" src="/_astro/ClientRouter.astro_astro_type_script_index_0_lang.CZ1STEZH.js"></script><link rel="stylesheet" href="/_astro/Footer.Cq0nITt3.css">
+    </script><meta name="astro-view-transitions-enabled" content="true"><meta name="astro-view-transitions-fallback" content="animate"><script type="module" src="/_astro/ClientRouter.astro_astro_type_script_index_0_lang.CZ1STEZH.js"></script><link rel="stylesheet" href="/_astro/Footer.DKAlEgKd.css">
 <style>@keyframes astroFadeInOut{0%{opacity:1}to{opacity:0}}@keyframes astroFadeIn{0%{opacity:0;mix-blend-mode:plus-lighter}to{opacity:1;mix-blend-mode:plus-lighter}}@keyframes astroFadeOut{0%{opacity:1;mix-blend-mode:plus-lighter}to{opacity:0;mix-blend-mode:plus-lighter}}@keyframes astroSlideFromRight{0%{transform:translate(100%)}}@keyframes astroSlideFromLeft{0%{transform:translate(-100%)}}@keyframes astroSlideToRight{to{transform:translate(100%)}}@keyframes astroSlideToLeft{to{transform:translate(-100%)}}@media(prefers-reduced-motion){::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}[data-astro-transition-scope]{animation:none!important}}
 .author-signature[data-astro-cid-n5tsuhpg]{width:min(100%,22rem);margin:clamp(3.75rem,8vw,5.75rem) 0 0 auto;color:#000}[data-theme=dark] .author-signature[data-astro-cid-n5tsuhpg]{color:#fff}.author-signature-canvas[data-astro-cid-n5tsuhpg]{position:relative;width:100%;aspect-ratio:1850 / 555}.author-signature-svg[data-astro-cid-n5tsuhpg]{display:block;width:100%;height:100%;overflow:visible}.author-signature-stroke[data-astro-cid-n5tsuhpg]{stroke-dasharray:1;stroke-dashoffset:1}.author-signature-ink[data-astro-cid-n5tsuhpg]{opacity:0}.author-signature-caption[data-astro-cid-n5tsuhpg]{display:flex;align-items:center;justify-content:flex-end;gap:.7rem;margin-top:.35rem;color:var(--muted-foreground);font-family:var(--font-mono-app);font-size:.66rem;font-weight:600;letter-spacing:.16em}.author-signature-caption-line[data-astro-cid-n5tsuhpg]{width:2.75rem;height:1px;background:color-mix(in srgb,var(--foreground) 42%,transparent)}@media(max-width:639px){.author-signature[data-astro-cid-n5tsuhpg]{width:min(82vw,19rem);margin-top:3.75rem}}@media(prefers-reduced-motion:reduce){.author-signature-stroke[data-astro-cid-n5tsuhpg]{stroke-dashoffset:0}.author-signature-ink[data-astro-cid-n5tsuhpg]{opacity:1}}
 </style><style>[data-astro-transition-scope="astro-36ssibgs-1"] { view-transition-name: networking; }@layer astro { ::view-transition-old(networking) { 
@@ -177,8 +177,7 @@ CS168 07 </span> <span class="mt-1 block"> CS168：主机网络 </span> </a> </l
 ，依照 <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh-hans"> CC BY-SA 4.0 </a> 
 许可发布
 
-。<span> 由英文原文完整翻译为简体中文；技术术语在首次出现时保留英文。</span> </p> </aside> <h2 id="数据中心拓扑">数据中心拓扑</h2>
-<h2 id="什么是数据中心">什么是数据中心？</h2>
+。<span> 由英文原文完整翻译为简体中文；技术术语在首次出现时保留英文。</span> </p> </aside> <h2 id="什么是数据中心">什么是数据中心？</h2>
 <p>到目前为止，在我们的互联网模型中，我们已经展示了终端主机相互发送数据包的情况。最终主机可能是客户端计算机（例如您的本地计算机）或服务器（例如 YouTube）。但是，YouTube 真的是互联网上的一台向全世界提供视频的机器吗？</p>
 <img width="800px" src="/image/cs168-textbook/datacenter/6-001-single-server.png">
 <p>事实上，YouTube 是一栋由互连机器组成的完整建筑，它们协同工作，为客户提供视频。所有这些机器都位于同一本地网络中，并且可以相互通信来满足请求（例如，如果您请求的视频存储在不同的机器上）。</p>
@@ -233,7 +232,7 @@ CS168 07 </span> <span class="mt-1 block"> CS168：主机网络 </span> </a> </l
 <p><strong>超额订阅</strong>是衡量我们距离完全二等分带宽有多远的指标，或者等效地衡量网络瓶颈部分的过载程度。它是二分带宽与全二分带宽（所有主机都以全速率发送时的带宽）的比率。</p>
 <img width="900px" src="/image/cs168-textbook/datacenter/6-015-bisection4.png">
 <p>在最右边的示例中，假设所有链路均为 1 Gbps，则平分带宽为 2 Gbps（将左侧四台主机与右侧四台主机分开）。当所有四个左侧主机同时发送数据时，获得的完整二等分带宽为 4 Gbps。因此，比率 2/4 告诉我们主机只能以其全速率的 50% 发送。换句话说，我们的网络超额订阅了 2 倍，因为如果主机全部以全速率发送，瓶颈链路将超载 2 倍（2 Gbps 链路上的 4 Gbps）。</p>
-<h2 id="数据中心拓扑-1">数据中心拓扑</h2>
+<h2 id="数据中心拓扑">数据中心拓扑</h2>
 <p>我们现在已经定义了二分带宽，这是一种衡量连通性的方法，它是网络拓扑的函数。在数据中心中，我们可以选择拓扑（例如选择安装电缆的位置）。我们应该构建什么拓扑来最大化二分带宽？</p>
 <p>一种可能的方法是将每个机架连接到一个巨大的交叉开关。左侧的所有机架可以同时以全速率将数据发送到交换机，交换机将所有数据以全速率转发到右侧。这将使我们能够实现完全平分带宽。</p>
 <img width="500px" src="/image/cs168-textbook/datacenter/6-016-topology1.png">
@@ -362,30 +361,37 @@ CS168 07 </span> <span class="mt-1 block"> CS168：主机网络 </span> </a> </l
     const isZh = document.documentElement.lang === "zh-CN";
     const copyButtonLabel = isZh ? "复制" : "Copy";
     const copiedButtonLabel = isZh ? "已复制" : "Copied";
-    const codeBlocks = Array.from(document.querySelectorAll("pre"));
+    const codeBlocks = Array.from(
+      document.querySelectorAll("#article pre:not(.code-block-shell pre)")
+    );
 
     for (const codeBlock of codeBlocks) {
       const wrapper = document.createElement("div");
-      wrapper.style.position = "relative";
+      wrapper.className = "code-block-shell";
 
-      const computedStyle = getComputedStyle(codeBlock);
-      const hasFileNameOffset =
-        computedStyle.getPropertyValue("--file-name-offset").trim() !== "";
+      const toolbar = document.createElement("div");
+      toolbar.className = "code-block-toolbar";
 
-      const topClass = hasFileNameOffset
-        ? "top-(--file-name-offset)"
-        : "-top-3";
+      const meta = document.createElement("span");
+      meta.className = "code-block-meta";
+      const filename = codeBlock.querySelector(".code-block-filename");
+      if (filename) {
+        meta.appendChild(filename);
+      } else {
+        meta.textContent = codeBlock.dataset.language ?? "text";
+      }
 
       const copyButton = document.createElement("button");
-      copyButton.className = `copy-code absolute end-3 ${topClass} rounded bg-muted border border-muted px-2 py-1 text-xs leading-4 text-foreground font-medium`;
+      copyButton.type = "button";
+      copyButton.className = "copy-code";
       copyButton.innerHTML = copyButtonLabel;
       copyButton.setAttribute("aria-label", copyButtonLabel);
       copyButton.setAttribute("aria-live", "polite");
       codeBlock.setAttribute("tabindex", "0");
-      codeBlock.appendChild(copyButton);
+      toolbar.append(meta, copyButton);
 
       codeBlock?.parentNode?.insertBefore(wrapper, codeBlock);
-      wrapper.appendChild(codeBlock);
+      wrapper.append(toolbar, codeBlock);
 
       copyButton.addEventListener("click", async () => {
         await copyCode(codeBlock, copyButton);
@@ -408,6 +414,27 @@ CS168 07 </span> <span class="mt-1 block"> CS168：主机网络 </span> </a> </l
     }
   }
   attachCopyButtons();
+
+  function enhanceMarkdownTables() {
+    const isZh = document.documentElement.lang === "zh-CN";
+    const tables = Array.from(
+      document.querySelectorAll("#article table:not(.table-scroll table)")
+    );
+
+    for (const table of tables) {
+      const wrapper = document.createElement("div");
+      wrapper.className = "table-scroll";
+      wrapper.setAttribute("role", "region");
+      wrapper.setAttribute(
+        "aria-label",
+        isZh ? "可横向滚动的表格" : "Scrollable table"
+      );
+      wrapper.setAttribute("tabindex", "0");
+      table.parentNode?.insertBefore(wrapper, table);
+      wrapper.appendChild(table);
+    }
+  }
+  enhanceMarkdownTables();
 
   /** Accessible image lightbox for article images. */
   function initLightbox() {

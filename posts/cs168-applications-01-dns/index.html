@@ -14,7 +14,7 @@
         // Expose value so theme.ts can skip re-detection.
         window.__theme = { value: theme };
       })();
-    </script><meta name="astro-view-transitions-enabled" content="true"><meta name="astro-view-transitions-fallback" content="animate"><script type="module" src="/_astro/ClientRouter.astro_astro_type_script_index_0_lang.CZ1STEZH.js"></script><link rel="stylesheet" href="/_astro/Footer.Cq0nITt3.css">
+    </script><meta name="astro-view-transitions-enabled" content="true"><meta name="astro-view-transitions-fallback" content="animate"><script type="module" src="/_astro/ClientRouter.astro_astro_type_script_index_0_lang.CZ1STEZH.js"></script><link rel="stylesheet" href="/_astro/Footer.DKAlEgKd.css">
 <style>@keyframes astroFadeInOut{0%{opacity:1}to{opacity:0}}@keyframes astroFadeIn{0%{opacity:0;mix-blend-mode:plus-lighter}to{opacity:1;mix-blend-mode:plus-lighter}}@keyframes astroFadeOut{0%{opacity:1;mix-blend-mode:plus-lighter}to{opacity:0;mix-blend-mode:plus-lighter}}@keyframes astroSlideFromRight{0%{transform:translate(100%)}}@keyframes astroSlideFromLeft{0%{transform:translate(-100%)}}@keyframes astroSlideToRight{to{transform:translate(100%)}}@keyframes astroSlideToLeft{to{transform:translate(-100%)}}@media(prefers-reduced-motion){::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}[data-astro-transition-scope]{animation:none!important}}
 .author-signature[data-astro-cid-n5tsuhpg]{width:min(100%,22rem);margin:clamp(3.75rem,8vw,5.75rem) 0 0 auto;color:#000}[data-theme=dark] .author-signature[data-astro-cid-n5tsuhpg]{color:#fff}.author-signature-canvas[data-astro-cid-n5tsuhpg]{position:relative;width:100%;aspect-ratio:1850 / 555}.author-signature-svg[data-astro-cid-n5tsuhpg]{display:block;width:100%;height:100%;overflow:visible}.author-signature-stroke[data-astro-cid-n5tsuhpg]{stroke-dasharray:1;stroke-dashoffset:1}.author-signature-ink[data-astro-cid-n5tsuhpg]{opacity:0}.author-signature-caption[data-astro-cid-n5tsuhpg]{display:flex;align-items:center;justify-content:flex-end;gap:.7rem;margin-top:.35rem;color:var(--muted-foreground);font-family:var(--font-mono-app);font-size:.66rem;font-weight:600;letter-spacing:.16em}.author-signature-caption-line[data-astro-cid-n5tsuhpg]{width:2.75rem;height:1px;background:color-mix(in srgb,var(--foreground) 42%,transparent)}@media(max-width:639px){.author-signature[data-astro-cid-n5tsuhpg]{width:min(82vw,19rem);margin-top:3.75rem}}@media(prefers-reduced-motion:reduce){.author-signature-stroke[data-astro-cid-n5tsuhpg]{stroke-dashoffset:0}.author-signature-ink[data-astro-cid-n5tsuhpg]{opacity:1}}
 </style><style>[data-astro-transition-scope="astro-36ssibgs-1"] { view-transition-name: networking; }@layer astro { ::view-transition-old(networking) { 
@@ -172,8 +172,7 @@ CS168 02 </span> <span class="mt-1 block"> HTTP </span> </a> </li> </ol> </div> 
 ，依照 <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh-hans"> CC BY-SA 4.0 </a> 
 许可发布
 
-。<span> 中文翻译；为适应中文阅读习惯调整了部分术语表达，未改变原意。</span> </p> </aside> <h2 id="dns">DNS</h2>
-<h2 id="dns-有什么用途">DNS 有什么用途？</h2>
+。<span> 中文翻译；为适应中文阅读习惯调整了部分术语表达，未改变原意。</span> </p> </aside> <h2 id="dns-有什么用途">DNS 有什么用途？</h2>
 <p>本节将介绍一些常见的应用（第 7 层）；它们运行在我们目前构建的各层之上。</p>
 <img width="400px" src="/image/cs168-textbook/applications/4-01-layer7.png">
 <p>我们首先介绍的应用是 DNS。它是一种运行在第 1～4 层之上的协议，提供名称解析这一重要的网络功能。</p>
@@ -270,7 +269,7 @@ CS168 02 </span> <span class="mt-1 block"> HTTP </span> </a> </li> </ol> </div> 
 <p>现在来逐步完成一次真实的 DNS 查询，寻找 <code>eecs.berkeley.edu</code> 的 IP 地址。你可以在家使用 <a href="https://en.wikipedia.org/wiki/Dig_(command)"><code>dig</code> 工具</a> 尝试；记得设置 <code>+norecurse</code> 标志，以便自行展开递归过程。</p>
 <p>每次 DNS 查询都从根服务器开始。根服务器的名称和 IP 地址通常以根提示文件的形式硬编码进解析器。感兴趣的话，可以查看这份根提示文件：<a href="https://www.internic.net/domain/named.root">https://www.internic.net/domain/named.root</a>。</p>
 <p>第一台根服务器的域名是 <code>a.root-servers.net</code>，IP 地址是 <code>198.41.0.4</code>。我们可以用 <code>dig</code> 向该地址发送 DNS 请求，询问 <code>eecs.berkeley.edu</code> 的 IP 地址。</p>
-<pre class="astro-code astro-code-themes min-light night-owl" style="--shiki-light:#24292eff;--shiki-dark:#d6deeb;--shiki-light-bg:#ffffff;--shiki-dark-bg:#011627; overflow-x: auto;--file-name-offset: -0.75rem;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ dig +norecurse eecs.berkeley.edu @198.41.0.4</span></span>
+<pre class="astro-code astro-code-themes min-light night-owl" style="--shiki-light:#24292eff;--shiki-dark:#d6deeb;--shiki-light-bg:#ffffff;--shiki-dark-bg:#011627; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ dig +norecurse eecs.berkeley.edu @198.41.0.4</span></span>
 <span class="line"><span></span></span>
 <span class="line"><span>;; Got answer:</span></span>
 <span class="line"><span>;; ->>HEADER&#x3C;&#x3C;- opcode: QUERY, status: NOERROR, id: 26114</span></span>
@@ -299,7 +298,7 @@ CS168 02 </span> <span class="mt-1 block"> HTTP </span> </a> </li> </ol> </div> 
 <p>权威部分和附加部分合在一起，提供下一台名称服务器的区域、域名和 IP 地址。为保持 DNS 消息的键值结构，这些信息被分散在两个部分中。</p>
 <p>完整地说：<code>172800</code> 是每条记录的 TTL（生存时间），这里设为 172,800 秒，即 48 小时。<code>IN</code> 是互联网类，基本可以忽略。有时你会看到类型为 <code>AAAA</code> 的记录，对应 IPv6 地址（通常的 <code>A</code> 类型记录对应 IPv4 地址）。</p>
 <p>合理性检查：接下来查询哪台名称服务器？我们怎么知道它位于哪里？要向它查询什么？\footnote{查询 <code>a.edu-servers.net</code>；由于附加部分中的记录，我们知道它的位置。仍像之前一样查询 <code>eecs.berkeley.edu</code> 的 IP 地址。}</p>
-<pre class="astro-code astro-code-themes min-light night-owl" style="--shiki-light:#24292eff;--shiki-dark:#d6deeb;--shiki-light-bg:#ffffff;--shiki-dark-bg:#011627; overflow-x: auto;--file-name-offset: -0.75rem;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ dig +norecurse eecs.berkeley.edu @192.5.6.30</span></span>
+<pre class="astro-code astro-code-themes min-light night-owl" style="--shiki-light:#24292eff;--shiki-dark:#d6deeb;--shiki-light-bg:#ffffff;--shiki-dark-bg:#011627; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ dig +norecurse eecs.berkeley.edu @192.5.6.30</span></span>
 <span class="line"><span></span></span>
 <span class="line"><span>;; Got answer:</span></span>
 <span class="line"><span>;; ->>HEADER&#x3C;&#x3C;- opcode: QUERY, status: NOERROR, id: 36257</span></span>
@@ -319,7 +318,7 @@ CS168 02 </span> <span class="mt-1 block"> HTTP </span> </a> </li> </ol> </div> 
 <span class="line"><span>adns3.berkeley.edu.  172800   IN   A    192.107.102.142</span></span>
 <span class="line"><span>...</span></span></code></pre>
 <p>下一次查询的答案部分同样为空；权威部分中的 <code>NS</code> 记录和附加部分中的 <code>A</code> 记录给出了负责 <code>berkeley.edu</code> 区域的名称服务器域名和 IP 地址。</p>
-<pre class="astro-code astro-code-themes min-light night-owl" style="--shiki-light:#24292eff;--shiki-dark:#d6deeb;--shiki-light-bg:#ffffff;--shiki-dark-bg:#011627; overflow-x: auto;--file-name-offset: -0.75rem;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ dig +norecurse eecs.berkeley.edu @128.32.136.3</span></span>
+<pre class="astro-code astro-code-themes min-light night-owl" style="--shiki-light:#24292eff;--shiki-dark:#d6deeb;--shiki-light-bg:#ffffff;--shiki-dark-bg:#011627; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ dig +norecurse eecs.berkeley.edu @128.32.136.3</span></span>
 <span class="line"><span></span></span>
 <span class="line"><span>;; Got answer:</span></span>
 <span class="line"><span>;; ->>HEADER&#x3C;&#x3C;- opcode: QUERY, status: NOERROR, id: 52788</span></span>
@@ -437,30 +436,37 @@ CS168 02 </span> <span class="mt-1 block"> HTTP </span> </a> </li> </ol> </div> 
     const isZh = document.documentElement.lang === "zh-CN";
     const copyButtonLabel = isZh ? "复制" : "Copy";
     const copiedButtonLabel = isZh ? "已复制" : "Copied";
-    const codeBlocks = Array.from(document.querySelectorAll("pre"));
+    const codeBlocks = Array.from(
+      document.querySelectorAll("#article pre:not(.code-block-shell pre)")
+    );
 
     for (const codeBlock of codeBlocks) {
       const wrapper = document.createElement("div");
-      wrapper.style.position = "relative";
+      wrapper.className = "code-block-shell";
 
-      const computedStyle = getComputedStyle(codeBlock);
-      const hasFileNameOffset =
-        computedStyle.getPropertyValue("--file-name-offset").trim() !== "";
+      const toolbar = document.createElement("div");
+      toolbar.className = "code-block-toolbar";
 
-      const topClass = hasFileNameOffset
-        ? "top-(--file-name-offset)"
-        : "-top-3";
+      const meta = document.createElement("span");
+      meta.className = "code-block-meta";
+      const filename = codeBlock.querySelector(".code-block-filename");
+      if (filename) {
+        meta.appendChild(filename);
+      } else {
+        meta.textContent = codeBlock.dataset.language ?? "text";
+      }
 
       const copyButton = document.createElement("button");
-      copyButton.className = `copy-code absolute end-3 ${topClass} rounded bg-muted border border-muted px-2 py-1 text-xs leading-4 text-foreground font-medium`;
+      copyButton.type = "button";
+      copyButton.className = "copy-code";
       copyButton.innerHTML = copyButtonLabel;
       copyButton.setAttribute("aria-label", copyButtonLabel);
       copyButton.setAttribute("aria-live", "polite");
       codeBlock.setAttribute("tabindex", "0");
-      codeBlock.appendChild(copyButton);
+      toolbar.append(meta, copyButton);
 
       codeBlock?.parentNode?.insertBefore(wrapper, codeBlock);
-      wrapper.appendChild(codeBlock);
+      wrapper.append(toolbar, codeBlock);
 
       copyButton.addEventListener("click", async () => {
         await copyCode(codeBlock, copyButton);
@@ -483,6 +489,27 @@ CS168 02 </span> <span class="mt-1 block"> HTTP </span> </a> </li> </ol> </div> 
     }
   }
   attachCopyButtons();
+
+  function enhanceMarkdownTables() {
+    const isZh = document.documentElement.lang === "zh-CN";
+    const tables = Array.from(
+      document.querySelectorAll("#article table:not(.table-scroll table)")
+    );
+
+    for (const table of tables) {
+      const wrapper = document.createElement("div");
+      wrapper.className = "table-scroll";
+      wrapper.setAttribute("role", "region");
+      wrapper.setAttribute(
+        "aria-label",
+        isZh ? "可横向滚动的表格" : "Scrollable table"
+      );
+      wrapper.setAttribute("tabindex", "0");
+      table.parentNode?.insertBefore(wrapper, table);
+      wrapper.appendChild(table);
+    }
+  }
+  enhanceMarkdownTables();
 
   /** Accessible image lightbox for article images. */
   function initLightbox() {
